@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TRADE.SYS — Institutional Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================== 全域樣式 ============================== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#06080f;--bg1:#0c1021;--bg2:#141928;--bg3:#1c2235;--bg4:#252c42;
+  --border:#2a3050;--border-l:#3a4570;
+  --t1:#e8ecf4;--t2:#8892a8;--t3:#5a6480;
+  --cyan:#00d4ff;--cyan-d:#00d4ff22;--cyan-m:#00d4ff55;
+  --green:#00e676;--green-d:#00e67622;
+  --red:#ff4757;--red-d:#ff475722;
+  --orange:#ffa726;--orange-d:#ffa72622;
+  --purple:#bb86fc;--purple-d:#bb86fc22;
+  --yellow:#ffd740;
+  --r:12px;--rs:8px;
+  --mono:'JetBrains Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+html{font-size:16px}
+body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ============================== 導航列 ============================== */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(6,8,15,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:1400px;margin:0 auto;display:flex;align-items:center;height:52px;padding:0 12px;gap:8px}
+.nav-brand{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--cyan);letter-spacing:1.5px;margin-right:auto;white-space:nowrap}
+.nav-tabs{display:flex;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:none;color:var(--t3);font-family:var(--sans);font-size:11px;font-weight:600;padding:6px 10px;border-radius:var(--rs);cursor:pointer;white-space:nowrap;transition:.2s}
+.tab:hover{color:var(--t2);background:var(--bg2)}
+.tab.on{color:var(--cyan);background:var(--cyan-d)}
+
+/* ============================== 主內容 ============================== */
+.main{padding:64px 12px 80px;max-width:1400px;margin:0 auto}
+.pg{display:none}.pg.on{display:block}
+
+/* ============================== 共用元件 ============================== */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card:hover{border-color:var(--border-l)}
+.card-t{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.col{flex:1;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.mono{font-family:var(--mono)}
+.small{font-size:12px}
+.muted{color:var(--t3)}
+.up{color:var(--green)}.dn{color:var(--red)}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:700}
+.tag-g{background:var(--green-d);color:var(--green)}
+.tag-r{background:var(--red-d);color:var(--red)}
+.tag-o{background:var(--orange-d);color:var(--orange)}
+.tag-c{background:var(--cyan-d);color:var(--cyan)}
+.tag-p{background:var(--purple-d);color:var(--purple)}
+.btn{padding:8px 14px;border:1px solid var(--border);border-radius:var(--rs);font-family:var(--mono);font-size:11px;cursor:pointer;background:var(--bg3);color:var(--t1);transition:.2s}
+.btn:hover{border-color:var(--t3)}
+.btn-c{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-d)}
+.btn-c:hover{background:var(--cyan);color:var(--bg0)}
+.btn-r{border-color:var(--red);color:var(--red)}
+.btn-r:hover{background:var(--red-d)}
+input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:8px 10px;color:var(--t1);font-family:var(--mono);font-size:12px;outline:none;transition:.2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--cyan)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.skeleton{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;height:18px;width:80px;display:inline-block}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.progress{height:6px;border-radius:3px;background:var(--bg4);overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .3s}
+
+/* SVG 圖表 */
+.chart-wrap{position:relative;width:100%;padding-top:40%;overflow:hidden}
+.chart-wrap svg{position:absolute;top:0;left:0;width:100%;height:100%}
+.chart-mini{width:100%;height:60px}
+
+/* ============================== 響應式 ============================== */
+@media(max-width:600px){
+  .grid2,.grid3{grid-template-columns:1fr}
+  .grid4{grid-template-columns:1fr 1fr}
+  .row{flex-direction:column}
+  .nav-brand{font-size:11px}
+  .tab{font-size:10px;padding:5px 7px}
+}
+
+/* ============================== 天氣頁面 ============================== */
+.city-card{cursor:pointer}
+.city-card.exp{border-color:var(--cyan)}
+.city-card .detail{display:none;margin-top:14px}
+.city-card.exp .detail{display:block}
+.ptable{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono)}
+.ptable th,.ptable td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left}
+.ptable th{color:var(--t3);font-size:10px;text-transform:uppercase}
+.ptable .ml{background:var(--cyan-d)}
+.ptable .sl{background:var(--purple-d)}
+.pbar{height:5px;border-radius:3px;background:var(--bg4)}
+.pbar-f{height:100%;border-radius:3px;background:var(--cyan)}
+.pbar-f.s{background:var(--purple)}
+.pm-link{display:inline-block;margin-top:10px;padding:6px 12px;background:var(--cyan-d);border:1px solid var(--cyan);border-radius:var(--rs);color:var(--cyan);font-size:11px;font-family:var(--mono)}
+.pm-link:hover{background:var(--cyan);color:var(--bg0);text-decoration:none}
+.weather-warn{background:var(--orange-d);border:1px solid var(--orange);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--orange);margin-bottom:14px;line-height:1.5}
+
+/* ============================== Terminal 頁面 ============================== */
+.coin-card{text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:14px}
+.coin-sym{font-family:var(--mono);font-size:13px;color:var(--t2)}
+.coin-price{font-family:var(--mono);font-size:22px;font-weight:700;margin:4px 0}
+.coin-chg{font-family:var(--mono);font-size:12px}
+.fng-val{font-family:var(--mono);font-size:56px;font-weight:700}
+.fng-bar{height:10px;border-radius:5px;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green),#00e676);position:relative;margin:12px 0}
+.fng-dot{width:16px;height:16px;border-radius:50%;background:var(--t1);border:2px solid var(--bg0);position:absolute;top:-3px;transition:left .8s cubic-bezier(.34,1.56,.64,1)}
+.indicator-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px}
+.indicator-row:last-child{border:none}
+.stock-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.stock-item{padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);text-align:center;font-family:var(--mono);font-size:12px;cursor:pointer;transition:.2s}
+.stock-item:hover{border-color:var(--cyan)}
+
+/* ============================== Agents 頁面 ============================== */
+.agent-card{border-left:3px solid var(--border);padding-left:14px}
+.agent-name{font-weight:700;font-size:14px;margin-bottom:4px}
+.agent-role{font-size:11px;color:var(--t3);margin-bottom:8px}
+.agent-verdict{font-family:var(--mono);font-size:13px;font-weight:700;margin-bottom:4px}
+.agent-reasoning{font-size:12px;color:var(--t2);line-height:1.5}
+.consensus-box{text-align:center;padding:24px;background:var(--bg1);border:2px solid var(--border);border-radius:var(--r)}
+.consensus-action{font-family:var(--mono);font-size:28px;font-weight:700;margin:8px 0}
+.consensus-conf{font-size:13px;color:var(--t2)}
+.debate-log{max-height:300px;overflow-y:auto;font-family:var(--mono);font-size:11px;line-height:1.8;padding:12px;background:var(--bg1);border-radius:var(--rs)}
+.debate-log .speaker{font-weight:700}
+
+/* ============================== Quant Lab 頁面 ============================== */
+.bt-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.bt-stat{text-align:center;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs)}
+.bt-stat-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px}
+.bt-stat-val{font-family:var(--mono);font-size:20px;font-weight:700;margin-top:4px}
+.bt-trades{max-height:250px;overflow-y:auto}
+.bt-trades table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+.bt-trades th,.bt-trades td{padding:5px 8px;border-bottom:1px solid var(--border);text-align:left}
+.bt-trades th{color:var(--t3);font-size:10px;text-transform:uppercase}
+
+/* ============================== Intel 頁面 ============================== */
+.report-box{font-family:var(--mono);font-size:12px;line-height:1.8;white-space:pre-wrap;background:var(--bg1);padding:16px;border-radius:var(--rs);max-height:500px;overflow-y:auto}
+.sentiment-meter{display:flex;align-items:center;gap:8px;margin:8px 0}
+.doc-area{width:100%;min-height:150px;resize:vertical;font-family:var(--mono);font-size:12px}
+
+/* ============================== Journal 頁面 ============================== */
+.j-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:12px}
+.j-form textarea{grid-column:1/-1;min-height:50px;resize:vertical}
+.j-table-wrap{overflow-x:auto}
+.j-table{width:100%;border-collapse:collapse;min-width:600px;font-family:var(--mono);font-size:11px}
+.j-table th,.j-table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left}
+.j-table th{color:var(--t3);font-size:10px;text-transform:uppercase}
+.j-table .del{background:none;border:none;color:var(--red);cursor:pointer;font-size:13px}
+.pnl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.pnl-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:12px;text-align:center}
+.pnl-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px}
+.pnl-val{font-family:var(--mono);font-size:20px;font-weight:700;margin-top:4px}
+
+/* ============================== Arsenal 頁面 ============================== */
+.ollama-status{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.ollama-on{background:var(--green);box-shadow:0 0 6px var(--green)}
+.ollama-off{background:var(--red)}
+.chat-box{height:300px;overflow-y:auto;padding:12px;background:var(--bg1);border-radius:var(--rs);margin-bottom:10px;font-family:var(--mono);font-size:12px;line-height:1.6}
+.chat-msg{margin-bottom:8px;padding:8px 10px;border-radius:var(--rs);max-width:85%}
+.chat-user{background:var(--cyan-d);margin-left:auto;text-align:right}
+.chat-ai{background:var(--bg3)}
+.resource-item{padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;transition:.2s}
+.resource-item:hover{border-color:var(--cyan)}
+.resource-name{font-weight:600;font-size:13px}
+.resource-desc{font-size:11px;color:var(--t2);margin-top:2px}
+.resource-tags{margin-top:4px}
+.search-box{position:relative;margin-bottom:12px}
+.search-box input{padding-left:30px}
+.search-box::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- ===== 導航 ===== -->
+<nav class="nav"><div class="nav-in">
+  <div class="nav-brand">TRADE.SYS</div>
+  <div class="nav-tabs">
+    <button class="tab on" data-p="weather">🌤️ Weather</button>
+    <button class="tab" data-p="terminal">📊 Terminal</button>
+    <button class="tab" data-p="agents">🤖 Agents</button>
+    <button class="tab" data-p="quant">📈 Quant</button>
+    <button class="tab" data-p="intel">📰 Intel</button>
+    <button class="tab" data-p="journal">📝 Journal</button>
+    <button class="tab" data-p="arsenal">📚 Arsenal</button>
+  </div>
+</div></nav>
+
+<div class="main">
+
+<!-- ================================================================== -->
+<!-- 🌤️ WEATHER EDGE — Polymarket 天氣套利 (Open-Meteo + 機率模型)      -->
+<!-- ================================================================== -->
+<div id="pg-weather" class="pg on">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+    <div><h2 style="font-size:18px;font-weight:700">Polymarket Weather Edge</h2><p class="small muted">預報 vs 定價 — 尋找錯誤定價機會</p></div>
+    <div style="text-align:right"><button class="btn btn-c" onclick="loadWeather()">⟳ Refresh</button><div class="small muted" id="w-upd"></div></div>
+  </div>
+  <div class="weather-warn">⚠️ Polymarket 用特定氣象站數據（NYC→Central Park, London→Heathrow, Chicago→O'Hare, Miami→MIA, Atlanta→Hartsfield, Seattle→Sea-Tac, Dallas→DFW, Toronto→Pearson）。Open-Meteo 為網格點預報，可能有微小偏差。</div>
+  <div id="w-box"><div class="card" style="text-align:center;padding:30px"><div class="spinner"></div> 載入中...</div></div>
+</div>
+
+<!-- ================================================================== -->
+<!-- 📊 TERMINAL — 開源彭博終端 (#17 OpenBB + #18 scraper)             -->
+<!-- ================================================================== -->
+<div id="pg-terminal" class="pg">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+    <div><h2 style="font-size:18px;font-weight:700">Market Terminal</h2><p class="small muted">整合 OpenBB + 技術分析 — 每 2 分鐘自動刷新</p></div>
+    <div style="text-align:right"><button class="btn btn-c" onclick="loadTerminal()">⟳ Refresh</button><div class="small muted" id="t-upd"></div></div>
+  </div>
+
+  <!-- 加密貨幣 -->
+  <div class="card">
+    <div class="card-t">₿ Crypto Prices</div>
+    <div class="grid3" id="crypto-cards">
+      <div class="coin-card"><div class="coin-sym">BTC</div><div class="coin-price"><span class="skeleton"></span></div></div>
+      <div class="coin-card"><div class="coin-sym">ETH</div><div class="coin-price"><span class="skeleton"></span></div></div>
+      <div class="coin-card"><div class="coin-sym">SOL</div><div class="coin-price"><span class="skeleton"></span></div></div>
+    </div>
+    <div id="btc-alert" style="display:none;margin-top:8px;padding:8px 12px;border-radius:var(--rs);font-family:var(--mono);font-size:12px"></div>
+  </div>
+
+  <!-- 價格圖表 + 技術指標 -->
+  <div class="row">
+    <div class="col" style="min-width:280px">
+      <div class="card">
+        <div class="card-t">📈 BTC 30-Day Chart + Indicators</div>
+        <div style="margin-bottom:8px">
+          <select id="chart-coin" onchange="renderChart()" style="width:auto;display:inline-block">
+            <option value="bitcoin">Bitcoin</option><option value="ethereum">Ethereum</option><option value="solana">Solana</option>
+          </select>
+          <select id="chart-days" onchange="loadChartData()" style="width:auto;display:inline-block;margin-left:4px">
+            <option value="30">30天</option><option value="90">90天</option><option value="180">180天</option>
+          </select>
+        </div>
+        <canvas id="price-chart" width="800" height="320" style="width:100%;height:auto;border-radius:var(--rs)"></canvas>
+        <div style="display:flex;gap:12px;margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--t3)">
+          <span>─ <span style="color:var(--cyan)">Price</span></span>
+          <span>─ <span style="color:var(--orange)">SMA20</span></span>
+          <span>─ <span style="color:var(--purple)">BB Upper/Lower</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="col" style="min-width:240px">
+      <div class="card">
+        <div class="card-t">📊 Technical Indicators</div>
+        <div id="tech-indicators">
+          <div style="text-align:center;padding:20px;color:var(--t3)"><div class="spinner"></div></div>
+        </div>
+      </div>
+      <!-- Fear & Greed -->
+      <div class="card">
+        <div class="card-t">🎯 Fear & Greed Index</div>
+        <div style="text-align:center">
+          <div class="fng-val" id="fng-val">--</div>
+          <div class="fng-bar"><div class="fng-dot" id="fng-dot" style="left:50%"></div></div>
+          <div id="fng-label" style="font-weight:600;font-size:14px">Loading...</div>
+          <div id="fng-advice" class="small" style="color:var(--t2);margin-top:6px;line-height:1.5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 美股指數 -->
+  <div class="card">
+    <div class="card-t">📉 US Market Indices</div>
+    <div class="stock-grid">
+      <a class="stock-item" href="https://finance.yahoo.com/quote/%5EGSPC/" target="_blank">S&P 500<br><span class="muted">^GSPC</span></a>
+      <a class="stock-item" href="https://finance.yahoo.com/quote/%5EIXIC/" target="_blank">NASDAQ<br><span class="muted">^IXIC</span></a>
+      <a class="stock-item" href="https://finance.yahoo.com/quote/%5EVIX/" target="_blank">VIX<br><span class="muted">恐慌指數</span></a>
+      <a class="stock-item" href="https://finance.yahoo.com/quote/DX-Y.NYB/" target="_blank">DXY<br><span class="muted">美元指數</span></a>
+      <a class="stock-item" href="https://finance.yahoo.com/quote/GC=F/" target="_blank">Gold<br><span class="muted">黃金期貨</span></a>
+      <a class="stock-item" href="https://finance.yahoo.com/quote/%5EDJI/" target="_blank">DOW 30<br><span class="muted">^DJI</span></a>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- 🤖 AI AGENTS — 多 Agent 辯論系統                                   -->
+<!-- (#2 ai-hedge-fund, #3 CrewAI, #4 AutoGen, #5 TradingAgents)       -->
+<!-- ================================================================== -->
+<div id="pg-agents" class="pg">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+    <div><h2 style="font-size:18px;font-weight:700">AI Agent Trading Desk</h2><p class="small muted">多 Agent 辯論決策系統 — 模擬機構級分析流程</p></div>
+    <div>
+      <select id="agent-coin" style="width:auto;display:inline-block">
+        <option value="bitcoin">Bitcoin</option><option value="ethereum">Ethereum</option><option value="solana">Solana</option>
+      </select>
+      <button class="btn btn-c" onclick="runAgents()" style="margin-left:4px">▶ 啟動分析</button>
+    </div>
+  </div>
+
+  <!-- 共識結果 -->
+  <div class="card consensus-box" id="consensus-box" style="display:none">
+    <div class="small muted">CHIEF INVESTMENT OFFICER — FINAL VERDICT</div>
+    <div class="consensus-action" id="consensus-action">—</div>
+    <div class="consensus-conf" id="consensus-conf"></div>
+    <div style="margin-top:8px;font-size:12px;color:var(--t2)" id="consensus-reason"></div>
+  </div>
+
+  <!-- Agent 分析卡片 -->
+  <div class="grid2" id="agent-cards">
+    <div class="card" style="text-align:center;padding:30px;grid-column:1/-1;color:var(--t3)">
+      選擇標的後按「啟動分析」，5 個 Agent 將各自分析並辯論
+    </div>
+  </div>
+
+  <!-- 辯論紀錄 -->
+  <div class="card" id="debate-card" style="display:none">
+    <div class="card-t">💬 Agent 辯論紀錄 (TradingAgents 風格)</div>
+    <div class="debate-log" id="debate-log"></div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- 📈 QUANT LAB — 策略回測引擎                                        -->
+<!-- (#9 FinRL, #11 Qlib, #12 Freqtrade, #13 NautilusTrader, #14 Lean)-->
+<!-- ================================================================== -->
+<div id="pg-quant" class="pg">
+  <div style="margin-bottom:12px"><h2 style="font-size:18px;font-weight:700">Quant Lab — Strategy Backtester</h2><p class="small muted">基於歷史數據的策略回測引擎 (Freqtrade + FinRL + Qlib 邏輯)</p></div>
+
+  <div class="card">
+    <div class="card-t">⚙️ Backtest Parameters</div>
+    <div class="bt-controls">
+      <div><label class="small muted">標的</label><select id="bt-coin"><option value="bitcoin">Bitcoin</option><option value="ethereum">Ethereum</option><option value="solana">Solana</option></select></div>
+      <div><label class="small muted">時間範圍</label><select id="bt-days"><option value="90">90 天</option><option value="180">180 天</option><option value="365">1 年</option></select></div>
+      <div><label class="small muted">策略</label><select id="bt-strategy"><option value="sma_cross">SMA 交叉</option><option value="rsi_revert">RSI 均值回歸</option><option value="bb_squeeze">布林帶突破</option><option value="macd_cross">MACD 交叉</option></select></div>
+      <div><label class="small muted">快線/短期</label><input type="number" id="bt-fast" value="10" min="2" max="100"></div>
+      <div><label class="small muted">慢線/長期</label><input type="number" id="bt-slow" value="30" min="5" max="200"></div>
+      <div><label class="small muted">初始資金</label><input type="number" id="bt-capital" value="1000" min="10"></div>
+    </div>
+    <button class="btn btn-c" onclick="runBacktest()" id="bt-run">▶ 執行回測</button>
+  </div>
+
+  <!-- 回測結果 -->
+  <div id="bt-results" style="display:none">
+    <div class="grid4" id="bt-stats"></div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-t">📈 Equity Curve</div>
+      <canvas id="bt-chart" width="800" height="280" style="width:100%;height:auto;border-radius:var(--rs)"></canvas>
+      <div style="display:flex;gap:12px;margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--t3)">
+        <span>─ <span style="color:var(--cyan)">策略</span></span>
+        <span>─ <span style="color:var(--t3)">Buy & Hold</span></span>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="card-t">📋 Trade Log</div>
+      <div class="bt-trades" id="bt-trades"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- 📰 INTEL — 投研報告 + 情緒分析 + 文件解析                          -->
+<!-- (#6 FinRobot, #7 FinGPT, #8 LlamaIndex, #10 report, #19 WSJ, #20)-->
+<!-- ================================================================== -->
+<div id="pg-intel" class="pg">
+  <div style="margin-bottom:12px"><h2 style="font-size:18px;font-weight:700">Intel Center</h2><p class="small muted">自動投研報告 + 情緒分析 + 文件解析</p></div>
+
+  <!-- 自動報告 -->
+  <div class="card">
+    <div class="card-t">📄 Auto Market Report (FinRobot + automated-market-report 風格)</div>
+    <p class="small muted" style="margin-bottom:8px">整合所有市場數據自動生成機構級日報</p>
+    <button class="btn btn-c" onclick="genReport()" id="report-btn">▶ 生成今日報告</button>
+    <button class="btn" onclick="copyReport()" style="margin-left:4px">📋 複製</button>
+    <button class="btn" onclick="downloadReport()" style="margin-left:4px">⬇ 下載 TXT</button>
+    <div class="report-box" id="report-box" style="margin-top:10px;display:none"></div>
+  </div>
+
+  <!-- 市場情緒分析 -->
+  <div class="card">
+    <div class="card-t">🧠 Sentiment Analysis (FinGPT + WSJ NLP 風格)</div>
+    <p class="small muted" style="margin-bottom:10px">基於鏈上數據、價格行為和市場指標的綜合情緒量化</p>
+    <div id="sentiment-panel">
+      <button class="btn btn-c" onclick="runSentiment()">▶ 執行情緒分析</button>
+    </div>
+  </div>
+
+  <!-- 文件解析 -->
+  <div class="card">
+    <div class="card-t">📑 Document Analyzer (LlamaIndex 風格)</div>
+    <p class="small muted" style="margin-bottom:8px">貼上財報文字、SEC filing 或任何金融文本，自動提取關鍵數據</p>
+    <textarea class="doc-area" id="doc-input" placeholder="貼上財報文字、earnings call 逐字稿、或任何金融文本...&#10;&#10;支援功能：&#10;• 自動提取數字和百分比&#10;• 識別財務術語和關鍵指標&#10;• 計算提及的正面/負面詞彙比例&#10;• 摘要關鍵發現"></textarea>
+    <div style="margin-top:8px">
+      <button class="btn btn-c" onclick="analyzeDoc()">▶ 解析文件</button>
+      <button class="btn" onclick="document.getElementById('doc-input').value='';document.getElementById('doc-result').style.display='none'" style="margin-left:4px">清除</button>
+    </div>
+    <div class="report-box" id="doc-result" style="margin-top:10px;display:none"></div>
+  </div>
+
+  <!-- 語音轉文字 -->
+  <div class="card">
+    <div class="card-t">🎙️ Voice-to-Text (WhisperX 風格)</div>
+    <p class="small muted" style="margin-bottom:8px">使用瀏覽器語音辨識，即時將法說會/會議錄音轉為文字</p>
+    <button class="btn btn-c" id="voice-btn" onclick="toggleVoice()">🎤 開始錄音</button>
+    <span class="small muted" id="voice-status" style="margin-left:8px"></span>
+    <textarea class="doc-area" id="voice-output" placeholder="語音辨識結果會出現在這裡..." style="margin-top:8px" readonly></textarea>
+    <div style="margin-top:6px">
+      <button class="btn" onclick="document.getElementById('doc-input').value=document.getElementById('voice-output').value">→ 送入文件解析器</button>
+      <button class="btn" onclick="copyText(document.getElementById('voice-output').value)" style="margin-left:4px">📋 複製</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- 📝 JOURNAL — 交易日誌                                              -->
+<!-- ================================================================== -->
+<div id="pg-journal" class="pg">
+  <h2 style="font-size:18px;font-weight:700;margin-bottom:12px">Trading Journal</h2>
+  <div class="pnl-grid" id="pnl-grid"></div>
+  <div class="card">
+    <div class="card-t">新增交易紀錄</div>
+    <div class="j-form" id="j-form">
+      <input type="date" id="j-date">
+      <select id="j-market"><option value="">市場</option><option>Polymarket</option><option>Crypto</option><option>Stock</option><option>Other</option></select>
+      <input type="text" id="j-action" placeholder="操作">
+      <input type="number" id="j-amount" placeholder="金額 ($)" step="0.01">
+      <input type="number" id="j-result" placeholder="結果 ($)" step="0.01">
+      <textarea id="j-notes" placeholder="備註..."></textarea>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-c" onclick="addTrade()">+ 新增</button>
+      <button class="btn" onclick="exportCSV()">⬇ CSV</button>
+      <button class="btn btn-r" onclick="clearTrades()">🗑 清除</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-t">交易紀錄</div>
+    <div class="j-table-wrap"><table class="j-table"><thead><tr><th>日期</th><th>市場</th><th>操作</th><th>金額</th><th>結果</th><th>損益</th><th>備註</th><th></th></tr></thead><tbody id="j-body"></tbody></table></div>
+    <div id="j-empty" style="text-align:center;padding:24px;color:var(--t3);font-size:12px">尚無交易紀錄</div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- 📚 ARSENAL — 全部內建工具集                                        -->
+<!-- (#1 Ollama, #15 策略排行, #16 量化計算器, #18 數據爬取)            -->
+<!-- ================================================================== -->
+<div id="pg-arsenal" class="pg">
+  <div style="margin-bottom:12px"><h2 style="font-size:18px;font-weight:700">Arsenal — Built-in Toolkit</h2><p class="small muted">本地 AI + 數據爬取 + 量化計算器 + 策略排行榜 — 全部內建，零外部依賴</p></div>
+
+  <!-- ★ Tool #1: Ollama 本地 AI -->
+  <div class="card">
+    <div class="card-t"><span class="tag tag-c" style="margin-right:6px">#01</span> 🧠 Local AI — Ollama 本地大腦</div>
+    <p class="small muted" style="margin-bottom:8px">連接本地 Ollama，用開源模型私密分析持倉。未連接時使用內建規則引擎。</p>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+      <input id="ollama-url" value="http://localhost:11434" style="width:220px">
+      <select id="ollama-model" style="width:auto"><option value="">選擇模型...</option></select>
+      <button class="btn btn-c" onclick="connectOllama()">連接</button>
+      <span class="small"><span class="ollama-status ollama-off" id="ollama-dot"></span><span id="ollama-st">未連接</span></span>
+    </div>
+    <div class="chat-box" id="chat-box">
+      <div class="chat-msg chat-ai">👋 歡迎！可直接提問（離線規則引擎），或連接 Ollama 獲得 AI 深度分析。<br>💡 <code>ollama pull deepseek-r1:8b</code> → 點「連接」</div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <input id="chat-input" placeholder="輸入問題... (支援中英文)" style="flex:1">
+      <button class="btn btn-c" onclick="sendChat()">發送</button>
+    </div>
+    <div class="small muted" style="margin-top:6px">
+      快捷：<a href="#" onclick="setChat('分析 BTC 目前的技術面');return false">BTC 技術面</a> ·
+      <a href="#" onclick="setChat('幫我評估現在是否適合建倉');return false">建倉評估</a> ·
+      <a href="#" onclick="setChat('用通俗的語言解釋什麼是 Sharpe Ratio');return false">Sharpe Ratio</a> ·
+      <a href="#" onclick="setChat('Kelly Criterion 怎麼用');return false">Kelly 公式</a>
+    </div>
+  </div>
+
+  <!-- ★ Tool #18: 數據爬取器 (stock-market-scraper) -->
+  <div class="card">
+    <div class="card-t"><span class="tag tag-c" style="margin-right:6px">#18</span> 📥 Market Data Scraper — 批量數據下載</div>
+    <p class="small muted" style="margin-bottom:8px">一鍵爬取歷史價格數據，自動下載 CSV/JSON，直接餵給你的模型</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:10px">
+      <div><label class="small muted">標的</label>
+        <select id="scrape-coin"><option value="bitcoin">Bitcoin</option><option value="ethereum">Ethereum</option><option value="solana">Solana</option><option value="dogecoin">Dogecoin</option><option value="cardano">Cardano</option><option value="polkadot">Polkadot</option></select>
+      </div>
+      <div><label class="small muted">時間範圍</label>
+        <select id="scrape-days"><option value="30">30 天</option><option value="90">90 天</option><option value="180">180 天</option><option value="365">1 年</option><option value="max">全部</option></select>
+      </div>
+      <div><label class="small muted">格式</label>
+        <select id="scrape-fmt"><option value="csv">CSV</option><option value="json">JSON</option></select>
+      </div>
+    </div>
+    <button class="btn btn-c" onclick="scrapeData()" id="scrape-btn">⬇ 下載數據</button>
+    <div id="scrape-preview" style="display:none;margin-top:10px">
+      <div class="small muted" style="margin-bottom:4px" id="scrape-info"></div>
+      <div style="overflow-x:auto;max-height:200px;background:var(--bg1);border-radius:var(--rs);padding:8px">
+        <table class="ptable" id="scrape-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ★ Tool #16: 量化計算器 (awesome-quant) -->
+  <div class="card">
+    <div class="card-t"><span class="tag tag-c" style="margin-right:6px">#16</span> 🧮 Quant Calculator — 量化計算工具</div>
+    <p class="small muted" style="margin-bottom:10px">倉位管理、Kelly 公式、風險報酬比、複利計算 — 華爾街寬客的核心工具箱</p>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn btn-c small" onclick="showCalc('position')">倉位計算器</button>
+      <button class="btn small" onclick="showCalc('kelly')">Kelly 公式</button>
+      <button class="btn small" onclick="showCalc('rr')">風險報酬比</button>
+      <button class="btn small" onclick="showCalc('compound')">複利計算</button>
+      <button class="btn small" onclick="showCalc('dca')">DCA 模擬器</button>
+    </div>
+    <div id="calc-panel">
+      <!-- 倉位計算器（預設顯示）-->
+      <div id="calc-position">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div><label class="small muted">總資金 ($)</label><input type="number" id="pos-capital" value="1000" oninput="calcPosition()"></div>
+          <div><label class="small muted">風險比例 (%)</label><input type="number" id="pos-risk" value="2" step="0.5" oninput="calcPosition()"></div>
+          <div><label class="small muted">進場價 ($)</label><input type="number" id="pos-entry" value="100" step="0.01" oninput="calcPosition()"></div>
+          <div><label class="small muted">止損價 ($)</label><input type="number" id="pos-stop" value="95" step="0.01" oninput="calcPosition()"></div>
+        </div>
+        <div id="pos-result" style="background:var(--bg1);border-radius:var(--rs);padding:12px;font-family:var(--mono);font-size:12px;line-height:2"></div>
+      </div>
+      <div id="calc-kelly" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div><label class="small muted">勝率 (%)</label><input type="number" id="kelly-win" value="55" step="1" oninput="calcKelly()"></div>
+          <div><label class="small muted">盈虧比 (贏/輸)</label><input type="number" id="kelly-rr" value="1.5" step="0.1" oninput="calcKelly()"></div>
+        </div>
+        <div id="kelly-result" style="background:var(--bg1);border-radius:var(--rs);padding:12px;font-family:var(--mono);font-size:12px;line-height:2"></div>
+      </div>
+      <div id="calc-rr" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+          <div><label class="small muted">進場價</label><input type="number" id="rr-entry" value="100" step="0.01" oninput="calcRR()"></div>
+          <div><label class="small muted">止損價</label><input type="number" id="rr-stop" value="95" step="0.01" oninput="calcRR()"></div>
+          <div><label class="small muted">目標價</label><input type="number" id="rr-target" value="115" step="0.01" oninput="calcRR()"></div>
+        </div>
+        <div id="rr-result" style="background:var(--bg1);border-radius:var(--rs);padding:12px;font-family:var(--mono);font-size:12px;line-height:2"></div>
+      </div>
+      <div id="calc-compound" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+          <div><label class="small muted">初始金額 ($)</label><input type="number" id="comp-init" value="1000" oninput="calcCompound()"></div>
+          <div><label class="small muted">月報酬率 (%)</label><input type="number" id="comp-rate" value="5" step="0.5" oninput="calcCompound()"></div>
+          <div><label class="small muted">月數</label><input type="number" id="comp-months" value="12" oninput="calcCompound()"></div>
+        </div>
+        <div id="comp-result" style="background:var(--bg1);border-radius:var(--rs);padding:12px;font-family:var(--mono);font-size:12px;line-height:2"></div>
+      </div>
+      <div id="calc-dca" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+          <div><label class="small muted">每期投入 ($)</label><input type="number" id="dca-amount" value="100" oninput="calcDCA()"></div>
+          <div><label class="small muted">標的</label><select id="dca-coin" onchange="calcDCA()"><option value="bitcoin">Bitcoin</option><option value="ethereum">Ethereum</option><option value="solana">Solana</option></select></div>
+          <div><label class="small muted">過去幾天</label><select id="dca-days" onchange="calcDCA()"><option value="90">90天</option><option value="180">180天</option><option value="365">1年</option></select></div>
+        </div>
+        <button class="btn btn-c" onclick="runDCA()">▶ 模擬 DCA</button>
+        <div id="dca-result" style="background:var(--bg1);border-radius:var(--rs);padding:12px;font-family:var(--mono);font-size:12px;line-height:2;margin-top:8px;display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ★ Tool #15: 策略排行榜 (best-of-algorithmic-trading) -->
+  <div class="card">
+    <div class="card-t"><span class="tag tag-c" style="margin-right:6px">#15</span> 🏆 Strategy Arena — 策略 PK 排行榜</div>
+    <p class="small muted" style="margin-bottom:8px">同時回測多種策略，自動排名 — 找出當前市場最優策略</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:10px">
+      <div><label class="small muted">標的</label><select id="arena-coin"><option value="bitcoin">Bitcoin</option><option value="ethereum">Ethereum</option><option value="solana">Solana</option></select></div>
+      <div><label class="small muted">時段</label><select id="arena-days"><option value="90">90 天</option><option value="180">180 天</option><option value="365">1 年</option></select></div>
+      <div><label class="small muted">初始資金</label><input type="number" id="arena-cap" value="1000"></div>
+    </div>
+    <button class="btn btn-c" onclick="runArena()" id="arena-btn">🏟️ 開始 PK</button>
+    <div id="arena-results" style="display:none;margin-top:12px">
+      <div id="arena-table"></div>
+    </div>
+  </div>
+
+  <!-- ★ Tool Map: 20 工具內建對照表 -->
+  <div class="card">
+    <div class="card-t">📋 20 Tools Map — 全部內建功能對照</div>
+    <p class="small muted" style="margin-bottom:8px">所有 20 個工具均已整合為 Dashboard 內建功能，無需開啟外部網站</p>
+    <div style="overflow-x:auto">
+      <table class="ptable" style="font-size:11px">
+        <thead><tr><th>#</th><th>原工具</th><th>內建位置</th><th>功能</th></tr></thead>
+        <tbody>
+          <tr><td>01</td><td>Ollama</td><td><span class="tag tag-p">Arsenal</span></td><td>本地 AI 對話 + 離線規則引擎</td></tr>
+          <tr><td>02</td><td>ai-hedge-fund</td><td><span class="tag tag-o">Agents</span></td><td>5 Agent 自動分析 + 交易決策</td></tr>
+          <tr><td>03</td><td>CrewAI</td><td><span class="tag tag-o">Agents</span></td><td>多 Agent 協作分析框架</td></tr>
+          <tr><td>04</td><td>AutoGen</td><td><span class="tag tag-o">Agents</span></td><td>Agent 反思/糾錯/辯論迴路</td></tr>
+          <tr><td>05</td><td>TradingAgents</td><td><span class="tag tag-o">Agents</span></td><td>華爾街風格辯論 + CIO 裁決</td></tr>
+          <tr><td>06</td><td>FinRobot</td><td><span class="tag tag-g">Intel</span></td><td>自動生成機構級投研日報</td></tr>
+          <tr><td>07</td><td>FinGPT</td><td><span class="tag tag-g">Intel</span></td><td>多維度情緒分析引擎</td></tr>
+          <tr><td>08</td><td>LlamaIndex</td><td><span class="tag tag-g">Intel</span></td><td>財報/文件解析 + NLP 提取</td></tr>
+          <tr><td>09</td><td>FinRL</td><td><span class="tag tag-c">Quant</span></td><td>策略回測 (SMA/RSI/BB/MACD)</td></tr>
+          <tr><td>10</td><td>auto-report</td><td><span class="tag tag-g">Intel</span></td><td>一鍵生成 + 下載市場日報</td></tr>
+          <tr><td>11</td><td>Microsoft Qlib</td><td><span class="tag tag-c">Quant</span></td><td>Alpha 回測 + 技術指標管線</td></tr>
+          <tr><td>12</td><td>Freqtrade</td><td><span class="tag tag-c">Quant</span></td><td>多策略回測 + 交易紀錄</td></tr>
+          <tr><td>13</td><td>NautilusTrader</td><td><span class="tag tag-c">Quant</span></td><td>極速回測引擎 + Equity Curve</td></tr>
+          <tr><td>14</td><td>Lean</td><td><span class="tag tag-c">Quant</span></td><td>事件驅動回測 + 統計報表</td></tr>
+          <tr><td>15</td><td>best-of-algo</td><td><span class="tag tag-p">Arsenal</span></td><td>策略 PK 排行榜 + 自動排名</td></tr>
+          <tr><td>16</td><td>awesome-quant</td><td><span class="tag tag-p">Arsenal</span></td><td>量化計算器 (倉位/Kelly/複利/DCA)</td></tr>
+          <tr><td>17</td><td>OpenBB</td><td><span class="tag tag-c">Terminal</span></td><td>圖表 + 技術指標 + F&G + 價格</td></tr>
+          <tr><td>18</td><td>scraper</td><td><span class="tag tag-p">Arsenal</span></td><td>批量爬取數據 + 下載 CSV/JSON</td></tr>
+          <tr><td>19</td><td>WSJ NLP</td><td><span class="tag tag-g">Intel</span></td><td>市場情緒量化 + 正負面詞分析</td></tr>
+          <tr><td>20</td><td>WhisperX</td><td><span class="tag tag-g">Intel</span></td><td>即時語音轉文字 (Web Speech)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .main -->
+
+<script>
+// ======================================================================
+// 全域數據儲存 — 所有頁面共享
+// ======================================================================
+const G = {
+  prices: {},          // 即時價格
+  history: {},         // 歷史價格 { bitcoin: { prices: [...], timestamps: [...] } }
+  fng: null,           // Fear & Greed
+  weather: [],         // 天氣數據
+  lastCrypto: 0,
+  lastFng: 0,
+};
+
+// ======================================================================
+// 城市定義
+// ======================================================================
+const CITIES = [
+  { name:'New York',  lat:40.7831,  lon:-73.9712, station:'Central Park (KNYC)',  tz:'America/New_York' },
+  { name:'Chicago',   lat:41.9742,  lon:-87.9073, station:"O'Hare Airport (KORD)", tz:'America/Chicago' },
+  { name:'Miami',     lat:25.7959,  lon:-80.2870, station:"Miami Int'l (KMIA)",    tz:'America/New_York' },
+  { name:'London',    lat:51.4700,  lon:-0.4543,  station:'Heathrow (EGLL)',       tz:'Europe/London' },
+  { name:'Atlanta',   lat:33.6407,  lon:-84.4277, station:'Hartsfield (KATL)',     tz:'America/New_York' },
+  { name:'Seattle',   lat:47.4502,  lon:-122.3088,station:'Sea-Tac (KSEA)',        tz:'America/Los_Angeles' },
+  { name:'Dallas',    lat:32.8998,  lon:-97.0403, station:'DFW Airport (KDFW)',    tz:'America/Chicago' },
+  { name:'Toronto',   lat:43.6777,  lon:-79.6248, station:'Pearson (CYYZ)',        tz:'America/Toronto' },
+];
+
+// ======================================================================
+// 量化資源庫數據
+// ======================================================================
+const RESOURCES = [
+  {name:'Ollama',cat:'infra',url:'https://github.com/ollama/ollama',desc:'本地跑開源 LLM（DeepSeek-R1 等），數據不出網',tags:['LLM','本地部署','隱私']},
+  {name:'ai-hedge-fund',cat:'agent',url:'https://github.com/virattt/ai-hedge-fund',desc:'多 Agent 對沖基金模擬，自動給交易決策',tags:['多Agent','交易決策','模擬']},
+  {name:'CrewAI',cat:'agent',url:'https://github.com/joaomdmoura/crewAI',desc:'零門檻 Multi-Agent 協作框架',tags:['多Agent','協作','框架']},
+  {name:'AutoGen',cat:'agent',url:'https://github.com/microsoft/autogen',desc:'微軟多 Agent 對話框架，反思/糾錯/循環邏輯',tags:['微軟','多Agent','對話']},
+  {name:'TradingAgents',cat:'agent',url:'https://github.com/TauricResearch/TradingAgents',desc:'模擬華爾街交易架構，多 Agent 辯論決策',tags:['華爾街','辯論','壓力測試']},
+  {name:'FinRobot',cat:'nlp',url:'https://github.com/ai4finance-foundation/finrobot',desc:'全自動產出機構級 Equity Research 報告',tags:['投研','報告','自動化']},
+  {name:'FinGPT',cat:'nlp',url:'https://github.com/AI4Finance-Foundation/FinGPT',desc:'金融專屬大模型，情緒量化精準度秒殺通用模型',tags:['金融NLP','情緒','大模型']},
+  {name:'LlamaIndex',cat:'data',url:'https://github.com/run-llama/llama_index',desc:'最強金融 RAG 框架，幾百頁財報精準提取',tags:['RAG','財報解析','10-K']},
+  {name:'FinRL',cat:'quant',url:'https://github.com/AI4Finance-Foundation/FinRL',desc:'深度強化學習量化交易框架',tags:['DRL','強化學習','量化']},
+  {name:'automated-market-report',cat:'data',url:'https://github.com/hgnx/automated-market-report',desc:'每天自動生成 PDF 市場日報',tags:['自動化','日報','PDF']},
+  {name:'Microsoft Qlib',cat:'quant',url:'https://github.com/microsoft/qlib',desc:'AI 驅動量化投資平台，全棧管線',tags:['微軟','Alpha','全棧']},
+  {name:'Freqtrade',cat:'quant',url:'https://github.com/freqtrade/freqtrade',desc:'頂級交易機器人引擎，內建策略庫+ML優化器',tags:['交易機器人','策略','回測']},
+  {name:'NautilusTrader',cat:'quant',url:'https://github.com/nautechsystems/nautilus_trader',desc:'Rust 核心奈秒級高頻回測引擎',tags:['Rust','高頻','實盤']},
+  {name:'Lean (QuantConnect)',cat:'quant',url:'https://github.com/QuantConnect/Lean',desc:'事件驅動回測引擎，支援股票/期權/外匯',tags:['回測','事件驅動','多資產']},
+  {name:'best-of-algorithmic-trading',cat:'quant',url:'https://github.com/merovinh/best-of-algorithmic-trading',desc:'全球頂級開源量化框架排行榜',tags:['排行榜','策略','開源']},
+  {name:'awesome-quant',cat:'quant',url:'https://github.com/wilsonfreitas/awesome-quant',desc:'量化金融終極百科，幾百個程式庫',tags:['百科','衍生品','ML']},
+  {name:'OpenBB',cat:'data',url:'https://github.com/OpenBB-finance/OpenBB',desc:'免費投研終端，整合股票/期權/加密/總經',tags:['終端','免費','全市場']},
+  {name:'stock-market-scraper',cat:'data',url:'https://github.com/gunjannandy/stock-market-scraper',desc:'無代碼批量爬取全市場歷史數據',tags:['爬蟲','CSV','無代碼']},
+  {name:'WSJ NLP Sentiment',cat:'nlp',url:'https://github.com/philippe-heitzmann/WSJ_WebScraping_NLP',desc:'華爾街日報 NLP 情感分析',tags:['WSJ','情感分析','媒體']},
+  {name:'WhisperX',cat:'nlp',url:'https://github.com/m-bain/whisperX',desc:'法說會精準分離多人語音轉逐字稿',tags:['語音','逐字稿','法說會']},
+  {name:'Backtrader',cat:'quant',url:'https://github.com/mementum/backtrader',desc:'Python 回測框架，社群活躍',tags:['回測','Python','社群']},
+  {name:'Zipline',cat:'quant',url:'https://github.com/quantopian/zipline',desc:'Quantopian 開源的事件驅動回測引擎',tags:['回測','事件驅動','Quantopian']},
+  {name:'TA-Lib',cat:'quant',url:'https://github.com/TA-Lib/ta-lib-python',desc:'技術分析指標函數庫 (200+指標)',tags:['技術分析','指標','函數庫']},
+  {name:'CCXT',cat:'data',url:'https://github.com/ccxt/ccxt',desc:'統一加密貨幣交易所 API（100+交易所）',tags:['加密','交易所','API']},
+  {name:'yfinance',cat:'data',url:'https://github.com/ranaroussi/yfinance',desc:'免費獲取 Yahoo Finance 歷史數據',tags:['Yahoo','美股','免費']},
+];
+
+// ======================================================================
+// 頁籤切換
+// ======================================================================
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
+    t.classList.add('on');
+    document.getElementById('pg-'+t.dataset.p).classList.add('on');
+    // 懶載入
+    if(t.dataset.p==='terminal' && !G.lastCrypto) loadTerminal();
+    if(t.dataset.p==='arsenal') renderResources();
+  });
+});
+
+// ======================================================================
+// 工具函數
+// ======================================================================
+function normalCDF(x){const a1=.254829592,a2=-.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=.3275911;const s=x<0?-1:1;x=Math.abs(x)/Math.SQRT2;const t=1/(1+p*x);return .5*(1+s*(1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x)))}
+function probInterval(fc,lo,hi,sd){return normalCDF((hi-fc)/sd)-normalCDF((lo-fc)/sd)}
+function fToC(f){return(f-32)*5/9}
+function cToF(c){return c*9/5+32}
+function fmt$(n){return n>=1e6?'$'+(n/1e6).toFixed(2)+'M':n>=1e3?'$'+n.toLocaleString('en',{maximumFractionDigits:0}):'$'+n.toFixed(2)}
+function fmtPct(n){return(n>=0?'+':'')+n.toFixed(2)+'%'}
+function ts(){return new Date().toLocaleTimeString()}
+function copyText(t){navigator.clipboard.writeText(t).then(()=>alert('已複製！'))}
+
+// SMA 計算
+function sma(arr,period){
+  const r=[];
+  for(let i=0;i<arr.length;i++){
+    if(i<period-1){r.push(null);continue}
+    let s=0;for(let j=i-period+1;j<=i;j++)s+=arr[j];
+    r.push(s/period);
+  }
+  return r;
+}
+// EMA 計算
+function ema(arr,period){
+  const r=[];const k=2/(period+1);
+  for(let i=0;i<arr.length;i++){
+    if(i===0){r.push(arr[0]);continue}
+    if(r[i-1]===null){r.push(arr[i]);continue}
+    r.push(arr[i]*k+r[i-1]*(1-k));
+  }
+  return r;
+}
+// RSI 計算
+function calcRSI(prices,period=14){
+  const r=[];
+  for(let i=0;i<prices.length;i++){
+    if(i<period){r.push(null);continue}
+    let gains=0,losses=0;
+    for(let j=i-period+1;j<=i;j++){
+      const d=prices[j]-prices[j-1];
+      if(d>0)gains+=d;else losses-=d;
+    }
+    const rs=gains/(losses||.0001);
+    r.push(100-100/(1+rs));
+  }
+  return r;
+}
+// MACD 計算
+function calcMACD(prices){
+  const e12=ema(prices,12),e26=ema(prices,26);
+  const macdLine=e12.map((v,i)=>(v!==null&&e26[i]!==null)?v-e26[i]:null);
+  const signal=ema(macdLine.map(v=>v||0),9);
+  const hist=macdLine.map((v,i)=>(v!==null&&signal[i]!==null)?v-signal[i]:null);
+  return{macdLine,signal,hist};
+}
+// 布林帶
+function calcBB(prices,period=20,mult=2){
+  const mid=sma(prices,period);
+  const upper=[],lower=[];
+  for(let i=0;i<prices.length;i++){
+    if(mid[i]===null){upper.push(null);lower.push(null);continue}
+    let s=0;for(let j=i-period+1;j<=i;j++)s+=(prices[j]-mid[i])**2;
+    const std=Math.sqrt(s/period);
+    upper.push(mid[i]+mult*std);
+    lower.push(mid[i]-mult*std);
+  }
+  return{mid,upper,lower};
+}
+
+// ======================================================================
+// 🌤️ WEATHER EDGE
+// ======================================================================
+async function loadWeather(){
+  const box=document.getElementById('w-box');
+  box.innerHTML='<div class="card" style="text-align:center;padding:30px"><div class="spinner"></div> 載入天氣數據中...</div>';
+  const results=await Promise.allSettled(CITIES.map(c=>fetchCity(c)));
+  box.innerHTML='';
+  results.forEach((r,i)=>{
+    box.innerHTML+=r.status==='fulfilled'?r.value:`<div class="card"><b>${CITIES[i].name}</b> <span style="color:var(--red)">— 載入失敗</span></div>`;
+  });
+  box.querySelectorAll('.city-card').forEach(c=>{
+    c.querySelector('.city-hdr').addEventListener('click',()=>c.classList.toggle('exp'));
+  });
+  document.getElementById('w-upd').textContent='更新：'+ts();
+}
+
+async function fetchCity(city){
+  const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&hourly=temperature_2m&timezone=${encodeURIComponent(city.tz)}&forecast_days=3&temperature_unit=celsius`);
+  const d=await r.json();
+  const hrs=d.hourly.time,temps=d.hourly.temperature_2m;
+  const daily={};
+  hrs.forEach((h,i)=>{
+    const dt=h.split('T')[0];
+    if(!daily[dt])daily[dt]={maxC:-999,allC:[]};
+    if(temps[i]>daily[dt].maxC)daily[dt].maxC=temps[i];
+    daily[dt].allC.push(temps[i]);
+  });
+  const dates=Object.keys(daily).sort();
+  const tmr=dates[1]?daily[dates[1]]:null;
+  const daf=dates[2]?daily[dates[2]]:null;
+
+  let detail='';
+  [{l:'明天 ('+dates[1]+')',d:tmr},{l:'後天 ('+dates[2]+')',d:daf}].forEach(day=>{
+    if(!day.d)return;
+    const maxF=cToF(day.d.maxC);
+    const{html,conf}=probTable(maxF,day.d.allC);
+    detail+=`<div style="margin-bottom:14px"><div style="font-size:12px;font-weight:600;margin-bottom:4px">${day.l}</div>
+      <div class="small" style="color:var(--t2);margin-bottom:6px">預報最高溫：<span class="mono" style="color:var(--t1)">${maxF.toFixed(1)}°F / ${day.d.maxC.toFixed(1)}°C</span> · 信心：<span class="tag tag-${conf==='high'?'g':conf==='medium'?'o':'r'}">${conf.toUpperCase()}</span></div>
+      ${html}</div>`;
+  });
+  const tF=tmr?cToF(tmr.maxC):null,dF=daf?cToF(daf.maxC):null;
+  return`<div class="card city-card"><div class="city-hdr" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;cursor:pointer">
+    <div><div class="mono" style="font-size:16px;font-weight:700">${city.name}</div><div class="small muted">📍 ${city.station}</div></div>
+    <div style="display:flex;align-items:center;gap:14px">
+      ${tF!==null?`<div style="text-align:right"><div class="small muted">Tomorrow</div><div class="mono" style="font-size:18px;font-weight:700">${tF.toFixed(0)}°F <span class="small muted">${tmr.maxC.toFixed(1)}°C</span></div></div>`:''}
+      ${dF!==null?`<div style="text-align:right"><div class="small muted">Day After</div><div class="mono" style="font-size:18px;font-weight:700">${dF.toFixed(0)}°F <span class="small muted">${daf.maxC.toFixed(1)}°C</span></div></div>`:''}
+      <span class="muted" style="font-size:11px">▼</span>
+    </div></div>
+    <div class="detail">${detail}
+      <a class="pm-link" href="https://polymarket.com/browse?query=${encodeURIComponent(city.name+' temperature')}" target="_blank">→ Polymarket 搜尋 ${city.name}</a>
+    </div></div>`;
+}
+
+function probTable(forecastF,allC){
+  const sd=3,center=Math.round(forecastF/5)*5;
+  const ivs=[];
+  for(let lo=center-25;lo<=center+25;lo+=5){
+    const p=probInterval(forecastF,lo,lo+5,sd);
+    if(p>.001)ivs.push({lo,hi:lo+5,p});
+  }
+  const sorted=[...ivs].sort((a,b)=>b.p-a.p);
+  const m=sorted[0],s2=sorted[1];
+  const topF=allC.map(c=>cToF(c)).sort((a,b)=>b-a).slice(0,6);
+  const inM=topF.filter(t=>t>=m.lo&&t<m.hi).length;
+  const conf=inM>=4?'high':inM>=2?'medium':'low';
+  let rows=ivs.map(iv=>{
+    const isM=iv===m,isS=iv===s2;
+    return`<tr class="${isM?'ml':isS?'sl':''}"><td>${iv.lo}°F–${iv.hi}°F</td><td>${fToC(iv.lo).toFixed(1)}°C–${fToC(iv.hi).toFixed(1)}°C</td><td><div class="pbar"><div class="pbar-f${isS?' s':''}" style="width:${(iv.p/m.p*100).toFixed(0)}%"></div></div></td><td style="font-weight:600">${(iv.p*100).toFixed(1)}%${isM?' ★最可能':isS?' ◆次可能':''}</td></tr>`;
+  }).join('');
+  return{html:`<div style="overflow-x:auto"><table class="ptable"><thead><tr><th>區間 °F</th><th>區間 °C</th><th>分佈</th><th>公平價格</th></tr></thead><tbody>${rows}</tbody></table></div>`,conf};
+}
+
+// ======================================================================
+// 📊 TERMINAL — 價格 + 圖表 + 技術指標 + F&G
+// ======================================================================
+async function loadTerminal(){
+  await Promise.allSettled([loadCrypto(),loadFNG(),loadChartData()]);
+  document.getElementById('t-upd').textContent='更新：'+ts();
+}
+
+async function loadCrypto(){
+  try{
+    const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true');
+    const d=await r.json();
+    G.prices=d; G.lastCrypto=Date.now();
+    const coins=[{id:'bitcoin',sym:'BTC'},{id:'ethereum',sym:'ETH'},{id:'solana',sym:'SOL'}];
+    document.getElementById('crypto-cards').innerHTML=coins.map(c=>{
+      const p=d[c.id];if(!p)return`<div class="coin-card"><div class="coin-sym">${c.sym}</div><div class="coin-price">N/A</div></div>`;
+      const up=p.usd_24h_change>=0;
+      return`<div class="coin-card"><div class="coin-sym">${c.sym}</div>
+        <div class="coin-price">${fmt$(p.usd)}</div>
+        <div class="coin-chg ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(p.usd_24h_change).toFixed(2)}%</div>
+        <div class="small muted" style="margin-top:4px">Vol: ${fmt$(p.usd_24h_vol)} · MCap: ${fmt$(p.usd_market_cap)}</div>
+      </div>`;
+    }).join('');
+    // BTC 警報
+    const al=document.getElementById('btc-alert');
+    if(d.bitcoin&&Math.abs(d.bitcoin.usd_24h_change)>5){
+      const ch=d.bitcoin.usd_24h_change;
+      al.style.display='block';
+      al.style.background=ch>0?'var(--green-d)':'var(--red-d)';
+      al.style.border='1px solid '+(ch>0?'var(--green)':'var(--red)');
+      al.style.color=ch>0?'var(--green)':'var(--red)';
+      al.textContent=`⚡ BTC 24h ${ch>0?'+':''}${ch.toFixed(2)}%！${ch>0?'暴漲中，注意追高風險':'大幅下跌，可能是機會'}`;
+    }else al.style.display='none';
+  }catch(e){
+    document.getElementById('crypto-cards').innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--red);padding:20px" class="small">⚠ CoinGecko 限流，請稍後重試</div>';
+  }
+}
+
+async function loadFNG(){
+  try{
+    const r=await fetch('https://api.alternative.me/fng/?limit=1');
+    const d=await r.json();
+    const v=parseInt(d.data[0].value),label=d.data[0].value_classification;
+    G.fng={value:v,label};
+    document.getElementById('fng-val').textContent=v;
+    document.getElementById('fng-val').style.color=v<=25?'var(--red)':v<=45?'var(--orange)':v<=55?'var(--yellow)':v<=75?'var(--green)':'#00e676';
+    document.getElementById('fng-dot').style.left=v+'%';
+    document.getElementById('fng-label').textContent=label;
+    const adv=v<=20?'🔴 極度恐慌 — 歷史上是長線買點，但注意基本面':v<=35?'🟠 恐慌 — 可關注優質標的，分批建倉':v<=55?'🟡 中性 — 維持現策，等信號':v<=75?'🟢 貪婪 — 注意獲利了結':'🔴 極度貪婪 — 市場可能過熱，考慮減倉';
+    document.getElementById('fng-advice').textContent=adv;
+  }catch(e){
+    document.getElementById('fng-val').textContent='--';
+    document.getElementById('fng-label').textContent='載入失敗';
+  }
+}
+
+// 歷史價格 + 圖表
+async function loadChartData(){
+  const coin=document.getElementById('chart-coin').value;
+  const days=document.getElementById('chart-days').value;
+  try{
+    const r=await fetch(`https://api.coingecko.com/api/v3/coins/${coin}/market_chart?vs_currency=usd&days=${days}`);
+    const d=await r.json();
+    G.history[coin]={prices:d.prices.map(p=>p[1]),timestamps:d.prices.map(p=>p[0])};
+    renderChart();
+    renderIndicators();
+  }catch(e){
+    document.getElementById('tech-indicators').innerHTML='<div class="small" style="color:var(--red);text-align:center;padding:10px">⚠ 無法載入歷史數據</div>';
+  }
+}
+
+function renderChart(){
+  const coin=document.getElementById('chart-coin').value;
+  const data=G.history[coin];
+  if(!data)return;
+  const canvas=document.getElementById('price-chart');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  const prices=data.prices;
+  const s20=sma(prices,20);
+  const bb=calcBB(prices,20,2);
+  const mn=Math.min(...prices)*.998,mx=Math.max(...prices)*1.002;
+  const scaleX=i=>i/(prices.length-1)*W;
+  const scaleY=v=>H-(v-mn)/(mx-mn)*H;
+
+  ctx.clearRect(0,0,W,H);
+  // 背景
+  ctx.fillStyle='#0c1021';ctx.fillRect(0,0,W,H);
+  // 網格
+  ctx.strokeStyle='#1a1f35';ctx.lineWidth=.5;
+  for(let i=0;i<5;i++){const y=H/5*i;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+  // 布林帶填充
+  ctx.fillStyle='rgba(187,134,252,0.08)';
+  ctx.beginPath();
+  let started=false;
+  for(let i=0;i<prices.length;i++){
+    if(bb.upper[i]===null)continue;
+    if(!started){ctx.moveTo(scaleX(i),scaleY(bb.upper[i]));started=true}
+    else ctx.lineTo(scaleX(i),scaleY(bb.upper[i]));
+  }
+  for(let i=prices.length-1;i>=0;i--){
+    if(bb.lower[i]===null)continue;
+    ctx.lineTo(scaleX(i),scaleY(bb.lower[i]));
+  }
+  ctx.fill();
+
+  // BB 線
+  function drawLine(arr,color,width=1){
+    ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();
+    let s=false;
+    arr.forEach((v,i)=>{if(v===null)return;if(!s){ctx.moveTo(scaleX(i),scaleY(v));s=true}else ctx.lineTo(scaleX(i),scaleY(v))});
+    ctx.stroke();
+  }
+  drawLine(bb.upper,'#bb86fc80');
+  drawLine(bb.lower,'#bb86fc80');
+  drawLine(s20,'#ffa726',1.5);
+  drawLine(prices,'#00d4ff',2);
+
+  // 價格標籤
+  ctx.fillStyle='#8892a8';ctx.font='11px JetBrains Mono';
+  ctx.fillText(fmt$(mx),4,14);
+  ctx.fillText(fmt$(mn),4,H-4);
+  ctx.fillText(fmt$(prices[prices.length-1]),W-80,14);
+}
+
+function renderIndicators(){
+  const coin=document.getElementById('chart-coin').value;
+  const data=G.history[coin];
+  if(!data)return;
+  const p=data.prices,len=p.length,last=p[len-1];
+  const s20=sma(p,20),s50=sma(p,50);
+  const rsi=calcRSI(p,14);
+  const macd=calcMACD(p);
+  const bb=calcBB(p,20,2);
+
+  const lastRSI=rsi[len-1],lastMACD=macd.macdLine[len-1],lastSignal=macd.signal[len-1];
+  const lastSMA20=s20[len-1],lastSMA50=s50[len-1];
+  const lastBBU=bb.upper[len-1],lastBBL=bb.lower[len-1];
+
+  const rsiColor=lastRSI>70?'var(--red)':lastRSI<30?'var(--green)':'var(--t1)';
+  const rsiTag=lastRSI>70?'超買':lastRSI<30?'超賣':'中性';
+  const macdBull=lastMACD>lastSignal;
+  const trendUp=lastSMA20>lastSMA50;
+  const bbPos=last>lastBBU?'上穿布林帶':last<lastBBL?'下穿布林帶':'帶內';
+
+  document.getElementById('tech-indicators').innerHTML=`
+    <div class="indicator-row"><span>RSI (14)</span><span style="color:${rsiColor}">${lastRSI?.toFixed(1)||'--'} (${rsiTag})</span></div>
+    <div class="indicator-row"><span>MACD</span><span class="${macdBull?'up':'dn'}">${lastMACD?.toFixed(2)||'--'} ${macdBull?'▲看多':'▼看空'}</span></div>
+    <div class="indicator-row"><span>Signal</span><span>${lastSignal?.toFixed(2)||'--'}</span></div>
+    <div class="indicator-row"><span>SMA 20</span><span>${lastSMA20?fmt$(lastSMA20):'--'}</span></div>
+    <div class="indicator-row"><span>SMA 50</span><span>${lastSMA50?fmt$(lastSMA50):'--'}</span></div>
+    <div class="indicator-row"><span>趨勢</span><span class="${trendUp?'up':'dn'}">${trendUp?'▲ SMA20>50 看多':'▼ SMA20<50 看空'}</span></div>
+    <div class="indicator-row"><span>BB Upper</span><span>${lastBBU?fmt$(lastBBU):'--'}</span></div>
+    <div class="indicator-row"><span>BB Lower</span><span>${lastBBL?fmt$(lastBBL):'--'}</span></div>
+    <div class="indicator-row"><span>BB 位置</span><span>${bbPos}</span></div>
+    <div style="margin-top:10px;padding:10px;background:var(--bg1);border-radius:var(--rs)">
+      <div class="small" style="font-weight:700;margin-bottom:4px">📋 綜合判讀</div>
+      <div class="small" style="color:var(--t2);line-height:1.6">${generateTechSummary(lastRSI,macdBull,trendUp,bbPos,last,lastSMA20)}</div>
+    </div>`;
+}
+
+function generateTechSummary(rsi,macdBull,trendUp,bbPos,price,sma20){
+  let signals=0;
+  if(rsi<30)signals+=2;else if(rsi<40)signals+=1;else if(rsi>70)signals-=2;else if(rsi>60)signals-=1;
+  if(macdBull)signals+=1;else signals-=1;
+  if(trendUp)signals+=1;else signals-=1;
+  if(price<sma20)signals+=1;else signals-=1;
+  if(signals>=3)return'<span class="up">強烈看多</span> — RSI + MACD + 趨勢共振，適合做多。注意設好止損。';
+  if(signals>=1)return'<span class="up">偏多</span> — 多數指標偏多，但信號不夠強。可小倉位試探。';
+  if(signals>=-1)return'<span style="color:var(--yellow)">中性震盪</span> — 多空分歧，建議觀望等待更明確信號。';
+  if(signals>=-3)return'<span class="dn">偏空</span> — 多數指標偏空，注意風險。逆向交易者可關注超賣反彈。';
+  return'<span class="dn">強烈看空</span> — 多重指標看空。做空或觀望為主。';
+}
+
+// ======================================================================
+// 🤖 AI AGENTS — 多 Agent 辯論交易決策
+// ======================================================================
+async function runAgents(){
+  const coin=document.getElementById('agent-coin').value;
+  const cards=document.getElementById('agent-cards');
+  cards.innerHTML='<div class="card" style="grid-column:1/-1;text-align:center;padding:30px"><div class="spinner"></div> Agents 分析中...</div>';
+  document.getElementById('consensus-box').style.display='none';
+  document.getElementById('debate-card').style.display='none';
+
+  // 確保有數據
+  if(!G.history[coin]){
+    try{
+      const r=await fetch(`https://api.coingecko.com/api/v3/coins/${coin}/market_chart?vs_currency=usd&days=90`);
+      const d=await r.json();
+      G.history[coin]={prices:d.prices.map(p=>p[1]),timestamps:d.prices.map(p=>p[0])};
+    }catch(e){cards.innerHTML='<div class="card" style="grid-column:1/-1;color:var(--red)">⚠ 數據載入失敗</div>';return}
+  }
+  if(!G.prices[coin]){
+    try{
+      const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coin}&vs_currencies=usd&include_24hr_change=true`);
+      G.prices=await r.json();
+    }catch(e){}
+  }
+  if(!G.fng){try{const r=await fetch('https://api.alternative.me/fng/?limit=1');const d=await r.json();G.fng={value:parseInt(d.data[0].value),label:d.data[0].value_classification}}catch(e){}}
+
+  const p=G.history[coin].prices;
+  const last=p[p.length-1];
+  const rsi=calcRSI(p,14);const lastRSI=rsi[p.length-1]||50;
+  const macd=calcMACD(p);const lastMACD=macd.macdLine[p.length-1]||0;const lastSig=macd.signal[p.length-1]||0;
+  const s20=sma(p,20);const s50=sma(p,50);
+  const chg24=G.prices[coin]?.usd_24h_change||0;
+  const chg7=((last-p[Math.max(0,p.length-7)])/p[Math.max(0,p.length-7)])*100;
+  const chg30=((last-p[0])/p[0])*100;
+  const fngV=G.fng?.value||50;
+  const vol=calcVolatility(p);
+  const bb=calcBB(p,20,2);
+  const bbU=bb.upper[p.length-1],bbL=bb.lower[p.length-1];
+
+  // 定義 5 個 Agent
+  const agents=[
+    {
+      name:'Benjamin Graham',role:'價值投資 Agent',color:'var(--green)',
+      analyze:()=>{
+        // 看價格相對歷史平均
+        const avg30=p.slice(-30).reduce((a,b)=>a+b)/30;
+        const discount=((last-avg30)/avg30)*100;
+        let score=0,reasoning='';
+        if(discount<-10){score=2;reasoning=`當前價格低於 30 日均價 ${Math.abs(discount).toFixed(1)}%，存在價值窪地。`}
+        else if(discount<-3){score=1;reasoning=`價格略低於 30 日均價 ${Math.abs(discount).toFixed(1)}%，有一定安全邊際。`}
+        else if(discount>10){score=-2;reasoning=`價格高於 30 日均價 ${discount.toFixed(1)}%，估值偏高，無安全邊際。`}
+        else if(discount>3){score=-1;reasoning=`價格略高於均值，謹慎觀望。`}
+        else{score=0;reasoning=`價格接近 30 日均值，估值中性。`}
+        if(chg30<-20){score+=1;reasoning+=' 月跌幅超 20%，恐慌拋售可能創造機會。'}
+        return{score,reasoning,verdict:score>=2?'STRONG BUY':score>=1?'BUY':score<=-2?'STRONG SELL':score<=-1?'SELL':'HOLD'}
+      }
+    },
+    {
+      name:'Momentum Trader',role:'動量策略 Agent',color:'var(--cyan)',
+      analyze:()=>{
+        let score=0,reasoning='';
+        const macdBull=lastMACD>lastSig;
+        const trendUp=s20[p.length-1]>s50[p.length-1];
+        if(macdBull){score+=1;reasoning+='MACD 金叉，短期動量向上。'}else{score-=1;reasoning+='MACD 死叉，動量轉弱。'}
+        if(trendUp){score+=1;reasoning+=' SMA20>SMA50 趨勢向上。'}else{score-=1;reasoning+=' SMA20<SMA50 趨勢向下。'}
+        if(chg7>5){score+=1;reasoning+=` 7 日漲 ${chg7.toFixed(1)}%，強勢突破。`}
+        else if(chg7<-5){score-=1;reasoning+=` 7 日跌 ${Math.abs(chg7).toFixed(1)}%，空頭主導。`}
+        return{score,reasoning,verdict:score>=2?'STRONG BUY':score>=1?'BUY':score<=-2?'STRONG SELL':score<=-1?'SELL':'HOLD'}
+      }
+    },
+    {
+      name:'Sentiment Analyst',role:'市場情緒 Agent',color:'var(--orange)',
+      analyze:()=>{
+        let score=0,reasoning='';
+        if(fngV<=20){score+=2;reasoning+=`極度恐慌 (${fngV})，歷史上是絕佳買點。`}
+        else if(fngV<=35){score+=1;reasoning+=`恐慌情緒 (${fngV})，逆向交易者的機會。`}
+        else if(fngV>=80){score-=2;reasoning+=`極度貪婪 (${fngV})，市場過熱，警惕回調。`}
+        else if(fngV>=65){score-=1;reasoning+=`貪婪情緒 (${fngV})，樂觀但需謹慎。`}
+        else{score=0;reasoning+=`情緒中性 (${fngV})，無明顯偏向。`}
+        if(Math.abs(chg24)>5){reasoning+=` 24h 劇烈波動 ${chg24>0?'+':''}${chg24.toFixed(1)}%，情緒放大中。`}
+        return{score,reasoning,verdict:score>=2?'STRONG BUY':score>=1?'BUY':score<=-2?'STRONG SELL':score<=-1?'SELL':'HOLD'}
+      }
+    },
+    {
+      name:'Risk Manager',role:'風險管理 Agent',color:'var(--red)',
+      analyze:()=>{
+        let score=0,reasoning='';
+        if(vol>4){score-=1;reasoning+=`波動率 ${vol.toFixed(1)}% 偏高，建議降低倉位。`}
+        else if(vol<1.5){score+=1;reasoning+=`波動率 ${vol.toFixed(1)}% 偏低，風險可控。`}
+        else{reasoning+=`波動率 ${vol.toFixed(1)}% 適中。`}
+        if(lastRSI>80){score-=2;reasoning+=` RSI ${lastRSI.toFixed(0)} 嚴重超買，回調風險極高。`}
+        else if(lastRSI>70){score-=1;reasoning+=` RSI ${lastRSI.toFixed(0)} 超買區域。`}
+        else if(lastRSI<20){score+=1;reasoning+=` RSI ${lastRSI.toFixed(0)} 嚴重超賣，可能反彈。`}
+        else if(lastRSI<30){score+=1;reasoning+=` RSI ${lastRSI.toFixed(0)} 超賣區域。`}
+        if(last>bbU){score-=1;reasoning+=' 價格突破布林帶上軌，注意回歸。'}
+        else if(last<bbL){score+=1;reasoning+=' 價格跌破布林帶下軌，超跌反彈機會。'}
+        const maxDD=calcMaxDrawdown(p.slice(-30));
+        reasoning+=` 30 日最大回撤 ${maxDD.toFixed(1)}%。`;
+        return{score,reasoning,verdict:score>=1?'LOW RISK':score<=-1?'HIGH RISK':'MODERATE RISK'}
+      }
+    },
+    {
+      name:'Contrarian',role:'逆向投資 Agent',color:'var(--purple)',
+      analyze:()=>{
+        let score=0,reasoning='';
+        // 逆向邏輯：大家恐慌時買，大家貪婪時賣
+        if(fngV<=25&&chg7<-5){score+=2;reasoning+=`市場恐慌+大跌，眾人恐懼我貪婪。逆向做多信號強烈。`}
+        else if(fngV>=75&&chg7>5){score-=2;reasoning+=`市場貪婪+大漲，眾人貪婪我恐懼。逆向做空/減倉信號。`}
+        else if(chg24<-8){score+=1;reasoning+=`24h 暴跌 ${chg24.toFixed(1)}%，過度反應概率高，關注反彈。`}
+        else if(chg24>8){score-=1;reasoning+=`24h 暴漲 ${chg24.toFixed(1)}%，FOMO 驅動概率高，不追。`}
+        else{reasoning+=`市場無極端偏離，逆向信號不明顯。`}
+        return{score,reasoning,verdict:score>=2?'STRONG BUY':score>=1?'BUY':score<=-2?'STRONG SELL':score<=-1?'SELL':'NEUTRAL'}
+      }
+    }
+  ];
+
+  // 執行所有 Agent 分析
+  const results=agents.map(a=>({...a,result:a.analyze()}));
+
+  // 渲染 Agent 卡片
+  cards.innerHTML=results.map(a=>{
+    const v=a.result.verdict;
+    const isBuy=v.includes('BUY'),isSell=v.includes('SELL');
+    const tagCls=isBuy?'tag-g':isSell?'tag-r':v.includes('HIGH')?'tag-r':v.includes('LOW')?'tag-g':'tag-o';
+    return`<div class="card agent-card" style="border-left-color:${a.color}">
+      <div class="agent-name" style="color:${a.color}">${a.name}</div>
+      <div class="agent-role">${a.role}</div>
+      <div class="agent-verdict"><span class="tag ${tagCls}">${v}</span> <span class="small muted">Score: ${a.result.score>0?'+':''}${a.result.score}</span></div>
+      <div class="agent-reasoning">${a.result.reasoning}</div>
+    </div>`;
+  }).join('');
+
+  // CIO 共識
+  const totalScore=results.reduce((s,a)=>s+a.result.score,0);
+  const action=totalScore>=4?'STRONG BUY':totalScore>=2?'BUY':totalScore>=-1?'HOLD':totalScore>=-3?'SELL':'STRONG SELL';
+  const actionColor=action.includes('BUY')?'var(--green)':action.includes('SELL')?'var(--red)':'var(--yellow)';
+  const confPct=Math.min(100,Math.abs(totalScore)/5*100).toFixed(0);
+
+  const cbox=document.getElementById('consensus-box');
+  cbox.style.display='block';cbox.style.borderColor=actionColor;
+  document.getElementById('consensus-action').textContent=action;
+  document.getElementById('consensus-action').style.color=actionColor;
+  document.getElementById('consensus-conf').innerHTML=`共識分數：${totalScore>0?'+':''}${totalScore}/10 · 信心：${confPct}% · <span class="mono">${coin.toUpperCase()} @ ${fmt$(last)}</span>`;
+
+  const bullAgents=results.filter(a=>a.result.score>0).map(a=>a.name);
+  const bearAgents=results.filter(a=>a.result.score<0).map(a=>a.name);
+  document.getElementById('consensus-reason').innerHTML=
+    `看多：${bullAgents.join(', ')||'無'} | 看空：${bearAgents.join(', ')||'無'}`;
+
+  // 辯論紀錄
+  document.getElementById('debate-card').style.display='block';
+  const debateLog=document.getElementById('debate-log');
+  let log='';
+  log+=`<div><span class="speaker" style="color:var(--cyan)">[系統]</span> 分析標的：${coin.toUpperCase()} @ ${fmt$(last)} | ${new Date().toLocaleString()}</div>`;
+  log+=`<div><span class="speaker" style="color:var(--cyan)">[系統]</span> RSI: ${lastRSI.toFixed(1)} | MACD: ${lastMACD.toFixed(2)} | F&G: ${fngV} | 24h: ${chg24>0?'+':''}${chg24.toFixed(2)}% | 7d: ${chg7>0?'+':''}${chg7.toFixed(1)}%</div><br>`;
+  results.forEach(a=>{
+    log+=`<div><span class="speaker" style="color:${a.color}">[${a.name}]</span> ${a.result.verdict} (Score: ${a.result.score>0?'+':''}${a.result.score}) — ${a.result.reasoning}</div>`;
+  });
+  log+=`<br><div><span class="speaker" style="color:var(--yellow)">[CIO 最終裁決]</span> <b>${action}</b> (共識分數 ${totalScore})</div>`;
+  log+=`<div><span class="speaker" style="color:var(--yellow)">[CIO]</span> ${totalScore>=2?'多數 Agent 看多，建議順勢做多，但需設好止損。':totalScore<=-2?'多數 Agent 看空，建議減倉或觀望。':'多空分歧較大，建議觀望等待更明確信號，不要勉強進場。'}</div>`;
+  debateLog.innerHTML=log;
+}
+
+function calcVolatility(p){
+  const returns=[];
+  for(let i=1;i<p.length;i++)returns.push((p[i]-p[i-1])/p[i-1]*100);
+  const avg=returns.reduce((a,b)=>a+b,0)/returns.length;
+  const variance=returns.reduce((s,r)=>s+(r-avg)**2,0)/returns.length;
+  return Math.sqrt(variance);
+}
+function calcMaxDrawdown(p){
+  let peak=p[0],maxDD=0;
+  for(const v of p){if(v>peak)peak=v;const dd=(peak-v)/peak*100;if(dd>maxDD)maxDD=dd}
+  return maxDD;
+}
+
+// ======================================================================
+// 📈 QUANT LAB — 策略回測引擎
+// ======================================================================
+async function runBacktest(){
+  const coin=document.getElementById('bt-coin').value;
+  const days=parseInt(document.getElementById('bt-days').value);
+  const strategy=document.getElementById('bt-strategy').value;
+  const fast=parseInt(document.getElementById('bt-fast').value);
+  const slow=parseInt(document.getElementById('bt-slow').value);
+  const capital=parseFloat(document.getElementById('bt-capital').value);
+
+  document.getElementById('bt-run').textContent='⏳ 回測中...';
+  document.getElementById('bt-run').disabled=true;
+
+  try{
+    const r=await fetch(`https://api.coingecko.com/api/v3/coins/${coin}/market_chart?vs_currency=usd&days=${days}`);
+    const d=await r.json();
+    const prices=d.prices.map(p=>p[1]);
+    const timestamps=d.prices.map(p=>new Date(p[0]).toLocaleDateString());
+
+    // 生成交易信號
+    const signals=generateSignals(prices,strategy,fast,slow);
+
+    // 執行回測
+    const result=executeBacktest(prices,signals,capital,timestamps);
+
+    // 顯示結果
+    document.getElementById('bt-results').style.display='block';
+    renderBTStats(result,prices,capital);
+    renderBTChart(result,prices,capital);
+    renderBTTrades(result);
+  }catch(e){
+    alert('回測失敗：'+e.message);
+  }
+  document.getElementById('bt-run').textContent='▶ 執行回測';
+  document.getElementById('bt-run').disabled=false;
+}
+
+function generateSignals(prices,strategy,fast,slow){
+  const signals=new Array(prices.length).fill(0); // 0=無, 1=買, -1=賣
+  switch(strategy){
+    case 'sma_cross':{
+      const f=sma(prices,fast),s=sma(prices,slow);
+      for(let i=1;i<prices.length;i++){
+        if(f[i]===null||s[i]===null||f[i-1]===null||s[i-1]===null)continue;
+        if(f[i]>s[i]&&f[i-1]<=s[i-1])signals[i]=1;
+        if(f[i]<s[i]&&f[i-1]>=s[i-1])signals[i]=-1;
+      }
+      break;
+    }
+    case 'rsi_revert':{
+      const r=calcRSI(prices,fast);
+      let inPosition=false;
+      for(let i=1;i<prices.length;i++){
+        if(r[i]===null)continue;
+        if(!inPosition&&r[i]<slow){signals[i]=1;inPosition=true} // slow = 超賣線
+        if(inPosition&&r[i]>100-slow){signals[i]=-1;inPosition=false}
+      }
+      break;
+    }
+    case 'bb_squeeze':{
+      const bb=calcBB(prices,fast,2);
+      let inPosition=false;
+      for(let i=1;i<prices.length;i++){
+        if(bb.lower[i]===null)continue;
+        if(!inPosition&&prices[i]<bb.lower[i]){signals[i]=1;inPosition=true}
+        if(inPosition&&prices[i]>bb.upper[i]){signals[i]=-1;inPosition=false}
+      }
+      break;
+    }
+    case 'macd_cross':{
+      const m=calcMACD(prices);
+      for(let i=1;i<prices.length;i++){
+        if(m.macdLine[i]===null||m.signal[i]===null)continue;
+        if(m.macdLine[i]>m.signal[i]&&m.macdLine[i-1]<=m.signal[i-1])signals[i]=1;
+        if(m.macdLine[i]<m.signal[i]&&m.macdLine[i-1]>=m.signal[i-1])signals[i]=-1;
+      }
+      break;
+    }
+  }
+  return signals;
+}
+
+function executeBacktest(prices,signals,capital,timestamps){
+  let cash=capital,position=0,equity=[capital];
+  const trades=[];
+  let entryPrice=0;
+
+  for(let i=1;i<prices.length;i++){
+    if(signals[i]===1&&position===0){
+      position=cash/prices[i];cash=0;entryPrice=prices[i];
+      trades.push({type:'BUY',date:timestamps[i],price:prices[i],idx:i});
+    }else if(signals[i]===-1&&position>0){
+      cash=position*prices[i];
+      const pnl=((prices[i]-entryPrice)/entryPrice*100);
+      trades.push({type:'SELL',date:timestamps[i],price:prices[i],pnl,idx:i});
+      position=0;
+    }
+    equity.push(cash+position*prices[i]);
+  }
+
+  // 如果還持有，以最後價格計算
+  const finalEquity=cash+position*prices[prices.length-1];
+  const totalReturn=((finalEquity-capital)/capital)*100;
+
+  // Sharpe Ratio（簡化版，假設無風險利率 0）
+  const returns=[];
+  for(let i=1;i<equity.length;i++)returns.push((equity[i]-equity[i-1])/equity[i-1]);
+  const avgR=returns.reduce((a,b)=>a+b,0)/returns.length;
+  const stdR=Math.sqrt(returns.reduce((s,r)=>s+(r-avgR)**2,0)/returns.length);
+  const sharpe=stdR>0?(avgR/stdR)*Math.sqrt(365):0;
+
+  // Max Drawdown
+  let peak=equity[0],maxDD=0;
+  equity.forEach(v=>{if(v>peak)peak=v;const dd=(peak-v)/peak*100;if(dd>maxDD)maxDD=dd});
+
+  const wins=trades.filter(t=>t.type==='SELL'&&t.pnl>0).length;
+  const totalTrades=trades.filter(t=>t.type==='SELL').length;
+
+  return{equity,trades,finalEquity,totalReturn,sharpe,maxDD,winRate:totalTrades>0?(wins/totalTrades*100):0,totalTrades,timestamps};
+}
+
+function renderBTStats(r,prices,capital){
+  const bh=((prices[prices.length-1]-prices[0])/prices[0])*100;
+  document.getElementById('bt-stats').innerHTML=`
+    <div class="bt-stat"><div class="bt-stat-label">總報酬</div><div class="bt-stat-val ${r.totalReturn>=0?'up':'dn'}">${r.totalReturn>=0?'+':''}${r.totalReturn.toFixed(2)}%</div></div>
+    <div class="bt-stat"><div class="bt-stat-label">最終淨值</div><div class="bt-stat-val">${fmt$(r.finalEquity)}</div></div>
+    <div class="bt-stat"><div class="bt-stat-label">Buy & Hold</div><div class="bt-stat-val ${bh>=0?'up':'dn'}">${bh>=0?'+':''}${bh.toFixed(2)}%</div></div>
+    <div class="bt-stat"><div class="bt-stat-label">Sharpe Ratio</div><div class="bt-stat-val">${r.sharpe.toFixed(2)}</div></div>
+    <div class="bt-stat"><div class="bt-stat-label">Max Drawdown</div><div class="bt-stat-val dn">-${r.maxDD.toFixed(2)}%</div></div>
+    <div class="bt-stat"><div class="bt-stat-label">勝率</div><div class="bt-stat-val">${r.winRate.toFixed(0)}%</div></div>
+    <div class="bt-stat"><div class="bt-stat-label">交易次數</div><div class="bt-stat-val">${r.totalTrades}</div></div>
+    <div class="bt-stat"><div class="bt-stat-label">Alpha</div><div class="bt-stat-val ${(r.totalReturn-bh)>=0?'up':'dn'}">${(r.totalReturn-bh)>=0?'+':''}${(r.totalReturn-bh).toFixed(2)}%</div></div>`;
+}
+
+function renderBTChart(r,prices,capital){
+  const canvas=document.getElementById('bt-chart');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  // Buy & Hold equity
+  const bhEquity=prices.map(p=>capital*p/prices[0]);
+  const all=[...r.equity,...bhEquity];
+  const mn=Math.min(...all)*.98,mx=Math.max(...all)*1.02;
+  const scX=i=>i/(r.equity.length-1)*W;
+  const scY=v=>H-(v-mn)/(mx-mn)*H;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0c1021';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#1a1f35';ctx.lineWidth=.5;
+  for(let i=0;i<5;i++){const y=H/5*i;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+  // B&H 線
+  ctx.strokeStyle='#5a648080';ctx.lineWidth=1;ctx.beginPath();
+  bhEquity.forEach((v,i)=>{i===0?ctx.moveTo(scX(i),scY(v)):ctx.lineTo(scX(i),scY(v))});ctx.stroke();
+
+  // 策略線
+  ctx.strokeStyle='var(--cyan)';ctx.lineWidth=2;ctx.beginPath();
+  r.equity.forEach((v,i)=>{i===0?ctx.moveTo(scX(i),scY(v)):ctx.lineTo(scX(i),scY(v))});ctx.stroke();
+
+  // 交易標記
+  r.trades.forEach(t=>{
+    ctx.fillStyle=t.type==='BUY'?'#00e676':'#ff4757';
+    ctx.beginPath();ctx.arc(scX(t.idx),scY(r.equity[t.idx]),4,0,Math.PI*2);ctx.fill();
+  });
+
+  ctx.fillStyle='#8892a8';ctx.font='11px JetBrains Mono';
+  ctx.fillText(fmt$(mx),4,14);ctx.fillText(fmt$(mn),4,H-4);
+}
+
+function renderBTTrades(r){
+  if(r.trades.length===0){document.getElementById('bt-trades').innerHTML='<div class="small muted" style="padding:12px;text-align:center">此策略在該時段內無交易信號</div>';return}
+  let html='<table><thead><tr><th>#</th><th>日期</th><th>類型</th><th>價格</th><th>損益</th></tr></thead><tbody>';
+  r.trades.forEach((t,i)=>{
+    html+=`<tr><td>${i+1}</td><td>${t.date}</td><td class="${t.type==='BUY'?'up':'dn'}">${t.type}</td><td>${fmt$(t.price)}</td><td class="${t.pnl>0?'up':t.pnl<0?'dn':''}">${t.pnl!==undefined?(t.pnl>0?'+':'')+t.pnl.toFixed(2)+'%':'—'}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('bt-trades').innerHTML=html;
+}
+
+// ======================================================================
+// 📰 INTEL — 投研報告 + 情緒分析 + 文件解析 + 語音
+// ======================================================================
+async function genReport(){
+  const btn=document.getElementById('report-btn');
+  btn.textContent='⏳ 生成中...';btn.disabled=true;
+  const box=document.getElementById('report-box');
+
+  // 確保有數據
+  if(!G.prices.bitcoin){
+    try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true');G.prices=await r.json()}catch(e){}
+  }
+  if(!G.fng){try{const r=await fetch('https://api.alternative.me/fng/?limit=1');const d=await r.json();G.fng={value:parseInt(d.data[0].value),label:d.data[0].value_classification}}catch(e){}}
+
+  const btc=G.prices.bitcoin||{};
+  const eth=G.prices.ethereum||{};
+  const sol=G.prices.solana||{};
+  const fng=G.fng||{value:'N/A',label:'N/A'};
+  const date=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  const report=`
+═══════════════════════════════════════════════════
+  DAILY MARKET INTELLIGENCE REPORT
+  ${date}
+  Generated by TRADE.SYS (FinRobot + automated-market-report 風格)
+═══════════════════════════════════════════════════
+
+1. MARKET OVERVIEW
+───────────────────────────────────────────────────
+  BTC/USD:  ${fmt$(btc.usd||0)}  (${fmtPct(btc.usd_24h_change||0)})
+  ETH/USD:  ${fmt$(eth.usd||0)}  (${fmtPct(eth.usd_24h_change||0)})
+  SOL/USD:  ${fmt$(sol.usd||0)}  (${fmtPct(sol.usd_24h_change||0)})
+
+  BTC 24h Volume:  ${fmt$(btc.usd_24h_vol||0)}
+  BTC Market Cap:  ${fmt$(btc.usd_market_cap||0)}
+
+2. SENTIMENT ANALYSIS
+───────────────────────────────────────────────────
+  Fear & Greed Index:  ${fng.value} (${fng.label})
+  ${fng.value<=25?'⚠️  EXTREME FEAR — Historically a strong buy signal':fng.value<=40?'📉 FEAR — Market pessimism may create opportunities':fng.value<=60?'😐 NEUTRAL — No clear directional bias':fng.value<=75?'📈 GREED — Caution advised, consider taking profits':'🚨 EXTREME GREED — High risk of correction'}
+
+3. KEY SIGNALS
+───────────────────────────────────────────────────
+  ${Math.abs(btc.usd_24h_change||0)>5?`⚡ BTC 24H ALERT: ${fmtPct(btc.usd_24h_change)} — Significant move detected`:'  ✓ BTC within normal 24h range'}
+  ${Math.abs(eth.usd_24h_change||0)>5?`⚡ ETH 24H ALERT: ${fmtPct(eth.usd_24h_change)} — Significant move detected`:'  ✓ ETH within normal 24h range'}
+  ${Math.abs(sol.usd_24h_change||0)>8?`⚡ SOL 24H ALERT: ${fmtPct(sol.usd_24h_change)} — Significant move detected`:'  ✓ SOL within normal 24h range'}
+
+4. RECOMMENDED ACTIONS
+───────────────────────────────────────────────────
+${generateRecommendations(btc,eth,sol,fng)}
+
+5. RISK ASSESSMENT
+───────────────────────────────────────────────────
+  Overall Market Risk: ${fng.value>=70?'HIGH 🔴':fng.value>=50?'MODERATE 🟡':fng.value>=30?'MODERATE-LOW 🟢':'LOW (Contrarian Buy) 🟢'}
+
+  Key Risks:
+  • Regulatory uncertainty remains a headwind
+  • ${fng.value>=60?'Market euphoria may lead to sharp corrections':'Oversold conditions may persist before recovery'}
+  • Always use stop-losses and position sizing
+
+═══════════════════════════════════════════════════
+  END OF REPORT | Generated ${new Date().toLocaleTimeString()}
+  DISCLAIMER: This is auto-generated analysis, not financial advice.
+═══════════════════════════════════════════════════`;
+
+  box.textContent=report;
+  box.style.display='block';
+  btn.textContent='▶ 生成今日報告';btn.disabled=false;
+}
+
+function generateRecommendations(btc,eth,sol,fng){
+  let recs=[];
+  if(fng.value<=25)recs.push('  ★ Fear & Greed 極度恐慌 — 考慮分批建倉 BTC/ETH');
+  if(fng.value>=75)recs.push('  ★ Fear & Greed 極度貪婪 — 考慮部分止盈');
+  if((btc.usd_24h_change||0)<-5)recs.push('  ★ BTC 暴跌超 5% — 關注支撐位，逆向交易者可留意');
+  if((btc.usd_24h_change||0)>5)recs.push('  ★ BTC 暴漲超 5% — 不追高，等回調再入場');
+  if(recs.length===0)recs.push('  ★ 市場平穩 — 維持現有策略，等待更明確信號');
+  return recs.join('\n');
+}
+
+function copyReport(){const t=document.getElementById('report-box').textContent;if(t)copyText(t)}
+function downloadReport(){
+  const t=document.getElementById('report-box').textContent;
+  if(!t)return;
+  const blob=new Blob([t],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`market_report_${new Date().toISOString().split('T')[0]}.txt`;
+  a.click();
+}
+
+// 情緒分析
+async function runSentiment(){
+  const panel=document.getElementById('sentiment-panel');
+  panel.innerHTML='<div class="spinner"></div> 分析市場情緒中...';
+
+  if(!G.prices.bitcoin){try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true');G.prices=await r.json()}catch(e){}}
+  if(!G.fng){try{const r=await fetch('https://api.alternative.me/fng/?limit=7');const d=await r.json();G.fng={value:parseInt(d.data[0].value),label:d.data[0].value_classification,history:d.data}}catch(e){}}
+  if(!G.history.bitcoin){try{const r=await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30');const d=await r.json();G.history.bitcoin={prices:d.prices.map(p=>p[1]),timestamps:d.prices.map(p=>p[0])}}catch(e){}}
+
+  const fng=G.fng||{value:50,label:'Neutral'};
+  const btcChg=G.prices.bitcoin?.usd_24h_change||0;
+  const p=G.history.bitcoin?.prices||[];
+  const vol=p.length>1?calcVolatility(p):2;
+  const rsi=p.length>14?calcRSI(p,14):[];
+  const lastRSI=rsi.length?rsi[rsi.length-1]:50;
+
+  // 多維度情緒評分
+  const scores=[
+    {name:'Fear & Greed',value:fng.value,weight:30,interp:fng.value<=25?'極度恐慌':fng.value<=40?'恐慌':fng.value<=60?'中性':fng.value<=75?'貪婪':'極度貪婪'},
+    {name:'BTC 24h 動量',value:Math.min(100,Math.max(0,50+btcChg*5)),weight:20,interp:btcChg>3?'強勢上漲':btcChg>0?'溫和上漲':btcChg>-3?'溫和下跌':'強勢下跌'},
+    {name:'RSI 超買超賣',value:lastRSI,weight:20,interp:lastRSI>70?'超買':lastRSI>55?'偏多':lastRSI>45?'中性':lastRSI>30?'偏空':'超賣'},
+    {name:'波動率',value:Math.min(100,vol*15),weight:15,interp:vol>4?'高波動':vol>2?'中等波動':'低波動'},
+    {name:'趨勢方向',value:p.length>20?(p[p.length-1]>sma(p,20).pop()?70:30):50,weight:15,interp:p.length>20?(p[p.length-1]>p[p.length-20]?'上升趨勢':'下降趨勢'):'數據不足'},
+  ];
+
+  const weightedScore=scores.reduce((s,x)=>s+x.value*(x.weight/100),0);
+  const overallLabel=weightedScore<=25?'極度悲觀':weightedScore<=40?'悲觀':weightedScore<=60?'中性':weightedScore<=75?'樂觀':'極度樂觀';
+  const overallColor=weightedScore<=25?'var(--red)':weightedScore<=40?'var(--orange)':weightedScore<=60?'var(--yellow)':weightedScore<=75?'var(--green)':'#00e676';
+
+  panel.innerHTML=`
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:14px;color:var(--t3)">綜合市場情緒</div>
+      <div style="font-family:var(--mono);font-size:42px;font-weight:700;color:${overallColor}">${weightedScore.toFixed(0)}</div>
+      <div style="font-size:16px;font-weight:600;color:${overallColor}">${overallLabel}</div>
+    </div>
+    <div class="progress" style="height:10px;margin-bottom:16px;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green),#00e676)">
+      <div style="width:4px;height:16px;background:white;border-radius:2px;position:relative;left:${weightedScore}%;top:-3px"></div>
+    </div>
+    ${scores.map(s=>`
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+          <span>${s.name} <span class="muted">(權重 ${s.weight}%)</span></span>
+          <span class="mono">${s.value.toFixed(0)} — ${s.interp}</span>
+        </div>
+        <div class="progress"><div class="progress-fill" style="width:${s.value}%;background:${s.value<=30?'var(--red)':s.value<=50?'var(--orange)':s.value<=70?'var(--green)':'#00e676'}"></div></div>
+      </div>`).join('')}
+    <div style="margin-top:14px;padding:10px;background:var(--bg1);border-radius:var(--rs)">
+      <div class="small" style="font-weight:700;margin-bottom:4px">📋 情緒分析摘要 (FinGPT + WSJ NLP 風格)</div>
+      <div class="small" style="color:var(--t2);line-height:1.6">
+        ${weightedScore<=30?'市場恐慌情緒濃厚，多數指標指向超賣。歷史數據顯示此類環境下 30 天後平均反彈概率較高。建議關注逆向做多機會，但務必控制倉位。':
+          weightedScore<=50?'市場情緒偏弱但尚未極端，波動可能加劇。建議減少槓桿，維持防守型配置。':
+          weightedScore<=70?'市場情緒平穩，趨勢相對健康。適合維持現有策略，順勢操作。':
+          '市場樂觀情緒高漲，需警惕過度樂觀。建議逐步獲利了結，提高現金部位。'}
+      </div>
+    </div>
+    <button class="btn" onclick="runSentiment()" style="margin-top:10px">⟳ 重新分析</button>`;
+}
+
+// 文件解析器（LlamaIndex 風格）
+function analyzeDoc(){
+  const text=document.getElementById('doc-input').value.trim();
+  if(!text){alert('請先貼上要分析的文本');return}
+  const result=document.getElementById('doc-result');
+
+  // 提取數字
+  const numbers=text.match(/\$[\d,.]+[BMKbmk]?|\d+\.?\d*%|\d[\d,]*\.\d+/g)||[];
+  // 識別財務術語
+  const finTerms=['revenue','earnings','profit','loss','margin','EPS','P/E','EBITDA','cash flow','debt','equity','dividend','guidance','forecast','outlook','growth','decline','beat','miss','營收','獲利','毛利率','淨利','每股盈餘','負債','股利','展望'];
+  const foundTerms=finTerms.filter(t=>text.toLowerCase().includes(t.toLowerCase()));
+  // 情緒分析
+  const posWords=['beat','exceeded','strong','growth','increase','improve','record','outperform','bullish','optimistic','升','漲','增','強','樂觀','突破','創新高'];
+  const negWords=['miss','decline','weak','loss','decrease','concern','risk','bearish','pessimistic','warn','跌','降','弱','悲觀','風險','虧','下滑'];
+  const posCount=posWords.reduce((c,w)=>{const matches=text.toLowerCase().match(new RegExp(w,'gi'));return c+(matches?matches.length:0)},0);
+  const negCount=negWords.reduce((c,w)=>{const matches=text.toLowerCase().match(new RegExp(w,'gi'));return c+(matches?matches.length:0)},0);
+  const totalSent=posCount+negCount||1;
+  const sentScore=((posCount-negCount)/totalSent*50+50).toFixed(0);
+
+  // 關鍵句子（包含數字的句子）
+  const sentences=text.split(/[.。!！?？\n]+/).filter(s=>s.trim().length>10);
+  const keySentences=sentences.filter(s=>/\d/.test(s)).slice(0,5);
+
+  const output=`
+═══════════════════════════════════════════════════
+  DOCUMENT ANALYSIS (LlamaIndex 風格)
+═══════════════════════════════════════════════════
+
+📊 提取到的數字和指標 (${numbers.length} 個):
+${numbers.length>0?numbers.map(n=>'  • '+n).join('\n'):'  (未找到數字)'}
+
+📋 識別到的財務術語 (${foundTerms.length} 個):
+${foundTerms.length>0?foundTerms.map(t=>'  • '+t).join('\n'):'  (未找到財務術語)'}
+
+🧠 情緒分析:
+  正面詞彙: ${posCount} 個
+  負面詞彙: ${negCount} 個
+  情緒分數: ${sentScore}/100 (${sentScore>60?'偏正面':sentScore<40?'偏負面':'中性'})
+
+📌 關鍵句子:
+${keySentences.length>0?keySentences.map((s,i)=>'  '+(i+1)+'. '+s.trim()).join('\n'):'  (未找到含數字的關鍵句子)'}
+
+📝 摘要:
+  文本長度: ${text.length} 字
+  總句數: ${sentences.length}
+  分析結論: ${sentScore>60?'文本整體偏正面/樂觀，可能包含利好信息。':sentScore<40?'文本整體偏負面/悲觀，需關注潛在風險。':'文本情緒中性，建議深入閱讀做進一步判斷。'}
+═══════════════════════════════════════════════════`;
+
+  result.textContent=output;
+  result.style.display='block';
+}
+
+// 語音辨識（WhisperX 風格，使用 Web Speech API）
+let recognition=null;
+let isRecording=false;
+function toggleVoice(){
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
+    alert('你的瀏覽器不支援語音辨識。請使用 Chrome。');return}
+  if(isRecording){
+    recognition.stop();isRecording=false;
+    document.getElementById('voice-btn').textContent='🎤 開始錄音';
+    document.getElementById('voice-status').textContent='已停止';
+    return;
+  }
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();
+  recognition.continuous=true;
+  recognition.interimResults=true;
+  recognition.lang='zh-TW'; // 支援中文
+  let finalText=document.getElementById('voice-output').value;
+  recognition.onresult=(e)=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)finalText+=e.results[i][0].transcript+'\n';
+      else interim+=e.results[i][0].transcript;
+    }
+    document.getElementById('voice-output').value=finalText+interim;
+  };
+  recognition.onend=()=>{
+    if(isRecording)recognition.start(); // 持續錄音
+  };
+  recognition.onerror=(e)=>{
+    document.getElementById('voice-status').textContent='錯誤: '+e.error;
+  };
+  recognition.start();isRecording=true;
+  document.getElementById('voice-btn').textContent='⏹ 停止錄音';
+  document.getElementById('voice-status').textContent='🔴 錄音中...';
+}
+
+// ======================================================================
+// 📝 JOURNAL — 交易日誌
+// ======================================================================
+function getTrades(){try{return JSON.parse(localStorage.getItem('trades')||'[]')}catch{return[]}}
+function saveTrades(t){localStorage.setItem('trades',JSON.stringify(t))}
+
+function addTrade(){
+  const date=document.getElementById('j-date').value;
+  const market=document.getElementById('j-market').value;
+  const action=document.getElementById('j-action').value;
+  const amount=parseFloat(document.getElementById('j-amount').value)||0;
+  const result=parseFloat(document.getElementById('j-result').value)||0;
+  const notes=document.getElementById('j-notes').value;
+  if(!date||!market||!action){alert('請填寫日期、市場和操作');return}
+  const trades=getTrades();
+  trades.unshift({id:Date.now(),date,market,action,amount,result,notes});
+  saveTrades(trades);renderJournal();
+  document.getElementById('j-action').value='';
+  document.getElementById('j-amount').value='';
+  document.getElementById('j-result').value='';
+  document.getElementById('j-notes').value='';
+}
+function deleteTrade(id){saveTrades(getTrades().filter(t=>t.id!==id));renderJournal()}
+function clearTrades(){if(!confirm('確定清除所有紀錄？'))return;saveTrades([]);renderJournal()}
+function exportCSV(){
+  const trades=getTrades();if(!trades.length){alert('沒有紀錄');return}
+  const csv='日期,市場,操作,金額,結果,損益,備註\n'+trades.map(t=>`${t.date},${t.market},${t.action},${t.amount},${t.result},${(t.result-t.amount).toFixed(2)},"${(t.notes||'').replace(/"/g,'""')}"`).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`trades_${new Date().toISOString().split('T')[0]}.csv`;a.click();
+}
+function renderJournal(){
+  const trades=getTrades();
+  const body=document.getElementById('j-body');
+  const empty=document.getElementById('j-empty');
+  if(!trades.length){body.innerHTML='';empty.style.display='block'}
+  else{
+    empty.style.display='none';
+    body.innerHTML=trades.map(t=>{
+      const pnl=t.result-t.amount;
+      return`<tr><td>${t.date}</td><td>${t.market}</td><td>${t.action}</td><td>$${t.amount.toFixed(2)}</td><td>$${t.result.toFixed(2)}</td><td class="${pnl>=0?'up':'dn'}">${pnl>=0?'+':''}$${pnl.toFixed(2)}</td><td title="${(t.notes||'').replace(/"/g,'&quot;')}" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notes||'—'}</td><td><button class="del" onclick="deleteTrade(${t.id})">✕</button></td></tr>`;
+    }).join('');
+  }
+  const totalPnL=trades.reduce((s,t)=>s+(t.result-t.amount),0);
+  const wins=trades.filter(t=>t.result>t.amount).length;
+  const wr=trades.length?(wins/trades.length*100).toFixed(0):0;
+  document.getElementById('pnl-grid').innerHTML=`
+    <div class="pnl-box"><div class="pnl-lbl">累計損益</div><div class="pnl-val ${totalPnL>=0?'up':'dn'}">${totalPnL>=0?'+':''}$${totalPnL.toFixed(2)}</div></div>
+    <div class="pnl-box"><div class="pnl-lbl">總交易</div><div class="pnl-val">${trades.length}</div></div>
+    <div class="pnl-box"><div class="pnl-lbl">勝率</div><div class="pnl-val">${wr}%</div></div>`;
+}
+
+// ======================================================================
+// 📚 ARSENAL — Ollama + 資源庫
+// ======================================================================
+let ollamaConnected=false;
+
+async function connectOllama(){
+  const url=document.getElementById('ollama-url').value;
+  const dot=document.getElementById('ollama-dot');
+  const st=document.getElementById('ollama-st');
+  const modelSelect=document.getElementById('ollama-model');
+  try{
+    const r=await fetch(url+'/api/tags');
+    const d=await r.json();
+    dot.className='ollama-status ollama-on';
+    st.textContent=`已連接 (${d.models.length} 模型)`;
+    ollamaConnected=true;
+    modelSelect.innerHTML=d.models.map(m=>`<option value="${m.name}">${m.name} (${(m.size/1e9).toFixed(1)}GB)</option>`).join('');
+  }catch(e){
+    dot.className='ollama-status ollama-off';
+    st.textContent='連接失敗 — 確認 Ollama 已啟動';
+    ollamaConnected=false;
+  }
+}
+
+function setChat(text){document.getElementById('chat-input').value=text;document.getElementById('chat-input').focus()}
+
+async function sendChat(){
+  const input=document.getElementById('chat-input');
+  const msg=input.value.trim();if(!msg)return;
+  const box=document.getElementById('chat-box');
+  box.innerHTML+=`<div class="chat-msg chat-user">${msg}</div>`;
+  input.value='';
+  box.scrollTop=box.scrollHeight;
+
+  if(!ollamaConnected){
+    // 離線模式：用內建規則引擎回覆
+    const reply=offlineAI(msg);
+    box.innerHTML+=`<div class="chat-msg chat-ai">${reply}</div>`;
+    box.scrollTop=box.scrollHeight;
+    return;
+  }
+
+  const model=document.getElementById('ollama-model').value;
+  box.innerHTML+=`<div class="chat-msg chat-ai" id="ai-typing"><div class="spinner"></div> 思考中...</div>`;
+  box.scrollTop=box.scrollHeight;
+
+  try{
+    const url=document.getElementById('ollama-url').value;
+    // 附加市場數據作為上下文
+    const context=buildMarketContext();
+    const r=await fetch(url+'/api/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model,prompt:`你是一個專業的金融分析師。以下是當前市場數據：\n${context}\n\n用戶問題：${msg}\n\n請用中文簡潔回答：`,stream:false})
+    });
+    const d=await r.json();
+    document.getElementById('ai-typing').innerHTML=d.response;
+  }catch(e){
+    document.getElementById('ai-typing').innerHTML=`<span style="color:var(--red)">回覆失敗：${e.message}</span>`;
+  }
+  box.scrollTop=box.scrollHeight;
+}
+
+function buildMarketContext(){
+  let ctx='';
+  if(G.prices.bitcoin)ctx+=`BTC: $${G.prices.bitcoin.usd} (24h: ${(G.prices.bitcoin.usd_24h_change||0).toFixed(2)}%)\n`;
+  if(G.prices.ethereum)ctx+=`ETH: $${G.prices.ethereum.usd} (24h: ${(G.prices.ethereum.usd_24h_change||0).toFixed(2)}%)\n`;
+  if(G.prices.solana)ctx+=`SOL: $${G.prices.solana.usd} (24h: ${(G.prices.solana.usd_24h_change||0).toFixed(2)}%)\n`;
+  if(G.fng)ctx+=`Fear & Greed: ${G.fng.value} (${G.fng.label})\n`;
+  return ctx||'（尚無市場數據）';
+}
+
+// 離線 AI 回覆（當 Ollama 未連接時的規則引擎）
+function offlineAI(msg){
+  const m=msg.toLowerCase();
+  if(m.includes('btc')||m.includes('比特幣')||m.includes('bitcoin')){
+    const btc=G.prices.bitcoin;
+    if(!btc)return'⚠️ 尚未載入 BTC 數據。請先到 Terminal 頁面刷新。';
+    const chg=btc.usd_24h_change||0;
+    return`📊 BTC 當前 $${btc.usd?.toLocaleString()||'N/A'} (24h ${chg>0?'+':''}${chg.toFixed(2)}%)\n\n${chg>3?'短期強勢，但注意追高風險。RSI 可能偏高。':chg<-3?'短期弱勢，可能有恐慌拋售。如果 F&G 也偏低，可以關注逆向機會。':'價格穩定，等待方向突破。'}\n\n💡 連接 Ollama 獲得更詳細的 AI 分析。`;
+  }
+  if(m.includes('建倉')||m.includes('買入')||m.includes('進場')){
+    const fng=G.fng;
+    return`🎯 建倉時機評估：\n\nFear & Greed: ${fng?fng.value+' ('+fng.label+')':'N/A'}\n\n${fng&&fng.value<=30?'✅ 恐慌時刻通常是好的建倉點。建議：\n1. 分 3-5 次建倉，不要一次All-in\n2. 設定止損（建議 -10%）\n3. 先用小資金測試':'⚠️ 目前市場情緒偏中性/偏樂觀，不是最佳建倉點。建議等待恐慌時再入場。'}\n\n💡 連接 Ollama 獲得更精確的分析。`;
+  }
+  if(m.includes('sharpe')){
+    return`📖 Sharpe Ratio（夏普比率）\n\n公式：(投資組合報酬 - 無風險利率) / 投資組合標準差\n\n簡單說：每承擔一單位風險，能賺到多少超額報酬。\n\n• > 1.0：好\n• > 2.0：很好\n• > 3.0：非常優秀\n• < 0：虧損或報酬低於無風險利率\n\n在 Quant Lab 回測時，系統會自動計算策略的 Sharpe Ratio。`;
+  }
+  return`🤖 離線模式 — Ollama 未連接\n\n我目前只能提供基礎回覆。連接 Ollama 後可以獲得：\n• 深度市場分析\n• 自然語言交互\n• 策略建議\n\n啟動方式：\n1. 安裝 Ollama: curl -fsSL https://ollama.com/install.sh | sh\n2. 下載模型: ollama pull deepseek-r1:8b\n3. 點擊上方「連接」按鈕`;
+}
+
+// ======================================================================
+// 📥 #18 Data Scraper — 批量數據下載
+// ======================================================================
+async function scrapeData(){
+  const coin=document.getElementById('scrape-coin').value;
+  const days=document.getElementById('scrape-days').value;
+  const format=document.getElementById('scrape-fmt').value;
+  const btn=document.getElementById('scrape-btn');
+  btn.textContent='⏳ 爬取中...';btn.disabled=true;
+  try{
+    const r=await fetch(`https://api.coingecko.com/api/v3/coins/${coin}/market_chart?vs_currency=usd&days=${days}`);
+    const d=await r.json();
+    const rows=d.prices.map((p,i)=>({
+      date:new Date(p[0]).toISOString().split('T')[0],
+      time:new Date(p[0]).toISOString().split('T')[1].slice(0,8),
+      price:p[1],
+      volume:d.total_volumes[i]?d.total_volumes[i][1]:0,
+      market_cap:d.market_caps[i]?d.market_caps[i][1]:0
+    }));
+    // 預覽
+    const preview=document.getElementById('scrape-preview');
+    preview.style.display='block';
+    document.getElementById('scrape-info').textContent=`✅ ${coin.toUpperCase()} — ${rows.length} 筆數據點 (${days==='max'?'全部':days+'天'})`;
+    const table=document.getElementById('scrape-table');
+    table.innerHTML=`<thead><tr><th>Date</th><th>Time</th><th>Price</th><th>Volume</th><th>MCap</th></tr></thead>
+      <tbody>${rows.slice(0,20).map(r=>`<tr><td>${r.date}</td><td>${r.time}</td><td>${fmt$(r.price)}</td><td>${fmt$(r.volume)}</td><td>${fmt$(r.market_cap)}</td></tr>`).join('')}
+      ${rows.length>20?`<tr><td colspan="5" class="muted">... 還有 ${rows.length-20} 筆 (下載完整檔案)</td></tr>`:''}</tbody>`;
+    // 下載檔案
+    let blob,filename;
+    if(format==='csv'){
+      const csv='Date,Time,Price_USD,Volume_USD,MarketCap_USD\n'+rows.map(r=>`${r.date},${r.time},${r.price},${r.volume},${r.market_cap}`).join('\n');
+      blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+      filename=`${coin}_${days}d_${new Date().toISOString().split('T')[0]}.csv`;
+    }else{
+      blob=new Blob([JSON.stringify(rows,null,2)],{type:'application/json'});
+      filename=`${coin}_${days}d_${new Date().toISOString().split('T')[0]}.json`;
+    }
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+  }catch(e){
+    alert('爬取失敗：'+e.message);
+  }
+  btn.textContent='⬇ 下載數據';btn.disabled=false;
+}
+
+// ======================================================================
+// 🧮 #16 Quant Calculator — 量化計算工具
+// ======================================================================
+function showCalc(type){
+  ['position','kelly','rr','compound','dca'].forEach(t=>{
+    const el=document.getElementById('calc-'+t);
+    if(el)el.style.display=t===type?'block':'none';
+  });
+  // 立即計算
+  if(type==='position')calcPosition();
+  if(type==='kelly')calcKelly();
+  if(type==='rr')calcRR();
+  if(type==='compound')calcCompound();
+}
+
+function calcPosition(){
+  const capital=parseFloat(document.getElementById('pos-capital').value)||0;
+  const riskPct=parseFloat(document.getElementById('pos-risk').value)||0;
+  const entry=parseFloat(document.getElementById('pos-entry').value)||0;
+  const stop=parseFloat(document.getElementById('pos-stop').value)||0;
+  if(!entry||!stop||entry===stop){document.getElementById('pos-result').innerHTML='<span class="muted">請填入有效數值</span>';return}
+  const riskPerUnit=Math.abs(entry-stop);
+  const riskAmount=capital*(riskPct/100);
+  const shares=Math.floor(riskAmount/riskPerUnit);
+  const posSize=shares*entry;
+  const posPct=(posSize/capital*100);
+  const isLong=entry>stop;
+  document.getElementById('pos-result').innerHTML=`
+    <div>方向：<b>${isLong?'🟢 做多 (Long)':'🔴 做空 (Short)'}</b></div>
+    <div>最大風險金額：<b class="dn">$${riskAmount.toFixed(2)}</b> (${riskPct}% of $${capital})</div>
+    <div>每單位風險：<b>$${riskPerUnit.toFixed(2)}</b> (${(riskPerUnit/entry*100).toFixed(2)}%)</div>
+    <div>建議買入數量：<b style="color:var(--cyan)">${shares}</b> 單位</div>
+    <div>倉位大小：<b>${fmt$(posSize)}</b> (佔總資金 ${posPct.toFixed(1)}%)</div>
+    <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+      ${posPct>50?'<span class="dn">⚠ 倉位超過 50%，風險偏高</span>':posPct>25?'<span style="color:var(--orange)">⚡ 中等倉位，注意風險管理</span>':'<span class="up">✅ 倉位合理</span>'}
+    </div>`;
+}
+
+function calcKelly(){
+  const winRate=(parseFloat(document.getElementById('kelly-win').value)||0)/100;
+  const rr=parseFloat(document.getElementById('kelly-rr').value)||0;
+  if(!winRate||!rr){document.getElementById('kelly-result').innerHTML='<span class="muted">請填入有效數值</span>';return}
+  const kelly=winRate-(1-winRate)/rr;
+  const halfKelly=kelly/2;
+  const quarterKelly=kelly/4;
+  const edge=winRate*rr-(1-winRate);
+  document.getElementById('kelly-result').innerHTML=`
+    <div>Kelly 最佳比例：<b style="color:var(--cyan)">${(kelly*100).toFixed(2)}%</b></div>
+    <div>Half Kelly（推薦）：<b class="up">${(halfKelly*100).toFixed(2)}%</b></div>
+    <div>Quarter Kelly（保守）：<b>${(quarterKelly*100).toFixed(2)}%</b></div>
+    <div>期望值 (Edge)：<b class="${edge>0?'up':'dn'}">${(edge*100).toFixed(2)}%</b> per trade</div>
+    <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+      ${kelly<=0?'<span class="dn">⚠ Kelly ≤ 0：沒有正期望值，不應下注！</span>':
+        kelly>0.25?'<span style="color:var(--orange)">⚡ Kelly 偏高，實務上建議用 Half Kelly 或更低</span>':
+        '<span class="up">✅ Kelly 在合理範圍，Half Kelly 是最常用的實戰比例</span>'}
+    </div>
+    <div class="small muted" style="margin-top:6px">💡 Kelly 公式：f* = W - (1-W)/R | W=勝率, R=盈虧比</div>`;
+}
+
+function calcRR(){
+  const entry=parseFloat(document.getElementById('rr-entry').value)||0;
+  const stop=parseFloat(document.getElementById('rr-stop').value)||0;
+  const target=parseFloat(document.getElementById('rr-target').value)||0;
+  if(!entry||!stop||!target){document.getElementById('rr-result').innerHTML='<span class="muted">請填入有效數值</span>';return}
+  const risk=Math.abs(entry-stop);
+  const reward=Math.abs(target-entry);
+  const rr=reward/risk;
+  const breakeven=1/(1+rr)*100;
+  document.getElementById('rr-result').innerHTML=`
+    <div>風險：<b class="dn">$${risk.toFixed(2)}</b> (${(risk/entry*100).toFixed(2)}%)</div>
+    <div>報酬：<b class="up">$${reward.toFixed(2)}</b> (${(reward/entry*100).toFixed(2)}%)</div>
+    <div>R:R 比：<b style="color:var(--cyan)">1 : ${rr.toFixed(2)}</b></div>
+    <div>損益平衡勝率：<b>${breakeven.toFixed(1)}%</b></div>
+    <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+      ${rr>=3?'<span class="up">🎯 優秀的 R:R，只要勝率 >25% 就能獲利</span>':
+        rr>=2?'<span class="up">✅ 良好的 R:R，適合大部分策略</span>':
+        rr>=1?'<span style="color:var(--orange)">⚡ R:R 偏低，需要較高勝率才能獲利</span>':
+        '<span class="dn">⚠ R:R < 1:1，風險大於報酬，建議重新設定</span>'}
+    </div>`;
+}
+
+function calcCompound(){
+  const init=parseFloat(document.getElementById('comp-init').value)||0;
+  const rate=(parseFloat(document.getElementById('comp-rate').value)||0)/100;
+  const months=parseInt(document.getElementById('comp-months').value)||0;
+  if(!init||!months){document.getElementById('comp-result').innerHTML='<span class="muted">請填入有效數值</span>';return}
+  const final=init*Math.pow(1+rate,months);
+  const totalReturn=((final-init)/init*100);
+  const milestones=[];
+  [3,6,12,24,36].forEach(m=>{
+    if(m<=months)milestones.push({m,val:init*Math.pow(1+rate,m)});
+  });
+  document.getElementById('comp-result').innerHTML=`
+    <div>最終金額：<b style="color:var(--cyan)">${fmt$(final)}</b></div>
+    <div>總報酬：<b class="${totalReturn>=0?'up':'dn'}">${totalReturn>=0?'+':''}${totalReturn.toFixed(2)}%</b></div>
+    <div>淨利潤：<b class="up">${fmt$(final-init)}</b></div>
+    ${milestones.length?'<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)"><div class="small muted" style="margin-bottom:4px">📊 里程碑：</div>'+milestones.map(ms=>`<div>${ms.m} 個月：<b>${fmt$(ms.val)}</b></div>`).join('')+'</div>':''}
+    <div class="small muted" style="margin-top:6px">💡 複利公式：FV = PV × (1 + r)^n</div>`;
+}
+
+// DCA 模擬器
+async function runDCA(){
+  const amount=parseFloat(document.getElementById('dca-amount').value)||100;
+  const coin=document.getElementById('dca-coin').value;
+  const days=document.getElementById('dca-days').value;
+  const result=document.getElementById('dca-result');
+  result.style.display='block';
+  result.innerHTML='<div class="spinner"></div> 計算中...';
+  try{
+    const r=await fetch(`https://api.coingecko.com/api/v3/coins/${coin}/market_chart?vs_currency=usd&days=${days}`);
+    const d=await r.json();
+    const prices=d.prices;
+    // 每週定投（每 7 天買一次）
+    const interval=Math.max(1,Math.floor(prices.length/Math.ceil(parseInt(days)/7)));
+    let totalInvested=0,totalCoins=0;
+    const buys=[];
+    for(let i=0;i<prices.length;i+=interval){
+      const price=prices[i][1];
+      const coins=amount/price;
+      totalInvested+=amount;
+      totalCoins+=coins;
+      buys.push({date:new Date(prices[i][0]).toLocaleDateString(),price,coins});
+    }
+    const currentPrice=prices[prices.length-1][1];
+    const currentValue=totalCoins*currentPrice;
+    const avgPrice=totalInvested/totalCoins;
+    const pnl=currentValue-totalInvested;
+    const pnlPct=((currentValue-totalInvested)/totalInvested*100);
+    // 比較一次性投入
+    const lumpSumCoins=totalInvested/prices[0][1];
+    const lumpSumValue=lumpSumCoins*currentPrice;
+    const lumpSumPnl=((lumpSumValue-totalInvested)/totalInvested*100);
+
+    result.innerHTML=`
+      <div><b>DCA 策略結果 (${coin.toUpperCase()})</b></div>
+      <div>買入次數：<b>${buys.length}</b> 次 (每週一次)</div>
+      <div>每次投入：<b>${fmt$(amount)}</b></div>
+      <div>總投入：<b>${fmt$(totalInvested)}</b></div>
+      <div>平均成本：<b>${fmt$(avgPrice)}</b></div>
+      <div>目前持幣：<b>${totalCoins.toFixed(6)}</b> ${coin.toUpperCase()}</div>
+      <div>目前價值：<b style="color:var(--cyan)">${fmt$(currentValue)}</b></div>
+      <div>DCA 損益：<b class="${pnl>=0?'up':'dn'}">${pnl>=0?'+':''}${fmt$(pnl)} (${pnlPct>=0?'+':''}${pnlPct.toFixed(2)}%)</b></div>
+      <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+        <div class="small muted">📊 vs 一次性投入 (Lump Sum)：</div>
+        <div>Lump Sum 報酬：<b class="${lumpSumPnl>=0?'up':'dn'}">${lumpSumPnl>=0?'+':''}${lumpSumPnl.toFixed(2)}%</b></div>
+        <div>${pnlPct>lumpSumPnl?'<span class="up">✅ DCA 勝出！定投策略在此期間表現更佳</span>':'<span style="color:var(--orange)">⚡ Lump Sum 勝出 — 但 DCA 降低了擇時風險</span>'}</div>
+      </div>`;
+  }catch(e){
+    result.innerHTML=`<span class="dn">⚠ 計算失敗：${e.message}</span>`;
+  }
+}
+
+// ======================================================================
+// 🏆 #15 Strategy Arena — 策略 PK 排行榜
+// ======================================================================
+async function runArena(){
+  const coin=document.getElementById('arena-coin').value;
+  const days=parseInt(document.getElementById('arena-days').value);
+  const capital=parseFloat(document.getElementById('arena-cap').value)||1000;
+  const btn=document.getElementById('arena-btn');
+  btn.textContent='⏳ PK 中...';btn.disabled=true;
+
+  try{
+    const r=await fetch(`https://api.coingecko.com/api/v3/coins/${coin}/market_chart?vs_currency=usd&days=${days}`);
+    const d=await r.json();
+    const prices=d.prices.map(p=>p[1]);
+    const timestamps=d.prices.map(p=>new Date(p[0]).toLocaleDateString());
+
+    // 所有策略
+    const strategies=[
+      {name:'SMA 10/30 交叉',id:'sma_cross',fast:10,slow:30},
+      {name:'SMA 20/50 交叉',id:'sma_cross',fast:20,slow:50},
+      {name:'SMA 5/20 交叉',id:'sma_cross',fast:5,slow:20},
+      {name:'RSI 30/70 均值回歸',id:'rsi_revert',fast:14,slow:30},
+      {name:'RSI 20/80 極端回歸',id:'rsi_revert',fast:14,slow:20},
+      {name:'布林帶突破 (20,2)',id:'bb_squeeze',fast:20,slow:2},
+      {name:'MACD 交叉',id:'macd_cross',fast:12,slow:26},
+      {name:'Buy & Hold',id:'buyhold',fast:0,slow:0},
+    ];
+
+    const results=strategies.map(s=>{
+      if(s.id==='buyhold'){
+        const ret=((prices[prices.length-1]-prices[0])/prices[0]*100);
+        const eq=prices.map(p=>capital*p/prices[0]);
+        let peak=eq[0],maxDD=0;eq.forEach(v=>{if(v>peak)peak=v;const dd=(peak-v)/peak*100;if(dd>maxDD)maxDD=dd});
+        return{...s,totalReturn:ret,finalEquity:capital*(1+ret/100),maxDD,winRate:ret>0?100:0,trades:0,sharpe:0};
+      }
+      const signals=generateSignals(prices,s.id,s.fast,s.slow);
+      const bt=executeBacktest(prices,signals,capital,timestamps);
+      return{...s,totalReturn:bt.totalReturn,finalEquity:bt.finalEquity,maxDD:bt.maxDD,winRate:bt.winRate,trades:bt.totalTrades,sharpe:bt.sharpe};
+    });
+
+    // 按報酬排序
+    results.sort((a,b)=>b.totalReturn-a.totalReturn);
+
+    document.getElementById('arena-results').style.display='block';
+    document.getElementById('arena-table').innerHTML=`
+      <div class="small muted" style="margin-bottom:6px">${coin.toUpperCase()} · ${days} 天 · 初始 ${fmt$(capital)}</div>
+      <div style="overflow-x:auto">
+      <table class="ptable">
+        <thead><tr><th>排名</th><th>策略</th><th>總報酬</th><th>最終淨值</th><th>Sharpe</th><th>MaxDD</th><th>勝率</th><th>交易數</th></tr></thead>
+        <tbody>${results.map((s,i)=>{
+          const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+          return`<tr${i===0?' class="ml"':''}${i===1?' class="sl"':''}>
+            <td>${medal}</td>
+            <td style="font-weight:600">${s.name}</td>
+            <td class="${s.totalReturn>=0?'up':'dn'}" style="font-weight:700">${s.totalReturn>=0?'+':''}${s.totalReturn.toFixed(2)}%</td>
+            <td>${fmt$(s.finalEquity)}</td>
+            <td>${s.sharpe.toFixed(2)}</td>
+            <td class="dn">-${s.maxDD.toFixed(1)}%</td>
+            <td>${s.winRate.toFixed(0)}%</td>
+            <td>${s.trades}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table></div>
+      <div style="margin-top:8px;padding:10px;background:var(--bg1);border-radius:var(--rs)">
+        <div class="small" style="font-weight:700;margin-bottom:4px">🏆 冠軍策略：${results[0].name}</div>
+        <div class="small" style="color:var(--t2);line-height:1.6">
+          在 ${coin.toUpperCase()} ${days} 天回測中，${results[0].name} 以 ${results[0].totalReturn>=0?'+':''}${results[0].totalReturn.toFixed(2)}% 的報酬率勝出。
+          ${results[0].id==='buyhold'?'Buy & Hold 在此期間表現最佳，說明市場處於單邊行情，策略交易未能戰勝大盤。':
+            `該策略超越 Buy & Hold ${(results[0].totalReturn-results.find(s=>s.id==='buyhold').totalReturn).toFixed(2)}%，Alpha 為正。`}
+          ${results[0].maxDD>20?'但最大回撤 '+results[0].maxDD.toFixed(1)+'% 較高，實際操作需注意風控。':''}
+        </div>
+      </div>`;
+  }catch(e){
+    alert('PK 失敗：'+e.message);
+  }
+  btn.textContent='🏟️ 開始 PK';btn.disabled=false;
+}
+
+// ======================================================================
+// 初始化
+// ======================================================================
+document.getElementById('j-date').valueAsDate=new Date();
+loadWeather();
+loadTerminal();
+renderJournal();
+// 初始化量化計算器
+calcPosition();
+
+
+// 自動刷新（每 2 分鐘）
+setInterval(()=>{loadCrypto();loadFNG()},120000);
+
+// 鍵盤快捷鍵：Enter 發送聊天
+document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat()});
+</script>
+
+</body>
+</html>
