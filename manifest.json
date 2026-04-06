@@ -1,0 +1,17 @@
+{
+  "name": "Trading Dashboard",
+  "short_name": "TradeDash",
+  "description": "Personal Investment Dashboard with 20 institutional-grade tools",
+  "start_url": "/trading-dashboard/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#00d4ff",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230a0a0f'/><text x='96' y='130' font-size='120' text-anchor='middle' fill='%2300d4ff'>📊</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
