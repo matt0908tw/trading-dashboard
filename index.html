@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes,viewport-fit=cover">
 <meta name="theme-color" content="#04060c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -41,6 +41,11 @@ a{color:var(--c);text-decoration:none;transition:opacity .15s}a:hover{opacity:.8
 
 /* STATUS BAR */
 .sbar{position:fixed;top:0;left:0;right:0;z-index:999;height:var(--bar);background:linear-gradient(180deg,rgba(5,8,16,0.97),rgba(5,8,16,0.88));backdrop-filter:blur(20px) saturate(1.2);border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;padding:0 16px;gap:16px;font:500 10px/1 var(--mono);overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+@supports(padding:env(safe-area-inset-top)){
+.sbar{height:calc(var(--bar) + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px)}
+.nav{top:calc(var(--bar) + env(safe-area-inset-top,0px))}
+.mmenu{top:calc(var(--bar) + var(--nav) + env(safe-area-inset-top,0px))}
+}
 .sbar::-webkit-scrollbar{display:none}
 .sbar .live{width:6px;height:6px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g);animation:p 2s ease-in-out infinite}
 @keyframes p{0%,100%{opacity:1;box-shadow:0 0 8px var(--g)}50%{opacity:.3;box-shadow:0 0 2px var(--g)}}
@@ -56,13 +61,14 @@ a{color:var(--c);text-decoration:none;transition:opacity .15s}a:hover{opacity:.8
 .tb.on{color:var(--c);background:rgba(0,212,255,0.08);box-shadow:inset 0 -2px 0 var(--c),0 2px 12px rgba(0,212,255,0.08)}
 .ham{display:none;background:0;border:0;color:var(--t1);font-size:20px;cursor:pointer;padding:6px;margin-left:auto;border-radius:8px;transition:all .2s var(--ease)}
 .ham:hover{background:rgba(255,255,255,0.05)}
-.mmenu{display:flex;position:fixed;top:calc(var(--bar)+var(--nav));left:0;right:0;bottom:0;background:rgba(5,8,16,0.96);backdrop-filter:blur(32px);z-index:199;padding:16px;overflow-y:auto;flex-direction:column;gap:2px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:all .3s var(--ease);pointer-events:none}
+.mmenu{display:flex;position:fixed;top:calc(var(--bar) + var(--nav));left:0;right:0;bottom:0;background:rgba(5,8,16,0.96);backdrop-filter:blur(32px);z-index:199;padding:16px;overflow-y:auto;flex-direction:column;gap:2px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:all .3s var(--ease);pointer-events:none}
 .mmenu.open{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
 .mmenu .tb{width:100%;text-align:left;padding:14px 16px;font-size:11px;border-radius:12px}
 @media(max-width:768px){.ham{display:block}.tabs{display:none}}
 
 /* MAIN */
-.main{padding:calc(var(--bar)+var(--nav)+14px) 12px 80px;max-width:1600px;margin:0 auto;position:relative;z-index:1}
+.main{padding:calc(var(--bar) + var(--nav) + 20px) 12px 80px;max-width:1600px;margin:0 auto;position:relative;z-index:1}
+@supports(padding:env(safe-area-inset-top)){.main{padding-top:calc(var(--bar) + var(--nav) + env(safe-area-inset-top,0px) + 20px)}}
 .pg{display:none;animation:pgIn .4s var(--ease)}.pg.on{display:block}
 @keyframes pgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
@@ -132,7 +138,7 @@ input:focus,select:focus,textarea:focus{border-color:rgba(0,212,255,0.35);box-sh
 @media(max-width:600px){
 :root{--bar:28px;--nav:44px;--rr:12px}
 html{font-size:13px}
-.main{padding:calc(var(--bar)+var(--nav)+8px) 8px 80px}
+.main{padding:calc(var(--bar) + var(--nav) + 16px) 8px 80px}
 .c{padding:12px}.rw{flex-direction:column}
 .g2,.g3,.g4{grid-template-columns:1fr}
 .mv{font-size:14px}
@@ -239,7 +245,7 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 </div>
 
 <!-- ALERT PANEL -->
-<div id="apnl" style="display:none;position:fixed;top:calc(var(--bar)+var(--nav));right:0;width:320px;max-width:90vw;height:calc(100vh - var(--bar) - var(--nav));background:rgba(8,12,22,0.92);backdrop-filter:blur(24px) saturate(1.3);border-left:1px solid rgba(255,255,255,0.05);z-index:198;padding:14px;overflow-y:auto;box-shadow:-8px 0 32px rgba(0,0,0,0.3)">
+<div id="apnl" style="display:none;position:fixed;top:calc(var(--bar) + var(--nav));right:0;width:320px;max-width:90vw;height:calc(100vh - var(--bar) - var(--nav));background:rgba(8,12,22,0.92);backdrop-filter:blur(24px) saturate(1.3);border-left:1px solid rgba(255,255,255,0.05);z-index:198;padding:14px;overflow-y:auto;box-shadow:-8px 0 32px rgba(0,0,0,0.3)">
 <div class="ct">PRICE ALERTS</div>
 <div class="g2" style="margin-bottom:4px"><select id="al-coin"><option value="BTCUSDT">BTC</option><option value="ETHUSDT">ETH</option><option value="SOLUSDT">SOL</option></select><select id="al-type"><option value="above">Above</option><option value="below">Below</option></select></div>
 <div style="display:flex;gap:3px;margin-bottom:8px"><input id="al-pr" type="number" placeholder="Price" style="flex:1"><button class="bt bc" onclick="addAlert()">+</button></div>
