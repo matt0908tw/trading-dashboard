@@ -836,10 +836,11 @@ async function loadEqIdx(){
 const el=E('eq-idx');ldg(el);
 try{
 const syms=['SPY','QQQ','DIA','IWM','VIX'];
-const res=await Promise.allSettled(syms.map(s=>
-DS.f(`eq:q:${s}`,`https://query1.finance.yahoo.com/v8/finance/chart/${s}?interval=1d&range=5d`).catch(()=>
-fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${s}?interval=1d&range=5d`)}`).then(r=>r.json())
-)));
+const res=await Promise.allSettled(syms.map(async s=>{
+const urls=yfProxy(`https://query1.finance.yahoo.com/v8/finance/chart/${s}?interval=1d&range=5d`);
+for(const u of urls){try{return await yfFetch(u,8000)}catch{}}
+throw new Error('unavailable');
+}));
 el.innerHTML=syms.map((s,i)=>{
 if(res[i].status!=='fulfilled')return`<div class="c" style="text-align:center"><div class="m xs mt">${s}</div><div class="dn xs">Unavailable</div></div>`;
 const d=res[i].value,m=d.chart?.result?.[0]?.meta;
@@ -850,24 +851,25 @@ if(s==='VIX'){E('sb-vix').textContent=pr.toFixed(1)}
 return`<div class="c" style="text-align:center;cursor:pointer" onclick="eqQuick('${s}')"><div class="m xs mt">${s}</div><div class="m" style="font-size:18px;font-weight:700;margin:2px 0">$${pr.toFixed(2)}</div><div class="m s ${u?'up':'dn'}">${u?'▲':'▼'} ${Math.abs(ch).toFixed(2)}%</div></div>`}).join('');
 }catch(e){el.innerHTML='<div class="c xs mt">Yahoo Finance unavailable — try CORS proxy</div>'}}
 
+function yfProxy(base){return[
+`https://corsproxy.io/?${encodeURIComponent(base)}`,
+base,
+`https://api.allorigins.win/raw?url=${encodeURIComponent(base)}`
+]}
+async function yfFetch(url,ms=10000){const ac=new AbortController();const t=setTimeout(()=>ac.abort(),ms);try{const r=await fetch(url,{signal:ac.signal});clearTimeout(t);if(!r.ok)throw new Error(r.status);return await r.json()}catch(e){clearTimeout(t);throw e}}
+
 async function yfChart(sym,range='6mo',interval='1d'){
 const key=`eq:ch:${sym}:${range}`;
 const cached=DS.get(key);if(cached)return cached;
-const urls=[
-`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=${interval}&range=${range}`,
-`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=${interval}&range=${range}`)}`
-];
-for(const u of urls){try{const r=await fetch(u);const d=await r.json();if(d.chart?.result?.[0]){DS.set(key,d.chart.result[0]);return d.chart.result[0]}}catch{}}
+const urls=yfProxy(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=${interval}&range=${range}`);
+for(const u of urls){try{const d=await yfFetch(u);if(d.chart?.result?.[0]){DS.set(key,d.chart.result[0]);return d.chart.result[0]}}catch{}}
 return null}
 
 async function yfQuote(sym){
 const key=`eq:qt:${sym}`;
 const cached=DS.get(key);if(cached)return cached;
-const urls=[
-`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`,
-`https://api.allorigins.win/raw?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`)}`
-];
-for(const u of urls){try{const r=await fetch(u);const d=await r.json();if(d.chart?.result?.[0]?.meta){DS.set(key,d.chart.result[0].meta);return d.chart.result[0].meta}}catch{}}
+const urls=yfProxy(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=5d`);
+for(const u of urls){try{const d=await yfFetch(u);if(d.chart?.result?.[0]?.meta){DS.set(key,d.chart.result[0].meta);return d.chart.result[0].meta}}catch{}}
 return null}
 
 async function loadEQ(){
@@ -1123,6 +1125,14 @@ const rows=ivs.map(iv=>{const isM=iv===m,isS=iv===s2;return`<tr${isM?' style="ba
 return{h:`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font:9px var(--mono)"><thead><tr><th style="padding:2px 4px;color:var(--t3)">°F</th><th style="padding:2px 4px;color:var(--t3)">°C</th><th style="padding:2px 4px;color:var(--t3)">Dist</th><th style="padding:2px 4px;color:var(--t3)">Fair</th></tr></thead><tbody>${rows}</tbody></table></div>`,cf}}
 
 /* ===== DAILY ANALYSIS SUMMARY ===== */
+async function daFetch(url,timeout=12000){
+const proxies=[url,`https://corsproxy.io/?${encodeURIComponent(url)}`,`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`];
+for(const p of proxies){
+const ac=new AbortController();const tid=setTimeout(()=>ac.abort(),timeout);
+try{const r=await fetch(p,{signal:ac.signal});clearTimeout(tid);if(!r.ok)throw new Error(r.status);return await r.json()}
+catch(e){clearTimeout(tid);continue}}
+throw new Error('資料獲取失敗，請稍後再試')}
+
 async function genAnalysis(){
 const btn=E('da-go');btn.textContent='⏳ Fetching...';btn.disabled=true;
 const asset=E('da-asset').value,days=+E('da-days').value;
@@ -1133,22 +1143,25 @@ try{
 let prices=[],volumes=[],timestamps=[],curPrice=0,fng={v:50,lb:'N/A'},fundRate=0,dailyVol24h=0;
 
 if(isEq){
-/* ——— Equity path: Yahoo Finance ——— */
+/* ——— Equity path: Yahoo Finance with fallback ——— */
 const range=days<=50?'3mo':days<=90?'6mo':'1y';
-const d=await yfChart(sym,range,'1d');
-if(!d)throw new Error('No equity data');
+const yUrl=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=${range}`;
+const yd=await daFetch(yUrl);
+const d=yd.chart?.result?.[0];
+if(!d)throw new Error('No equity data for '+sym);
 const cl=d.indicators?.quote?.[0]?.close||[],vl=d.indicators?.quote?.[0]?.volume||[],ts=d.timestamp||[];
 prices=cl.filter(v=>v!=null).slice(-days);volumes=vl.filter(v=>v!=null).slice(-days);
 timestamps=ts.slice(ts.length-prices.length);
 curPrice=prices[prices.length-1];
-const qt=await yfQuote(sym);
 dailyVol24h=vl.slice(-1)[0]||0;
 }else{
-/* ——— Crypto path: CoinGecko ——— */
-const cd=await DS.f(`da:${asset}:${days}`,`https://api.coingecko.com/api/v3/coins/${asset}/market_chart?vs_currency=usd&days=${days}`);
+/* ——— Crypto path: CoinGecko with fallback ——— */
+const cgUrl=`https://api.coingecko.com/api/v3/coins/${asset}/market_chart?vs_currency=usd&days=${days}`;
+const cd=await daFetch(cgUrl);
+if(!cd.prices||!cd.prices.length)throw new Error('No crypto data');
 prices=cd.prices.map(x=>x[1]);volumes=cd.total_volumes.map(x=>x[1]);timestamps=cd.prices.map(x=>x[0]);
 curPrice=prices[prices.length-1];
-try{const fg=await DS.f('fng','https://api.alternative.me/fng/?limit=1');fng={v:+fg.data[0].value,lb:fg.data[0].value_classification}}catch{}
+try{const fgd=await daFetch('https://api.alternative.me/fng/?limit=1',8000);fng={v:+fgd.data[0].value,lb:fgd.data[0].value_classification}}catch{}
 try{const fr=DS.get('deriv:fund');if(fr)fundRate=+fr[fr.length-1].fundingRate}catch{}
 dailyVol24h=volumes[volumes.length-1]||0;
 }
@@ -1267,10 +1280,10 @@ signals.push({n:'Depth (Bid%)',v:bidDom+'%',sig:+bidDom>55?'🟢 買盤強':+bid
 }
 }
 if(isEq){
-const qt=await yfQuote(sym);
-const avg50d=qt?.fiftyDayAverage||l50,avg200d=qt?.twoHundredDayAverage||l200;
-signals.push({n:'vs 50 DMA',v:((lt-avg50d)/avg50d*100).toFixed(2)+'%',
-sig:lt>avg50d?'🟢 Above':'🔴 Below',detail:`50DMA: $${avg50d?.toFixed(2)}`});
+let avg50d=l50,avg200d=l200;
+try{const qt=await yfQuote(sym);if(qt){avg50d=qt.fiftyDayAverage||l50;avg200d=qt.twoHundredDayAverage||l200}}catch{}
+signals.push({n:'vs 50 DMA',v:((lt-(avg50d||lt))/(avg50d||lt)*100).toFixed(2)+'%',
+sig:lt>(avg50d||0)?'🟢 Above':'🔴 Below',detail:`50DMA: $${(avg50d||0).toFixed(2)}`});
 signals.push({n:'vs 200 DMA',v:((lt-(avg200d||lt))/(avg200d||lt)*100).toFixed(2)+'%',
 sig:lt>(avg200d||0)?'🟢 Above':'🔴 Below',detail:`200DMA: $${(avg200d||0).toFixed(2)}`});
 }
