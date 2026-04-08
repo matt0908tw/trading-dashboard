@@ -477,7 +477,58 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 
 <!-- ===== INTEL ===== -->
 <div id="pg-intel" class="pg">
-<div style="margin-bottom:8px"><b style="font-size:15px">Intel Center</b><br><span class="s mt">Reports · Sentiment · NLP · Voice</span></div>
+<div style="margin-bottom:8px"><b style="font-size:15px">Intel Center</b><br><span class="s mt">Reports · Analysis · Sentiment · NLP · Voice</span></div>
+
+<!-- ★ DAILY ANALYSIS SUMMARY — full-width top section -->
+<div class="c" style="margin-bottom:8px;border:1px solid rgba(0,212,255,0.12)">
+<div class="ct"><span class="ld"></span>DAILY ANALYSIS SUMMARY — 每日分析報告</div>
+<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+<select id="da-asset" style="width:auto;min-width:120px">
+<optgroup label="Crypto">
+<option value="bitcoin">BTC</option><option value="ethereum">ETH</option><option value="solana">SOL</option>
+</optgroup>
+<optgroup label="US Equities">
+<option value="eq:NVDA">NVDA</option><option value="eq:TSLA">TSLA</option><option value="eq:AAPL">AAPL</option>
+<option value="eq:MSFT">MSFT</option><option value="eq:AMZN">AMZN</option><option value="eq:GOOGL">GOOGL</option>
+<option value="eq:META">META</option><option value="eq:SPY">SPY</option><option value="eq:QQQ">QQQ</option>
+</optgroup>
+</select>
+<select id="da-days" style="width:auto;min-width:80px">
+<option value="50">50 Days</option><option value="30">30 Days</option><option value="90">90 Days</option>
+</select>
+<button class="bt bc" onclick="genAnalysis()" id="da-go">▶ GENERATE ANALYSIS</button>
+<button class="bt" onclick="copyText(E('da-out').innerText)">COPY</button>
+<button class="bt" onclick="dlAnalysis()">EXPORT TXT</button>
+</div>
+<div id="da-out" style="display:none">
+<!-- Trend Timeline -->
+<div style="margin-bottom:10px;padding:10px;background:var(--bg0);border-radius:var(--rr);border:1px solid var(--bdr)">
+<div style="font:700 10px var(--mono);color:var(--c);margin-bottom:6px;letter-spacing:1px">K-LINE TREND TIMELINE</div>
+<canvas id="cv-da-kline"></canvas>
+<div id="da-timeline" style="margin-top:6px;font:10px var(--mono);line-height:1.8"></div>
+</div>
+<!-- Cross-Validation Table -->
+<div style="margin-bottom:10px;padding:10px;background:var(--bg0);border-radius:var(--rr);border:1px solid var(--bdr)">
+<div style="font:700 10px var(--mono);color:var(--p);margin-bottom:6px;letter-spacing:1px">CROSS-VALIDATION SIGNAL TABLE</div>
+<div id="da-signals" style="overflow-x:auto"></div>
+</div>
+<!-- Key Levels -->
+<div style="margin-bottom:10px;padding:10px;background:var(--bg0);border-radius:var(--rr);border:1px solid var(--bdr)">
+<div style="font:700 10px var(--mono);color:var(--y);margin-bottom:6px;letter-spacing:1px">KEY PRICE LEVELS</div>
+<div id="da-levels"></div>
+</div>
+<!-- Trade Recommendations -->
+<div style="padding:10px;background:rgba(0,212,255,0.03);border-radius:var(--rr);border:1px solid rgba(0,212,255,0.15)">
+<div style="font:700 10px var(--mono);color:var(--g);margin-bottom:6px;letter-spacing:1px">TRADE RECOMMENDATIONS</div>
+<div id="da-recs"></div>
+</div>
+<!-- Footer -->
+<div style="margin-top:8px;text-align:center;font:9px var(--mono);color:var(--t3)">
+<span id="da-ts"></span> · NEXUS v3 · Not financial advice · Data: CoinGecko + Alternative.me
+</div>
+</div>
+</div>
+
 <div class="rw">
 <div class="cl" style="min-width:260px">
 <div class="c"><div class="ct">MARKET REPORT</div>
@@ -1070,6 +1121,251 @@ return`<div class="c" style="cursor:pointer" onclick="this.querySelector('.wx-de
 function pTbl(fc,ac){const sd=3,ct=Math.round(fc/5)*5,ivs=[];for(let lo=ct-25;lo<=ct+25;lo+=5){const p=probIv(fc,lo,lo+5,sd);if(p>.001)ivs.push({lo,hi:lo+5,p})}const sr=[...ivs].sort((a,b)=>b.p-a.p),m=sr[0],s2=sr[1];const tf=ac.map(c=>c2f(c)).sort((a,b)=>b-a).slice(0,6),im=tf.filter(t=>t>=m.lo&&t<m.hi).length,cf=im>=4?'high':im>=2?'medium':'low';
 const rows=ivs.map(iv=>{const isM=iv===m,isS=iv===s2;return`<tr${isM?' style="background:var(--cd)"':isS?' style="background:var(--pd)"':''}><td style="padding:3px 4px;border-bottom:1px solid var(--bdr)">${iv.lo}–${iv.hi}°F</td><td style="padding:3px 4px;border-bottom:1px solid var(--bdr)">${f2c(iv.lo).toFixed(1)}–${f2c(iv.hi).toFixed(1)}°C</td><td style="padding:3px 4px;border-bottom:1px solid var(--bdr);width:60px"><div style="height:3px;border-radius:2px;background:var(--bg4)"><div style="height:100%;border-radius:2px;background:${isS?'var(--p)':'var(--c)'};width:${(iv.p/m.p*100).toFixed(0)}%"></div></div></td><td style="padding:3px 4px;border-bottom:1px solid var(--bdr);font-weight:600">${(iv.p*100).toFixed(1)}%${isM?' ★':isS?' ◆':''}</td></tr>`}).join('');
 return{h:`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font:9px var(--mono)"><thead><tr><th style="padding:2px 4px;color:var(--t3)">°F</th><th style="padding:2px 4px;color:var(--t3)">°C</th><th style="padding:2px 4px;color:var(--t3)">Dist</th><th style="padding:2px 4px;color:var(--t3)">Fair</th></tr></thead><tbody>${rows}</tbody></table></div>`,cf}}
+
+/* ===== DAILY ANALYSIS SUMMARY ===== */
+async function genAnalysis(){
+const btn=E('da-go');btn.textContent='⏳ Fetching...';btn.disabled=true;
+const asset=E('da-asset').value,days=+E('da-days').value;
+const isEq=asset.startsWith('eq:'),sym=isEq?asset.slice(3):asset;
+const label=isEq?sym:sym.toUpperCase().replace('BITCOIN','BTC').replace('ETHEREUM','ETH').replace('SOLANA','SOL');
+const shortLbl={'bitcoin':'BTC','ethereum':'ETH','solana':'SOL'}[asset]||label;
+try{
+let prices=[],volumes=[],timestamps=[],curPrice=0,fng={v:50,lb:'N/A'},fundRate=0,dailyVol24h=0;
+
+if(isEq){
+/* ——— Equity path: Yahoo Finance ——— */
+const range=days<=50?'3mo':days<=90?'6mo':'1y';
+const d=await yfChart(sym,range,'1d');
+if(!d)throw new Error('No equity data');
+const cl=d.indicators?.quote?.[0]?.close||[],vl=d.indicators?.quote?.[0]?.volume||[],ts=d.timestamp||[];
+prices=cl.filter(v=>v!=null).slice(-days);volumes=vl.filter(v=>v!=null).slice(-days);
+timestamps=ts.slice(ts.length-prices.length);
+curPrice=prices[prices.length-1];
+const qt=await yfQuote(sym);
+dailyVol24h=vl.slice(-1)[0]||0;
+}else{
+/* ——— Crypto path: CoinGecko ——— */
+const cd=await DS.f(`da:${asset}:${days}`,`https://api.coingecko.com/api/v3/coins/${asset}/market_chart?vs_currency=usd&days=${days}`);
+prices=cd.prices.map(x=>x[1]);volumes=cd.total_volumes.map(x=>x[1]);timestamps=cd.prices.map(x=>x[0]);
+curPrice=prices[prices.length-1];
+try{const fg=await DS.f('fng','https://api.alternative.me/fng/?limit=1');fng={v:+fg.data[0].value,lb:fg.data[0].value_classification}}catch{}
+try{const fr=DS.get('deriv:fund');if(fr)fundRate=+fr[fr.length-1].fundingRate}catch{}
+dailyVol24h=volumes[volumes.length-1]||0;
+}
+
+btn.textContent='⏳ Analyzing...';
+const n=prices.length,lt=curPrice;
+
+/* ——— Technical Indicators ——— */
+const s20=sma(prices,20),s50=sma(prices,50),s200=sma(prices,200);
+const r14=rsi(prices,14),lr=r14[n-1]||50;
+const mc=macd(prices),lm=mc.ml[n-1]||0,ls=mc.sig[n-1]||0;
+const bx=bb(prices,20,2),bU=bx.u[n-1],bL=bx.l[n-1],bM=bx.mid[n-1];
+const v=vol(prices);
+const hi=Math.max(...prices),lo=Math.min(...prices);
+const fromHi=((lt-hi)/hi*100),fromLo=((lt-lo)/lo*100);
+const l20=s20[n-1],l50=s50[n-1],l200=s200[n-1];
+
+/* ——— Find key turning points for timeline ——— */
+const events=[];
+const step=Math.max(1,Math.floor(n/12));
+let prevDir=0;
+for(let i=2;i<n;i++){
+const d5=i>=5?((prices[i]-prices[i-5])/prices[i-5]*100):0;
+const v3=i>=3?(volumes.slice(i-2,i+1).reduce((a,b)=>a+b,0)/3):volumes[i];
+const vAvg=volumes.slice(Math.max(0,i-20),i).reduce((a,b)=>a+b,0)/Math.min(20,i);
+const vRatio=v3/(vAvg||1);
+const isLocalHi=i>=2&&i<n-1&&prices[i]>=prices[i-1]&&prices[i]>=prices[i-2]&&(i>=n-2||prices[i]>=prices[i+1]);
+const isLocalLo=i>=2&&i<n-1&&prices[i]<=prices[i-1]&&prices[i]<=prices[i-2]&&(i>=n-2||prices[i]<=prices[i+1]);
+const curDir=d5>3?1:d5<-3?-1:0;
+if(isLocalHi&&prices[i]===hi)events.push({i,p:prices[i],t:'peak',note:'Period High'});
+else if(isLocalLo&&prices[i]===lo)events.push({i,p:prices[i],t:'trough',note:'Period Low'});
+else if(vRatio>2&&Math.abs(d5)>3)events.push({i,p:prices[i],t:d5>0?'surge':'dump',note:`Vol ${vRatio.toFixed(1)}x ${d5>0?'+':''}${d5.toFixed(1)}%`});
+else if(curDir!==prevDir&&curDir!==0&&Math.abs(d5)>4)events.push({i,p:prices[i],t:curDir>0?'reversal_up':'reversal_dn',note:`${d5>0?'Rally':'Drop'} ${d5.toFixed(1)}%`});
+prevDir=curDir;
+}
+/* Add latest point */
+const c7=n>7?((lt-prices[n-8])/prices[n-8]*100):0;
+const c1=n>1?((lt-prices[n-2])/prices[n-2]*100):0;
+events.push({i:n-1,p:lt,t:'now',note:`Current ${c1>0?'+':''}${c1.toFixed(1)}%`});
+/* Deduplicate — keep max 10 events, spaced apart */
+const filtered=[];let lastIdx=-999;
+events.sort((a,b)=>a.i-b.i);
+for(const ev of events){if(ev.i-lastIdx>=Math.max(2,Math.floor(n/15))||ev.t==='now'||ev.t==='peak'||ev.t==='trough'){filtered.push(ev);lastIdx=ev.i}}
+const keyEvents=filtered.slice(-12);
+
+/* ——— Render K-line chart ——— */
+const cv=E('cv-da-kline'),{c:ctx,w:W,h:H}=acv(cv,.3);
+const mn=lo*.998,mx=hi*1.002;
+const sx=i=>i/(n-1)*W,sy=vv=>H-(vv-mn)/(mx-mn)*H;
+ctx.clearRect(0,0,W,H);ctx.fillStyle='#060a14';ctx.fillRect(0,0,W,H);
+ctx.strokeStyle='#131b2e';ctx.lineWidth=.5;for(let g=0;g<5;g++){const gy=H/5*g;ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke()}
+/* BB fill */
+ctx.fillStyle='rgba(167,139,250,.04)';ctx.beginPath();let started=0;
+for(let i=0;i<n;i++){if(bx.u[i]===null)continue;!started?(ctx.moveTo(sx(i),sy(bx.u[i])),started=1):ctx.lineTo(sx(i),sy(bx.u[i]))}
+for(let i=n-1;i>=0;i--){if(bx.l[i]===null)continue;ctx.lineTo(sx(i),sy(bx.l[i]))}ctx.fill();
+dln(ctx,s50,sx,sy,'#ffffff20',1);dln(ctx,s20,sx,sy,'#ff980080',1.5);dln(ctx,prices,sx,sy,'#00bbff',2);
+/* Mark events on chart */
+keyEvents.forEach(ev=>{
+const x=sx(ev.i),y=sy(ev.p);
+const cl=ev.t==='peak'||ev.t==='dump'||ev.t==='reversal_dn'?'#ff4757':ev.t==='trough'||ev.t==='surge'||ev.t==='reversal_up'?'#00e676':'#00d4ff';
+ctx.fillStyle=cl;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=cl+'60';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,ev.t==='peak'||ev.t==='dump'?y-18:y+18);ctx.stroke();
+ctx.fillStyle='#aab8d0';ctx.font='8px JetBrains Mono';
+const txt=isEq?'$'+ev.p.toFixed(2):'$'+ev.p.toLocaleString('en',{maximumFractionDigits:0});
+ctx.fillText(txt,x-20,ev.t==='peak'||ev.t==='dump'?y-20:y+24);
+});
+ctx.fillStyle='#5a6a88';ctx.font='9px JetBrains Mono';
+ctx.fillText(shortLbl+' '+days+'D K-Line · '+new Date().toLocaleDateString('zh-TW'),4,10);
+
+/* ——— Render Timeline ——— */
+const fmtDate=ts=>{const d=new Date(isEq?ts*1000:ts);return(d.getMonth()+1)+'/'+d.getDate()};
+const tClr={peak:'var(--r)',trough:'var(--g)',surge:'var(--g)',dump:'var(--r)',reversal_up:'var(--g)',reversal_dn:'var(--r)',now:'var(--c)'};
+const tIcon={peak:'▼',trough:'▲',surge:'🚀',dump:'💥',reversal_up:'↗',reversal_dn:'↘',now:'●'};
+E('da-timeline').innerHTML=keyEvents.map(ev=>{
+const dt=timestamps[ev.i]?fmtDate(timestamps[ev.i]):'—';
+const pStr=isEq?'$'+ev.p.toFixed(2):'$'+ev.p.toLocaleString('en',{maximumFractionDigits:0});
+return`<div style="display:flex;align-items:center;gap:6px;padding:2px 0;border-bottom:1px solid var(--bdr)"><span class="m" style="color:var(--t3);min-width:38px">${dt}</span><span style="color:${tClr[ev.t]||'var(--t2)'};min-width:16px">${tIcon[ev.t]||'·'}</span><span class="m" style="min-width:80px">${pStr}</span><span style="color:var(--t2);font-size:9px">${ev.note}</span></div>`
+}).join('');
+
+/* ——— Cross-Validation Signal Table ——— */
+const signals=[];
+if(!isEq){
+signals.push({n:'Fear & Greed',v:fng.v,sig:fng.v<=25?'🟢 反向買入':fng.v>=75?'🔴 反向賣出':'🟡 中性',
+detail:fng.v<=20?'極度恐懼 < 20 — 歷史最佳入場區':fng.v<=25?'恐懼區域 — 逆勢機會':fng.v>=75?'貪婪過熱 — 減倉':fng.lb});
+signals.push({n:'Funding Rate',v:(fundRate*100).toFixed(4)+'%',
+sig:fundRate>0.001?'🔴 多頭擁擠':fundRate<-0.001?'🟢 空頭擁擠':'🟡 中性',
+detail:fundRate>0.001?'多方付費 — 回調風險':fundRate<-0.001?'空方付費 — 軋空機會':'資金費率正常'});
+}
+const avgVol=volumes.slice(-20).reduce((a,b)=>a+b,0)/20;
+const recentVol=volumes.slice(-3).reduce((a,b)=>a+b,0)/3;
+const volRatio=recentVol/(avgVol||1);
+signals.push({n:'Volume',v:isEq?fK(recentVol):$$(recentVol),
+sig:volRatio>1.5&&c7>0?'🟢 放量上漲':volRatio>1.5&&c7<0?'🔴 放量下跌':volRatio<0.6?'🟡 縮量':'🟡 正常',
+detail:`近 3 日均量 / 20 日均量 = ${volRatio.toFixed(2)}x`});
+signals.push({n:'RSI(14)',v:lr.toFixed(1),
+sig:lr<30?'🟢 超賣':lr>70?'🔴 超買':'🟡 中性',
+detail:lr<20?'極度超賣 — 強反彈信號':lr<30?'超賣區 — 反彈機會':lr>80?'極度超買 — 回調在即':lr>70?'超買區 — 謹慎':'RSI 正常範圍'});
+signals.push({n:'MACD',v:lm>ls?'Golden X':'Death X',
+sig:lm>ls?'🟢 多頭交叉':'🔴 空頭交叉',
+detail:`MACD:${lm.toFixed(2)} Signal:${ls.toFixed(2)}`});
+const trendStr=l20>l50?'20>50':'20<50';
+signals.push({n:'SMA Trend',v:trendStr+(l200?(l50>(l200||0)?' 50>200':' 50<200'):''),
+sig:l20>l50&&l50>(l200||Infinity)?'🟢 多頭排列':l20<l50?'🔴 空頭排列':'🟡 交叉中',
+detail:`SMA20:${isEq?'$'+l20?.toFixed(2):$$(l20||0)} SMA50:${isEq?'$'+l50?.toFixed(2):$$(l50||0)}`});
+const bW=bU&&bL?((bU-bL)/(bM||1)*100):0;
+signals.push({n:'Bollinger',v:lt>bU?'Above Band':lt<bL?'Below Band':'Inside',
+sig:lt<bL?'🟢 低於下軌':lt>bU?'🔴 高於上軌':bW<2?'🟢 Squeeze':'🟡 Inside',
+detail:`Width:${bW.toFixed(2)}% ${bW<2?'— 擠壓 → 即將突破':bW>5?'— 寬幅震盪':''}`});
+signals.push({n:'Price vs High',v:fromHi.toFixed(1)+'%',
+sig:fromHi>-5?'🟡 接近前高阻力':fromHi<-20?'🟢 深度折價':'🟡 中間區域',
+detail:`高點 ${isEq?'$'+hi.toFixed(2):$$(hi)} 低點 ${isEq?'$'+lo.toFixed(2):$$(lo)}`});
+if(!isEq){
+const bidDom=DS.get('term:depth');
+if(bidDom){
+signals.push({n:'Depth (Bid%)',v:bidDom+'%',sig:+bidDom>55?'🟢 買盤強':+bidDom<45?'🔴 賣壓重':'🟡 平衡',detail:'Order book bid side dominance'});
+}
+}
+if(isEq){
+const qt=await yfQuote(sym);
+const avg50d=qt?.fiftyDayAverage||l50,avg200d=qt?.twoHundredDayAverage||l200;
+signals.push({n:'vs 50 DMA',v:((lt-avg50d)/avg50d*100).toFixed(2)+'%',
+sig:lt>avg50d?'🟢 Above':'🔴 Below',detail:`50DMA: $${avg50d?.toFixed(2)}`});
+signals.push({n:'vs 200 DMA',v:((lt-(avg200d||lt))/(avg200d||lt)*100).toFixed(2)+'%',
+sig:lt>(avg200d||0)?'🟢 Above':'🔴 Below',detail:`200DMA: $${(avg200d||0).toFixed(2)}`});
+}
+
+E('da-signals').innerHTML=`<table style="width:100%;border-collapse:collapse;font:10px var(--mono)">
+<thead><tr style="color:var(--t3);font-size:9px"><th style="padding:4px;text-align:left">Factor</th><th style="padding:4px;text-align:center">Value</th><th style="padding:4px;text-align:center">Signal</th><th style="padding:4px;text-align:left">Detail</th></tr></thead>
+<tbody>${signals.map(s=>`<tr style="border-bottom:1px solid var(--bdr)"><td style="padding:4px;font-weight:600">${s.n}</td><td style="padding:4px;text-align:center" class="m">${s.v}</td><td style="padding:4px;text-align:center;white-space:nowrap">${s.sig}</td><td style="padding:4px;color:var(--t2);font-size:9px">${s.detail}</td></tr>`).join('')}</tbody></table>`;
+
+/* ——— Key Levels ——— */
+const support1=isEq?Math.min(l20||lt,l50||lt):Math.min(bL||lo,l20||lo);
+const support2=lo;
+const resist1=isEq?Math.max(l20||lt,l50||lt):Math.max(bU||hi,l20||hi);
+const resist2=hi;
+const levels=[
+{n:'Strong Resistance',p:resist2,cl:'var(--r)',note:'Period High — 前高壓力'},
+{n:'Resistance 1',p:resist1,cl:'var(--o)',note:isEq?'SMA Resistance':'BB Upper / SMA'},
+{n:'Current Price',p:lt,cl:'var(--c)',note:`Now ${c1>0?'+':''}${c1.toFixed(2)}%`},
+{n:'Support 1',p:support1,cl:'var(--g)',note:isEq?'SMA Support':'BB Lower / SMA'},
+{n:'Strong Support',p:support2,cl:'var(--g)',note:'Period Low — 強支撐'},
+];
+const pFmt=p=>isEq?'$'+p.toFixed(2):'$'+p.toLocaleString('en',{maximumFractionDigits:0});
+E('da-levels').innerHTML=levels.map(lv=>{
+const pctFromCur=((lv.p-lt)/lt*100);
+return`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bdr);font:10px var(--mono)">
+<span style="color:${lv.cl};font-weight:700;min-width:130px">${lv.n}</span>
+<span class="m" style="min-width:90px;font-weight:600">${pFmt(lv.p)}</span>
+<span class="${pctFromCur>=0?'up':'dn'}" style="min-width:60px">${pctFromCur>=0?'+':''}${pctFromCur.toFixed(1)}%</span>
+<span style="color:var(--t2);font-size:9px">${lv.note}</span></div>`}).join('');
+
+/* ——— Trade Recommendations ——— */
+const bullSigs=signals.filter(s=>s.sig.includes('🟢')).length;
+const bearSigs=signals.filter(s=>s.sig.includes('🔴')).length;
+const neutralSigs=signals.filter(s=>s.sig.includes('🟡')).length;
+const bias=bullSigs>bearSigs+1?'BULLISH':bearSigs>bullSigs+1?'BEARISH':'NEUTRAL';
+const biasClr=bias==='BULLISH'?'var(--g)':bias==='BEARISH'?'var(--r)':'var(--y)';
+const stopDist=Math.abs(lt-support2)/lt*100;
+const tgt1Pct=stopDist*1.5,tgt2Pct=stopDist*2.5;
+const entryPullback=lt*(1-Math.min(0.03,stopDist/4/100));
+const stopLoss=support2*(isEq?0.98:0.97);
+const tgt1=lt*(1+tgt1Pct/100),tgt2=lt*(1+tgt2Pct/100);
+const rr1=(tgt1-lt)/(lt-stopLoss),rr2=(tgt2-lt)/(lt-stopLoss);
+
+let recsHtml=`<div style="text-align:center;margin-bottom:10px;padding:8px;border:2px solid ${biasClr};border-radius:var(--rr)">
+<div class="xs mt">OVERALL BIAS</div>
+<div class="m" style="font-size:22px;font-weight:700;color:${biasClr}">${bias}</div>
+<div class="xs mt">🟢 ${bullSigs} Bull · 🟡 ${neutralSigs} Neutral · 🔴 ${bearSigs} Bear</div></div>`;
+
+if(bias==='BULLISH'||bias==='NEUTRAL'){
+recsHtml+=`<div style="margin-bottom:8px;padding:8px;background:rgba(0,230,118,0.04);border:1px solid rgba(0,230,118,0.15);border-radius:var(--rr)">
+<div style="font-weight:700;color:var(--g);margin-bottom:4px">📈 做多策略 Long Setup</div>
+<div style="font:10px var(--mono);line-height:1.8">
+<div>Entry Zone: <b>${pFmt(entryPullback)}</b> – <b>${pFmt(lt)}</b> (等回調接或現價輕倉)</div>
+<div>Stop Loss: <b class="dn">${pFmt(stopLoss)}</b> (前低下方 ${isEq?'2':'3'}%)</div>
+<div>Target 1: <b class="up">${pFmt(tgt1)}</b> (R:R ${rr1.toFixed(1)}:1)</div>
+<div>Target 2: <b class="up">${pFmt(tgt2)}</b> (R:R ${rr2.toFixed(1)}:1)</div>
+<div style="margin-top:4px;color:var(--t2);font-size:9px">建議：分批進場，先 30% 倉位試單，突破確認後加碼</div>
+</div></div>`;
+}
+if(bias==='BEARISH'||bias==='NEUTRAL'){
+const shortEntry=lt;const shortStop=resist2*(isEq?1.02:1.03);
+const shortTgt1=lt*(1-tgt1Pct/100),shortTgt2=lt*(1-tgt2Pct/100);
+recsHtml+=`<div style="margin-bottom:8px;padding:8px;background:rgba(255,71,87,0.04);border:1px solid rgba(255,71,87,0.15);border-radius:var(--rr)">
+<div style="font-weight:700;color:var(--r);margin-bottom:4px">📉 做空策略 Short Setup</div>
+<div style="font:10px var(--mono);line-height:1.8">
+<div>Entry Zone: <b>${pFmt(shortEntry)}</b> (反彈至阻力位附近)</div>
+<div>Stop Loss: <b class="dn">${pFmt(shortStop)}</b> (前高上方 ${isEq?'2':'3'}%)</div>
+<div>Target 1: <b class="up">${pFmt(shortTgt1)}</b></div>
+<div>Target 2: <b class="up">${pFmt(shortTgt2)}</b></div>
+<div style="margin-top:4px;color:var(--t2);font-size:9px">建議：等反彈到阻力位才做空，不追空</div>
+</div></div>`;
+}
+recsHtml+=`<div style="padding:8px;background:var(--bg2);border-radius:var(--rr);font:9px var(--mono);color:var(--t2);line-height:1.7">
+<b style="color:var(--y)">⚠ 不做的情況 No-Trade Conditions:</b><br>
+· 如果價格直接突破 ${pFmt(resist2)} 不回調 → 不追高<br>
+${!isEq?`· 如果 Funding Rate 突然 > 0.05% → 過熱等回調<br>`:''}
+· 如果 RSI > 80 同時接近前高 → 等回落<br>
+· 如果成交量持續萎縮 (Vol Ratio < 0.5) → 觀望<br>
+· 如果${isEq?'VIX飆升':'F&G > 80'} → 市場過熱，減倉而非加倉
+</div>`;
+E('da-recs').innerHTML=recsHtml;
+
+/* ——— Timestamp ——— */
+E('da-ts').textContent=`Generated: ${new Date().toLocaleString('zh-TW')} · ${shortLbl} ${days}D Analysis`;
+E('da-out').style.display='block';
+toast(`${shortLbl} 分析報告已生成`,'success');
+}catch(err){
+E('da-out').style.display='none';
+toast(`Analysis failed: ${err.message}`,'error');
+}finally{btn.textContent='▶ GENERATE ANALYSIS';btn.disabled=false}}
+
+function dlAnalysis(){
+const txt=E('da-out').innerText;if(!txt)return;
+const a=document.createElement('a');
+a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+a.download=`nexus_analysis_${E('da-asset').value}_${new Date().toISOString().split('T')[0]}.txt`;a.click()}
 
 /* ===== INTEL ===== */
 async function genRpt(){const btn=E('rp-go');btn.textContent='⏳';btn.disabled=true;const bx=E('rp-bx');try{await DS.f('crypto','https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true')}catch{}try{const d=await DS.f('fng','https://api.alternative.me/fng/?limit=1');DS.set('fng:p',{v:+d.data[0].value,lb:d.data[0].value_classification})}catch{}
