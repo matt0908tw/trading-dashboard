@@ -198,6 +198,10 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 <span style="color:var(--bdr)">│</span>
 <span class="sym">SPY</span><span class="pr" id="sb-spyp">—</span><span class="ch" id="sb-spyc">—</span>
 <span style="color:var(--bdr)">│</span>
+<span class="sym">NVDA</span><span class="pr" id="sb-nvdap">—</span><span class="ch" id="sb-nvdac">—</span>
+<span style="color:var(--bdr)">│</span>
+<span class="sym">TSLA</span><span class="pr" id="sb-tslap">—</span><span class="ch" id="sb-tslac">—</span>
+<span style="color:var(--bdr)">│</span>
 <span class="sym">VIX</span><span class="pr" id="sb-vix">—</span>
 <span style="color:var(--bdr)">│</span>
 <span class="sym">F&G</span><span class="pr" id="sb-fng">—</span>
@@ -503,8 +507,18 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 <div id="da-out" style="display:none">
 <!-- Trend Timeline -->
 <div style="margin-bottom:10px;padding:10px;background:var(--bg0);border-radius:var(--rr);border:1px solid var(--bdr)">
-<div style="font:700 10px var(--mono);color:var(--c);margin-bottom:6px;letter-spacing:1px">K-LINE TREND TIMELINE</div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+<div style="font:700 10px var(--mono);color:var(--c);letter-spacing:1px">K-LINE TREND TIMELINE</div>
+<div style="display:flex;gap:3px;align-items:center">
+<button class="bt xs" onclick="daZoom(-1)" style="padding:4px 8px;min-height:24px">−</button>
+<span class="xs mt" id="da-zoom-lbl">100%</span>
+<button class="bt xs" onclick="daZoom(1)" style="padding:4px 8px;min-height:24px">+</button>
+<button class="bt xs" onclick="daZoom(0)" style="padding:4px 8px;min-height:24px">Reset</button>
+</div>
+</div>
+<div style="overflow-x:auto;overflow-y:hidden" id="da-chart-wrap">
 <canvas id="cv-da-kline"></canvas>
+</div>
 <div id="da-timeline" style="margin-top:6px;font:10px var(--mono);line-height:1.8"></div>
 </div>
 <!-- Cross-Validation Table -->
@@ -1207,29 +1221,10 @@ events.sort((a,b)=>a.i-b.i);
 for(const ev of events){if(ev.i-lastIdx>=Math.max(2,Math.floor(n/15))||ev.t==='now'||ev.t==='peak'||ev.t==='trough'){filtered.push(ev);lastIdx=ev.i}}
 const keyEvents=filtered.slice(-12);
 
-/* ——— Render K-line chart ——— */
-const cv=E('cv-da-kline'),{c:ctx,w:W,h:H}=acv(cv,.3);
-const mn=lo*.998,mx=hi*1.002;
-const sx=i=>i/(n-1)*W,sy=vv=>H-(vv-mn)/(mx-mn)*H;
-ctx.clearRect(0,0,W,H);ctx.fillStyle='#060a14';ctx.fillRect(0,0,W,H);
-ctx.strokeStyle='#131b2e';ctx.lineWidth=.5;for(let g=0;g<5;g++){const gy=H/5*g;ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke()}
-/* BB fill */
-ctx.fillStyle='rgba(167,139,250,.04)';ctx.beginPath();let started=0;
-for(let i=0;i<n;i++){if(bx.u[i]===null)continue;!started?(ctx.moveTo(sx(i),sy(bx.u[i])),started=1):ctx.lineTo(sx(i),sy(bx.u[i]))}
-for(let i=n-1;i>=0;i--){if(bx.l[i]===null)continue;ctx.lineTo(sx(i),sy(bx.l[i]))}ctx.fill();
-dln(ctx,s50,sx,sy,'#ffffff20',1);dln(ctx,s20,sx,sy,'#ff980080',1.5);dln(ctx,prices,sx,sy,'#00bbff',2);
-/* Mark events on chart */
-keyEvents.forEach(ev=>{
-const x=sx(ev.i),y=sy(ev.p);
-const cl=ev.t==='peak'||ev.t==='dump'||ev.t==='reversal_dn'?'#ff4757':ev.t==='trough'||ev.t==='surge'||ev.t==='reversal_up'?'#00e676':'#00d4ff';
-ctx.fillStyle=cl;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
-ctx.strokeStyle=cl+'60';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,ev.t==='peak'||ev.t==='dump'?y-18:y+18);ctx.stroke();
-ctx.fillStyle='#aab8d0';ctx.font='8px JetBrains Mono';
-const txt=isEq?'$'+ev.p.toFixed(2):'$'+ev.p.toLocaleString('en',{maximumFractionDigits:0});
-ctx.fillText(txt,x-20,ev.t==='peak'||ev.t==='dump'?y-20:y+24);
-});
-ctx.fillStyle='#5a6a88';ctx.font='9px JetBrains Mono';
-ctx.fillText(shortLbl+' '+days+'D K-Line · '+new Date().toLocaleDateString('zh-TW'),4,10);
+/* ——— Render K-line chart (zoomable) ——— */
+daLastState={prices,isEq,shortLbl,days,timestamps,keyEvents,hi,lo};
+daZoomLv=1;E('da-zoom-lbl').textContent='100%';
+daRedrawKline();
 
 /* ——— Render Timeline ——— */
 const fmtDate=ts=>{const d=new Date(isEq?ts*1000:ts);return(d.getMonth()+1)+'/'+d.getDate()};
@@ -1460,6 +1455,70 @@ function rmAl(id){sAl(gAl().filter(a=>a.id!==id));rAl()}
 function rAl(){const a=gAl();E('al-list').innerHTML=a.length?a.map(x=>`<div class="al-i${x.fired?' al-f':''}"><div><span class="m" style="font-weight:600">${x.coin.replace('USDT','')}</span> ${x.type==='above'?'▲':'▼'} ${$$(x.price)} ${x.fired?'<span class="tg tg-o">FIRED</span>':'<span class="tg tg-c">ON</span>'}</div><button style="background:0;border:0;color:var(--r);cursor:pointer" onclick="rmAl(${x.id})">✕</button></div>`).join(''):'<div class="xs mt" style="text-align:center;padding:8px">No alerts</div>'}
 function chkAl(sym,pr){const a=gAl();let ch=false;a.forEach(x=>{if(x.coin!==sym||x.fired)return;if((x.type==='above'&&pr>=x.price)||(x.type==='below'&&pr<=x.price)){x.fired=true;ch=true;if('Notification' in window&&Notification.permission==='granted')new Notification(`NEXUS: ${sym}`,{body:`${x.type==='above'?'Above':'Below'} $${x.price} — Now: $${pr.toFixed(2)}`})}});if(ch){sAl(a);rAl()}}
 
+/* ===== STATUS BAR — LIVE EQUITY + DERIV TICKERS ===== */
+async function loadSbEquities(){
+const syms=[{s:'SPY',ep:'sb-spyp',ec:'sb-spyc'},{s:'NVDA',ep:'sb-nvdap',ec:'sb-nvdac'},{s:'TSLA',ep:'sb-tslap',ec:'sb-tslac'},{s:'^VIX',ep:'sb-vix',ec:null}];
+const res=await Promise.allSettled(syms.map(x=>{
+const urls=yfProxy('https://query1.finance.yahoo.com/v8/finance/chart/'+x.s+'?interval=1d&range=5d');
+return(async()=>{for(const u of urls){try{return await yfFetch(u,8000)}catch{}}throw new Error('fail')})();
+}));
+syms.forEach((x,i)=>{
+if(res[i].status!=='fulfilled')return;
+const d=res[i].value,m=d.chart?.result?.[0]?.meta;if(!m)return;
+const pr=m.regularMarketPrice||0,pc=m.previousClose||pr,ch=((pr-pc)/pc*100),u=ch>=0;
+E(x.ep).textContent='$'+pr.toFixed(2);
+if(x.ec){const ce=E(x.ec);ce.textContent=(u?'+':'')+ch.toFixed(2)+'%';ce.style.color=u?'var(--g)':'var(--r)'}
+else E(x.ep).textContent=pr.toFixed(1);
+})}
+
+async function loadSbDeriv(){
+try{const d=await DS.f('deriv:fund','https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1');E('sb-fund').textContent=(+d[0].fundingRate*100).toFixed(4)+'%'}catch{}
+try{const d=await DS.f('deriv:oi','https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT');const oi=+d.openInterest,pr=LD.BTCUSDT?.p||0,usd=oi*pr;E('sb-oi').textContent=usd>=1e9?(usd/1e9).toFixed(1)+'B':(usd/1e6).toFixed(0)+'M'}catch{}}
+
+/* ===== K-LINE ZOOM ===== */
+let daZoomLv=1,daLastPrices=null,daLastState=null;
+function daZoom(dir){
+if(!daLastState)return;
+if(dir===0)daZoomLv=1;
+else daZoomLv=Math.max(1,Math.min(5,daZoomLv+(dir>0?0.5:-0.5)));
+E('da-zoom-lbl').textContent=Math.round(daZoomLv*100)+'%';
+daRedrawKline();}
+
+function daRedrawKline(){
+if(!daLastState)return;
+const{prices,isEq,shortLbl,days,timestamps,keyEvents,hi,lo}=daLastState;
+const n=prices.length;
+const wrap=E('da-chart-wrap');
+const baseW=wrap.parentElement.clientWidth-22;
+const W=Math.round(baseW*daZoomLv);
+const cv=E('cv-da-kline');
+const H=Math.round(baseW*.3);
+const dpr=window.devicePixelRatio||1;
+cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';
+const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+const s20=sma(prices,20),s50=sma(prices,50);
+const bx=bb(prices,20,2);
+const mn=lo*.998,mx=hi*1.002;
+const sx=i=>i/(n-1)*W,sy=v=>H-(v-mn)/(mx-mn)*H;
+ctx.clearRect(0,0,W,H);ctx.fillStyle='#060a14';ctx.fillRect(0,0,W,H);
+ctx.strokeStyle='#131b2e';ctx.lineWidth=.5;for(let g=0;g<5;g++){const gy=H/5*g;ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke()}
+ctx.fillStyle='rgba(167,139,250,.04)';ctx.beginPath();let started=0;
+for(let i=0;i<n;i++){if(bx.u[i]===null)continue;!started?(ctx.moveTo(sx(i),sy(bx.u[i])),started=1):ctx.lineTo(sx(i),sy(bx.u[i]))}
+for(let i=n-1;i>=0;i--){if(bx.l[i]===null)continue;ctx.lineTo(sx(i),sy(bx.l[i]))}ctx.fill();
+dln(ctx,s50,sx,sy,'#ffffff20',1);dln(ctx,s20,sx,sy,'#ff980080',1.5);dln(ctx,prices,sx,sy,'#00bbff',2);
+keyEvents.forEach(ev=>{
+const x=sx(ev.i),y=sy(ev.p);
+const cl=ev.t==='peak'||ev.t==='dump'||ev.t==='reversal_dn'?'#ff4757':ev.t==='trough'||ev.t==='surge'||ev.t==='reversal_up'?'#00e676':'#00d4ff';
+ctx.fillStyle=cl;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle=cl+'60';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,ev.t==='peak'||ev.t==='dump'?y-18:y+18);ctx.stroke();
+ctx.fillStyle='#aab8d0';ctx.font='8px JetBrains Mono';
+const txt=isEq?'$'+ev.p.toFixed(2):'$'+ev.p.toLocaleString('en',{maximumFractionDigits:0});
+ctx.fillText(txt,Math.min(x-20,W-60),ev.t==='peak'||ev.t==='dump'?y-20:y+24);
+});
+ctx.fillStyle='#5a6a88';ctx.font='9px JetBrains Mono';
+ctx.fillText(shortLbl+' '+days+'D K-Line · '+new Date().toLocaleDateString('zh-TW'),4,10);
+if(daZoomLv>1)wrap.scrollLeft=(wrap.scrollWidth-wrap.clientWidth)/2;}
+
 /* ===== INIT ===== */
 E('j-dt').valueAsDate=new Date();
 if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
@@ -1469,7 +1528,11 @@ loadTerm();
 rJnl();
 rAl();
 cPos();
+/* Load status bar equity + deriv tickers on startup */
+setTimeout(()=>{loadSbEquities();loadSbDeriv()},1500);
 setInterval(()=>{DS.inv('crypto');DS.inv('fng');if(DS.is('term'))loadTerm()},12e4);
+setInterval(()=>{loadSbEquities()},3e5);
+setInterval(()=>{loadSbDeriv()},6e4);
 E('ch-in').addEventListener('keydown',e=>{if(e.key==='Enter')sndChat()});
 let rzt;window.addEventListener('resize',()=>{clearTimeout(rzt);rzt=setTimeout(()=>{if(DS.is('term')&&DS.get(`h:${E('ch-coin').value}`)){rPC();rRC();rMC()}if(DS.is('deriv')&&DS.get('deriv:lsd'))ldLSC()},200)});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
