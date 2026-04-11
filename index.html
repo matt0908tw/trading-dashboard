@@ -265,6 +265,7 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 <div style="display:flex;gap:3px">
 <select id="ch-coin" onchange="loadChart()" style="width:auto;min-width:70px"><option value="bitcoin">BTC</option><option value="ethereum">ETH</option><option value="solana">SOL</option></select>
 <select id="ch-days" onchange="loadChart()" style="width:auto;min-width:60px"><option value="7">7D</option><option value="30" selected>30D</option><option value="90">90D</option><option value="180">180D</option></select>
+<button class="bt" id="cm-tog" onclick="chartMode=chartMode==='candle'?'line':'candle';E('cm-tog').textContent=chartMode==='candle'?'◩':'━';rPC()" style="min-width:32px">◩</button>
 <button class="bt bc" onclick="DS.invalidate('crypto');DS.invalidate('fng');loadTerm()">⟳</button>
 <button class="bt" onclick="toggleAP()" title="Alerts">🔔</button>
 </div>
@@ -400,8 +401,11 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 <div><label class="xs mt">CAPITAL</label><input type="number" id="bt-k" value="1000"></div>
 <div><label class="xs mt">FEE%</label><input type="number" id="bt-fe" value="0.1" step="0.01"></div>
 <div><label class="xs mt">SLIP%</label><input type="number" id="bt-sp" value="0.05" step="0.01"></div>
+<div><label class="xs mt">SL·ATR</label><input type="number" id="bt-sla" value="2" step="0.1" title="Stop-loss = entry - N×ATR14 (0=off)"></div>
+<div><label class="xs mt">TP·ATR</label><input type="number" id="bt-tpa" value="4" step="0.1" title="Take-profit = entry + N×ATR14 (0=off)"></div>
 </div>
-<div style="display:flex;gap:3px"><button class="bt bc" onclick="runBT()" id="bt-go">▶ BACKTEST</button><button class="bt" onclick="runMC()">🎲 MONTE CARLO</button><button class="bt" onclick="runArena()">🏟 ARENA</button></div>
+<div style="display:flex;gap:3px;flex-wrap:wrap"><button class="bt bc" onclick="runBT()" id="bt-go">▶ BACKTEST</button><button class="bt" onclick="runWF()" id="bt-wf">🔀 WALK-FWD</button><button class="bt" onclick="runMC()">🎲 MONTE CARLO</button><button class="bt" onclick="runArena()">🏟 ARENA</button></div>
+<div id="wf-res" style="display:none;margin-top:6px"><div class="ct">WALK-FORWARD (70% IS / 30% OOS)</div><div id="wf-st" class="ga"></div><div id="wf-note" class="xs mt" style="margin-top:4px"></div></div>
 </div>
 <div id="bt-res" style="display:none"><div class="ga" id="bt-st" style="margin-bottom:6px"></div>
 <div class="rw"><div class="cl" style="min-width:260px;flex:2"><div class="c"><div class="ct">EQUITY CURVE</div><canvas id="cv-eq"></canvas></div></div>
@@ -607,6 +611,7 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 <div style="display:flex;gap:2px;flex-wrap:wrap;margin-bottom:6px">
 <button class="bt bc xs" onclick="shCalc('pos')">Position</button>
 <button class="bt xs" onclick="shCalc('kel')">Kelly</button>
+<button class="bt xs" onclick="shCalc('bay')">Bayes</button>
 <button class="bt xs" onclick="shCalc('rr')">R:R</button>
 <button class="bt xs" onclick="shCalc('cmp')">Compound</button>
 <button class="bt xs" onclick="shCalc('var')">VaR</button>
@@ -614,6 +619,7 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 <div id="clc">
 <div id="clc-pos"><div class="g2" style="margin-bottom:4px"><div><label class="xs mt">CAPITAL</label><input type="number" id="p-k" value="1000" oninput="cPos()"></div><div><label class="xs mt">RISK%</label><input type="number" id="p-r" value="2" step="0.5" oninput="cPos()"></div><div><label class="xs mt">ENTRY</label><input type="number" id="p-e" value="100" step="0.01" oninput="cPos()"></div><div><label class="xs mt">STOP</label><input type="number" id="p-s" value="95" step="0.01" oninput="cPos()"></div></div><div id="p-o" style="background:var(--bg0);border-radius:var(--rr);padding:8px;font:11px var(--mono);line-height:1.7"></div></div>
 <div id="clc-kel" style="display:none"><div class="g2" style="margin-bottom:4px"><div><label class="xs mt">WIN%</label><input type="number" id="k-w" value="55" oninput="cKel()"></div><div><label class="xs mt">R:R</label><input type="number" id="k-r" value="1.5" step="0.1" oninput="cKel()"></div></div><div id="k-o" style="background:var(--bg0);border-radius:var(--rr);padding:8px;font:11px var(--mono);line-height:1.7"></div></div>
+<div id="clc-bay" style="display:none"><div class="xs mt" style="margin-bottom:4px">條件概率更新：給定先驗 P(H)、證據下 P(E|H) 與 P(E|¬H)，算出後驗 P(H|E)</div><div class="g3" style="margin-bottom:4px"><div><label class="xs mt">PRIOR P(H)%</label><input type="number" id="b-pr" value="50" min="0" max="100" oninput="cBay()"></div><div><label class="xs mt">P(E|H)%</label><input type="number" id="b-ph" value="80" min="0" max="100" oninput="cBay()" title="How likely is the evidence if hypothesis is true"></div><div><label class="xs mt">P(E|¬H)%</label><input type="number" id="b-pn" value="30" min="0" max="100" oninput="cBay()" title="How likely is the evidence if hypothesis is false"></div></div><div id="b-o" style="background:var(--bg0);border-radius:var(--rr);padding:8px;font:11px var(--mono);line-height:1.7"></div></div>
 <div id="clc-rr" style="display:none"><div class="g3" style="margin-bottom:4px"><div><label class="xs mt">ENTRY</label><input type="number" id="rr-e" value="100" step="0.01" oninput="cRR()"></div><div><label class="xs mt">STOP</label><input type="number" id="rr-s" value="95" step="0.01" oninput="cRR()"></div><div><label class="xs mt">TARGET</label><input type="number" id="rr-t" value="115" step="0.01" oninput="cRR()"></div></div><div id="rr-o" style="background:var(--bg0);border-radius:var(--rr);padding:8px;font:11px var(--mono);line-height:1.7"></div></div>
 <div id="clc-cmp" style="display:none"><div class="g3" style="margin-bottom:4px"><div><label class="xs mt">INIT$</label><input type="number" id="cm-i" value="1000" oninput="cCmp()"></div><div><label class="xs mt">MO%</label><input type="number" id="cm-r" value="5" step="0.5" oninput="cCmp()"></div><div><label class="xs mt">MONTHS</label><input type="number" id="cm-m" value="12" oninput="cCmp()"></div></div><div id="cm-o" style="background:var(--bg0);border-radius:var(--rr);padding:8px;font:11px var(--mono);line-height:1.7"></div></div>
 <div id="clc-var" style="display:none"><div class="g3" style="margin-bottom:4px"><div><label class="xs mt">PORT$</label><input type="number" id="vr-p" value="10000" oninput="cVaR()"></div><div><label class="xs mt">CONF%</label><input type="number" id="vr-c" value="95" oninput="cVaR()"></div><div><label class="xs mt">DAYS</label><input type="number" id="vr-d" value="1" oninput="cVaR()"></div></div><div id="vr-o" style="background:var(--bg0);border-radius:var(--rr);padding:8px;font:11px var(--mono);line-height:1.7"></div></div>
@@ -629,11 +635,18 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 const E=id=>document.getElementById(id);
 
 /* ===== DashboardState ===== */
-class DS_{constructor(){this.c=new Map;this.p=new Map;this.ttl={crypto:60e3,fng:12e4,chart:12e4,weather:3e5,deriv:3e4,heatmap:6e4};this.ld=new Set}
+/* DS_: cache + per-host rate limit + retry + timeout */
+class DS_{constructor(){this.c=new Map;this.p=new Map;this.ttl={crypto:60e3,fng:12e4,chart:12e4,weather:3e5,deriv:3e4,heatmap:6e4,ohlc:12e4};this.ld=new Set;
+/* per-host: minGapMs between requests, last fire time, queue */
+this.hosts={'api.coingecko.com':{gap:2500,last:0,q:[]},'fapi.binance.com':{gap:150,last:0,q:[]},'api.binance.com':{gap:150,last:0,q:[]},'alternative.me':{gap:1000,last:0,q:[]},'api.open-meteo.com':{gap:500,last:0,q:[]}};}
 get(k){const c=this.c.get(k);if(!c)return null;if(Date.now()-c.t>(this.ttl[k.split(':')[0]]||12e4))return null;return c.d}
 set(k,d){this.c.set(k,{d,t:Date.now()})}
 inv(k){this.c.delete(k);this.p.delete(k)}
-async f(k,u){const c=this.get(k);if(c)return c;if(this.p.has(k))return this.p.get(k);const p=fetch(u).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{this.set(k,d);this.p.delete(k);return d}).catch(e=>{this.p.delete(k);throw e});this.p.set(k,p);return p}
+invalidate(k){return this.inv(k)}
+host(u){try{return new URL(u).host}catch{return ''}}
+async _gate(u){const h=this.host(u),hs=this.hosts[h];if(!hs)return;const now=Date.now(),wait=hs.last+hs.gap-now;if(wait>0)await new Promise(r=>setTimeout(r,wait));hs.last=Date.now()}
+async _fetch(u,tries=3,timeout=15000){for(let i=0;i<tries;i++){await this._gate(u);const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),timeout);try{const r=await fetch(u,{signal:ctl.signal});clearTimeout(to);if(r.status===429){const back=Math.min(8000,1500*(i+1)*(i+1));await new Promise(x=>setTimeout(x,back));continue}if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}catch(e){clearTimeout(to);if(i===tries-1)throw e;await new Promise(x=>setTimeout(x,800*(i+1)))}}throw new Error('fetch failed')}
+async f(k,u,opts={}){const c=this.get(k);if(c)return c;if(this.p.has(k))return this.p.get(k);const p=this._fetch(u,opts.tries||3,opts.timeout||15000).then(d=>{this.set(k,d);this.p.delete(k);return d}).catch(e=>{this.p.delete(k);throw e});this.p.set(k,p);return p}
 mk(t){this.ld.add(t)}is(t){return this.ld.has(t)}}
 const DS=new DS_;
 
@@ -656,12 +669,71 @@ function vol(p){const r=[];for(let i=1;i<p.length;i++)r.push((p[i]-p[i-1])/p[i-1
 function mdd(p){let pk=p[0],d=0;for(const v of p){if(v>pk)pk=v;const x=(pk-v)/pk*100;if(x>d)d=x}return d}
 function sharpe(eq){const r=[];for(let i=1;i<eq.length;i++)r.push((eq[i]-eq[i-1])/eq[i-1]);if(!r.length)return 0;const a=r.reduce((s,v)=>s+v,0)/r.length,sd=Math.sqrt(r.reduce((s,v)=>s+(v-a)**2,0)/r.length);return sd>0?(a/sd)*Math.sqrt(365):0}
 function sortino(eq){const r=[];for(let i=1;i<eq.length;i++)r.push((eq[i]-eq[i-1])/eq[i-1]);if(!r.length)return 0;const a=r.reduce((s,v)=>s+v,0)/r.length,neg=r.filter(v=>v<0),dd=neg.length?Math.sqrt(neg.reduce((s,v)=>s+v*v,0)/neg.length):1e-4;return(a/dd)*Math.sqrt(365)}
+/* ATR from OHLC array (falls back to close-only range proxy) */
+function atr(ohlc,n=14){const tr=[];for(let i=0;i<ohlc.length;i++){const c=ohlc[i];if(!c){tr.push(null);continue}if(i===0){tr.push(c.h-c.l);continue}const pc=ohlc[i-1].c,x=Math.max(c.h-c.l,Math.abs(c.h-pc),Math.abs(c.l-pc));tr.push(x)}const r=[];for(let i=0;i<tr.length;i++){if(i<n-1){r.push(null);continue}let s=0;for(let j=i-n+1;j<=i;j++)s+=tr[j];r.push(s/n)}return r}
+/* Profit factor = sum(wins)/abs(sum(losses)) */
+function profitFactor(trades){let w=0,l=0;for(const t of trades)if(t.pnl!==undefined){if(t.pnl>0)w+=t.pnl;else l+=t.pnl}return l<0?w/Math.abs(l):(w>0?Infinity:0)}
 function pcorr(a,b){const n=Math.min(a.length,b.length);if(n<2)return 0;const ma=a.slice(-n).reduce((s,v)=>s+v,0)/n,mb=b.slice(-n).reduce((s,v)=>s+v,0)/n;let nm=0,da=0,db=0;for(let i=0;i<n;i++){const ai=a[a.length-n+i]-ma,bi=b[b.length-n+i]-mb;nm+=ai*bi;da+=ai*ai;db+=bi*bi}return da&&db?nm/Math.sqrt(da*db):0}
 
 /* Canvas */
 function scv(cv,w,h){const d=devicePixelRatio||1;cv.width=w*d;cv.height=h*d;cv.style.width=w+'px';cv.style.height=h+'px';const c=cv.getContext('2d');c.scale(d,d);return c}
 function acv(cv,ar){const w=cv.parentElement.clientWidth-2,h=Math.round(w*ar);return{c:scv(cv,w,h),w,h}}
 function dln(c,a,sx,sy,cl,lw=1){c.strokeStyle=cl;c.lineWidth=lw;c.beginPath();let s=0;a.forEach((v,i)=>{if(v===null||isNaN(v))return;!s?(c.moveTo(sx(i),sy(v)),s=1):c.lineTo(sx(i),sy(v))});c.stroke()}
+
+/* Candlestick renderer */
+function drawCandles(ctx,ohlc,sx,sy,W,n){
+const bw=Math.max(1,W/n*.65);
+ohlc.forEach((c,i)=>{if(!c)return;
+const x=sx(i),up=c.c>=c.o,cl=up?'#00e676':'#ff4757',cf=up?'#00e67650':'#ff475750';
+ctx.strokeStyle=cl;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,sy(c.h));ctx.lineTo(x,sy(c.l));ctx.stroke();
+const y1=sy(Math.max(c.o,c.c)),y2=sy(Math.min(c.o,c.c)),bh=Math.max(1,y2-y1);
+ctx.fillStyle=cf;ctx.fillRect(x-bw/2,y1,bw,bh);ctx.strokeRect(x-bw/2,y1,bw,bh)})}
+
+/* Y-axis price scale */
+function drawYAxis(ctx,mn,mx,W,H,fmt){
+ctx.fillStyle='#4a5568';ctx.font='8px JetBrains Mono';ctx.textAlign='right';
+for(let i=0;i<=4;i++){const v=mn+(mx-mn)*(1-i/4),y=H/4*i;
+ctx.fillText(fmt?fmt(v):v.toFixed(2),W-3,y+10)}ctx.textAlign='left'}
+
+/* Crosshair overlay */
+function drawCrosshair(ctx,mx2,my,W,H,prices,ohlc,sx,sy,mn,mxP,isEq){
+if(mx2<0)return;
+ctx.strokeStyle='#ffffff20';ctx.lineWidth=.5;ctx.setLineDash([3,3]);
+ctx.beginPath();ctx.moveTo(mx2,0);ctx.lineTo(mx2,H);ctx.stroke();
+ctx.beginPath();ctx.moveTo(0,my);ctx.lineTo(W,my);ctx.stroke();ctx.setLineDash([]);
+const pv=mxP-(my/H)*(mxP-mn);
+ctx.fillStyle='rgba(0,212,255,0.15)';ctx.fillRect(W-60,my-8,60,16);
+ctx.fillStyle='#00d4ff';ctx.font='8px JetBrains Mono';ctx.textAlign='right';
+ctx.fillText(isEq?'$'+pv.toFixed(2):'$'+pv.toFixed(0),W-3,my+3);ctx.textAlign='left';
+const idx=Math.round(mx2/W*(prices.length-1));
+if(ohlc&&ohlc[idx]){const c=ohlc[idx];
+ctx.fillStyle='rgba(10,14,26,0.9)';ctx.fillRect(mx2+8,4,110,48);ctx.strokeStyle='#ffffff15';ctx.strokeRect(mx2+8,4,110,48);
+ctx.fillStyle='#aab8d0';ctx.font='8px JetBrains Mono';
+ctx.fillText('O:'+c.o.toFixed(2),mx2+12,16);ctx.fillText('H:'+c.h.toFixed(2),mx2+12,26);
+ctx.fillText('L:'+c.l.toFixed(2),mx2+12,36);ctx.fillText('C:'+c.c.toFixed(2),mx2+12,46)}}
+
+/* Smart Money Concepts — BOS / CHoCH */
+function findSwings(p,lb=5){const sw=[];for(let i=lb;i<p.length-1;i++){
+let isH=true,isL=true;for(let j=Math.max(0,i-lb);j<i;j++){if(p[j]>p[i])isH=false;if(p[j]<p[i])isL=false}
+for(let j=i+1;j<=Math.min(p.length-1,i+lb);j++){if(p[j]>p[i])isH=false;if(p[j]<p[i])isL=false}
+if(isH)sw.push({i,p:p[i],type:'H'});if(isL)sw.push({i,p:p[i],type:'L'});}return sw}
+
+function detectSMC(swings){
+const sigs=[];let lH=null,lL=null;
+for(const s of swings){
+if(s.type==='H'){if(lH){sigs.push(s.p>lH.p?{i:s.i,type:'BOS',dir:'bull',lv:lH.p}:{i:s.i,type:'CHoCH',dir:'bear',lv:lH.p})}lH=s}
+if(s.type==='L'){if(lL){sigs.push(s.p<lL.p?{i:s.i,type:'BOS',dir:'bear',lv:lL.p}:{i:s.i,type:'CHoCH',dir:'bull',lv:lL.p})}lL=s}}
+return sigs}
+
+function drawSMC(ctx,smc,sx,sy,W){
+smc.slice(-8).forEach(s=>{
+const x=sx(s.i),y=sy(s.lv);
+ctx.strokeStyle=s.dir==='bull'?'#00e67640':'#ff475740';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(W,y);ctx.stroke();ctx.setLineDash([]);
+ctx.fillStyle=s.type==='BOS'?(s.dir==='bull'?'#00e676':'#ff4757'):'#a78bfa';
+ctx.font='bold 8px JetBrains Mono';ctx.fillText(s.type,x+2,y-4)})}
+
+let chartMode='candle';
 
 /* ===== NAV ===== */
 const allT=document.querySelectorAll('.tb'),mm=E('mmenu'),hm=E('ham');
@@ -739,12 +811,41 @@ E('brd').innerHTML=`<div style="display:flex;height:16px;border-radius:3px;overf
 
 /* ===== TERMINAL ===== */
 async function loadTerm(){await Promise.allSettled([ldCr(),ldFNG(),loadChart()])}
-async function ldCr(){const el=E('cc');try{const d=await DS.f('crypto','https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true');
-el.innerHTML=[{i:'bitcoin',s:'BTC'},{i:'ethereum',s:'ETH'},{i:'solana',s:'SOL'}].map(c=>{const p=d[c.i];if(!p)return`<div class="c">${c.s} N/A</div>`;const u=(p.usd_24h_change||0)>=0;return`<div class="c" style="text-align:center"><div class="m xs mt">${c.s}/USD</div><div class="m" style="font-size:20px;font-weight:700;margin:3px 0">${$$(p.usd)}</div><div class="m s ${u?'up':'dn'}">${u?'▲':'▼'} ${Math.abs(p.usd_24h_change||0).toFixed(2)}%</div><div class="g2 xs mt" style="margin-top:4px"><div>Vol ${$$(p.usd_24h_vol||0)}</div><div>MCap ${$$(p.usd_market_cap||0)}</div></div></div>`}).join('')}catch{el.innerHTML='<div class="c">CoinGecko rate limited</div>'}}
+async function ldCr(){const el=E('cc');
+const syms=[{i:'bitcoin',s:'BTC',b:'BTCUSDT'},{i:'ethereum',s:'ETH',b:'ETHUSDT'},{i:'solana',s:'SOL',b:'SOLUSDT'}];
+/* Primary: Binance 24hr ticker (no key, no rate limit for single sym). Fallback: CoinGecko */
+try{
+const rs=await Promise.all(syms.map(c=>DS.f(`tk:${c.b}`,`https://api.binance.com/api/v3/ticker/24hr?symbol=${c.b}`).catch(()=>null)));
+if(rs.every(r=>r&&r.lastPrice)){const mp={};syms.forEach((c,i)=>{const r=rs[i];mp[c.i]={usd:+r.lastPrice,usd_24h_change:+r.priceChangePercent,usd_24h_vol:+r.quoteVolume,usd_market_cap:0}});DS.set('crypto',mp);
+el.innerHTML=syms.map(c=>{const p=mp[c.i],u=p.usd_24h_change>=0;return`<div class="c" style="text-align:center"><div class="m xs mt">${c.s}/USD</div><div class="m" style="font-size:20px;font-weight:700;margin:3px 0">${$$(p.usd)}</div><div class="m s ${u?'up':'dn'}">${u?'▲':'▼'} ${Math.abs(p.usd_24h_change).toFixed(2)}%</div><div class="g2 xs mt" style="margin-top:4px"><div>Vol ${$$(p.usd_24h_vol)}</div><div>Binance</div></div></div>`}).join('');return}
+const d=await DS.f('crypto','https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true');
+el.innerHTML=syms.map(c=>{const p=d[c.i];if(!p)return`<div class="c">${c.s} N/A</div>`;const u=(p.usd_24h_change||0)>=0;return`<div class="c" style="text-align:center"><div class="m xs mt">${c.s}/USD</div><div class="m" style="font-size:20px;font-weight:700;margin:3px 0">${$$(p.usd)}</div><div class="m s ${u?'up':'dn'}">${u?'▲':'▼'} ${Math.abs(p.usd_24h_change||0).toFixed(2)}%</div><div class="g2 xs mt" style="margin-top:4px"><div>Vol ${$$(p.usd_24h_vol||0)}</div><div>MCap ${$$(p.usd_market_cap||0)}</div></div></div>`}).join('')
+}catch{el.innerHTML='<div class="c">Price feed unavailable</div>'}}
 
 async function ldFNG(){try{const d=await DS.f('fng','https://api.alternative.me/fng/?limit=1');const v=+d.data[0].value,lb=d.data[0].value_classification;E('fv').textContent=v;E('fv').style.color=v<=25?'var(--r)':v<=45?'var(--o)':v<=55?'var(--y)':'var(--g)';E('fd').style.left=v+'%';E('fl').textContent=lb;E('fa').textContent=v<=20?'EXTREME FEAR — buy zone':v<=35?'FEAR — watch entries':v<=55?'NEUTRAL — wait':v<=75?'GREED — take profit':'EXTREME GREED — reduce risk';DS.set('fng:p',{v,lb});E('sb-fng').textContent=v+' '+lb}catch{E('fv').textContent='--'}}
 
-async function loadChart(){const co=E('ch-coin').value,dy=E('ch-days').value;try{const d=await DS.f(`chart:${co}:${dy}`,`https://api.coingecko.com/api/v3/coins/${co}/market_chart?vs_currency=usd&days=${dy}`);DS.set(`h:${co}`,{p:d.prices.map(x=>x[1]),t:d.prices.map(x=>x[0])});rPC();rRC();rMC();rTI();rMTF()}catch{E('ti').innerHTML='<span class="xs mt">Chart failed</span>'}}
+async function loadChart(){const co=E('ch-coin').value,dy=+E('ch-days').value;
+const bmap={bitcoin:'BTCUSDT',ethereum:'ETHUSDT',solana:'SOLUSDT'};
+/* Binance klines: pick interval to fit requested days */
+const ivPick=dy<=7?'1h':dy<=30?'4h':dy<=90?'8h':'1d';
+const limPick=dy<=7?Math.min(168,dy*24):dy<=30?Math.min(180,dy*6):dy<=90?Math.min(270,dy*3):Math.min(365,dy);
+try{
+const bsym=bmap[co];
+/* Try Binance first */
+if(bsym){try{
+const k=await DS.f(`kl:${bsym}:${ivPick}:${limPick}`,`https://api.binance.com/api/v3/klines?symbol=${bsym}&interval=${ivPick}&limit=${limPick}`);
+const closes=k.map(x=>+x[4]),ts=k.map(x=>+x[0]);
+const ohlcArr=k.map(x=>({t:+x[0],o:+x[1],h:+x[2],l:+x[3],c:+x[4],v:+x[5]}));
+DS.set(`h:${co}`,{p:closes,t:ts,ohlc:ohlcArr});rPC();rRC();rMC();rTI();rMTF();return
+}catch(e){console.warn('Binance kline failed, falling back to CoinGecko',e)}}
+/* Fallback: CoinGecko */
+const d=await DS.f(`chart:${co}:${dy}`,`https://api.coingecko.com/api/v3/coins/${co}/market_chart?vs_currency=usd&days=${dy}`);
+const closes=d.prices.map(x=>x[1]),ts=d.prices.map(x=>x[0]);
+let ohlcArr=null;
+try{const od=await DS.f(`ohlc:${co}:${dy}`,`https://api.coingecko.com/api/v3/coins/${co}/ohlc?vs_currency=usd&days=${dy}`);
+ohlcArr=od.map(x=>({t:x[0],o:x[1],h:x[2],l:x[3],c:x[4]}))}catch{}
+DS.set(`h:${co}`,{p:closes,t:ts,ohlc:ohlcArr});rPC();rRC();rMC();rTI();rMTF()
+}catch(e){console.error(e);E('ti').innerHTML='<span class="xs mt">Chart failed: '+e.message+'</span>'}}
 
 function rPC(){const co=E('ch-coin').value,d=DS.get(`h:${co}`);if(!d)return;const cv=E('cv-price'),{c:ctx,w:W,h:H}=acv(cv,.35);const p=d.p,s20=sma(p,20),s50=sma(p,50),b=bb(p,20,2);const mn=Math.min(...p)*.998,mx=Math.max(...p)*1.002;const sx=i=>i/(p.length-1)*W,sy=v=>H-(v-mn)/(mx-mn)*H;
 ctx.clearRect(0,0,W,H);ctx.fillStyle='#080d18';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#131b2e';ctx.lineWidth=.5;for(let i=0;i<5;i++){const y=H/5*i;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
@@ -791,8 +892,7 @@ const ags=[
 {n:'Quant',rl:'Statistical edge',cl:'#ff6b9d',w:1.3,run(){let s=0,r='';const z=(lt-s20[p.length-1])/(vl*lt/100||1);r+=`Z:${z.toFixed(2)} `;if(z<-2){s=2;r+='Extreme↑'}else if(z<-1){s=1;r+='Below mean↑'}else if(z>2){s=-2;r+='Extreme↓'}else if(z>1){s=-1;r+='Above mean↓'}return{s,r:r.trim(),v:s>=2?'STRONG BUY':s>=1?'BUY':s<=-2?'STRONG SELL':s<=-1?'SELL':'HOLD'}}},
 ];
 const res=ags.map(a=>({...a,x:a.run()})),wt=res.reduce((s,a)=>s+a.x.s*a.w,0),tw=res.reduce((s,a)=>s+a.w,0),ns=wt/tw;
-const act=ns>=1.2?'STRONG BUY':ns>=.4?'BUY':ns>=-.4?'HOLD':ns>=-.4?'HOLD':ns>=-.4?'HOLD':'STRONG SELL';
-const finalAct=ns>=1.2?'STRONG BUY':ns>=.4?'BUY':ns<=-.4?(ns<=-1.2?'STRONG SELL':'SELL'):'HOLD';
+const finalAct=ns>=1.2?'STRONG BUY':ns>=.4?'BUY':ns<=-1.2?'STRONG SELL':ns<=-.4?'SELL':'HOLD';
 const conf=Math.min(100,Math.abs(ns)/2*100).toFixed(0),ac=finalAct.includes('BUY')?'var(--g)':finalAct.includes('SELL')?'var(--r)':'var(--y)';
 cards.innerHTML=res.map(a=>{const v=a.x.v,ib=v.includes('BUY'),is=v.includes('SELL')||v.includes('HIGH'),tc=ib?'tg-g':is?'tg-r':'tg-o';return`<div class="c ag-c" style="border-left-color:${a.cl}"><div style="font-weight:700;font-size:12px;color:${a.cl}">${a.n} <span class="xs mt">(w:${a.w})</span></div><div class="xs mt">${a.rl}</div><div style="margin:3px 0"><span class="tg ${tc}">${v}</span> <span class="m xs mt">Sc:${a.x.s>0?'+':''}${a.x.s}</span></div><div class="xs" style="color:var(--t2)">${a.x.r}</div></div>`}).join('');
 const cb=E('cbox');cb.style.display='block';cb.style.borderColor=ac;E('cact').textContent=finalAct;E('cact').style.color=ac;E('ccnf').innerHTML=`Weighted: ${ns.toFixed(2)} · Conf: ${conf}% · ${co.toUpperCase()} @ ${$$(lt)}`;E('crsn').innerHTML=`Bull: ${res.filter(a=>a.x.s>0).map(a=>a.n).join(', ')||'None'} | Bear: ${res.filter(a=>a.x.s<0).map(a=>a.n).join(', ')||'None'}`;
@@ -805,17 +905,52 @@ else if(st==='bb_squeeze'){const b=bb(p,f,2);let pos=0;for(let i=1;i<p.length;i+
 else if(st==='macd_cross'){const m=macd(p);for(let i=1;i<p.length;i++){if(!m.ml[i]||!m.sig[i])continue;if(m.ml[i]>m.sig[i]&&m.ml[i-1]<=m.sig[i-1])s[i]=1;if(m.ml[i]<m.sig[i]&&m.ml[i-1]>=m.sig[i-1])s[i]=-1}}
 return s}
 
-function execBT(p,sig,cap,ts,fee,slip){let cash=cap,pos=0,eq=[cap],trades=[],en=0,tf=0;
-for(let i=1;i<p.length;i++){if(sig[i]===1&&pos===0){const ep=p[i]*(1+slip),c=cash*fee;tf+=c;pos=(cash-c)/ep;cash=0;en=ep;trades.push({ty:'BUY',dt:ts[i],pr:p[i],idx:i})}else if(sig[i]===-1&&pos>0){const ep=p[i]*(1-slip);cash=pos*ep;const c=cash*fee;tf+=c;cash-=c;trades.push({ty:'SELL',dt:ts[i],pr:p[i],pnl:((ep-en)/en)*100,idx:i});pos=0}eq.push(cash+pos*p[i])}
+/* execBT now supports ATR-based SL/TP. opts: {slAtr, tpAtr, atrArr} */
+function execBT(p,sig,cap,ts,fee,slip,opts={}){let cash=cap,pos=0,eq=[cap],trades=[],en=0,tf=0,stopP=null,tpP=null;
+const slA=opts.slAtr||0,tpA=opts.tpAtr||0,atrA=opts.atrArr||null;
+for(let i=1;i<p.length;i++){
+/* Intrabar SL/TP check (uses current close as conservative proxy) */
+if(pos>0&&(stopP||tpP)){let hit=null,exitP=null;
+if(stopP&&p[i]<=stopP){hit='SL';exitP=stopP}
+else if(tpP&&p[i]>=tpP){hit='TP';exitP=tpP}
+if(hit){const ep=exitP*(1-slip);cash=pos*ep;const c=cash*fee;tf+=c;cash-=c;trades.push({ty:'SELL',dt:ts[i],pr:exitP,pnl:((ep-en)/en)*100,idx:i,ex:hit});pos=0;stopP=null;tpP=null}}
+if(sig[i]===1&&pos===0){const ep=p[i]*(1+slip),c=cash*fee;tf+=c;pos=(cash-c)/ep;cash=0;en=ep;
+if(slA&&atrA&&atrA[i]){stopP=ep-slA*atrA[i];tpP=tpA?ep+tpA*atrA[i]:null}
+trades.push({ty:'BUY',dt:ts[i],pr:p[i],idx:i})}
+else if(sig[i]===-1&&pos>0){const ep=p[i]*(1-slip);cash=pos*ep;const c=cash*fee;tf+=c;cash-=c;trades.push({ty:'SELL',dt:ts[i],pr:p[i],pnl:((ep-en)/en)*100,idx:i,ex:'SIG'});pos=0;stopP=null;tpP=null}
+eq.push(cash+pos*p[i])}
 const fn=cash+pos*p[p.length-1],rt=((fn-cap)/cap)*100,ws=trades.filter(t=>t.ty==='SELL'&&t.pnl>0).length,tc=trades.filter(t=>t.ty==='SELL').length;
-return{eq,trades,rt,sh:sharpe(eq),dd:mdd(eq),wr:tc>0?ws/tc*100:0,tc,tf}}
+return{eq,trades,rt,sh:sharpe(eq),dd:mdd(eq),wr:tc>0?ws/tc*100:0,tc,tf,pf:profitFactor(trades)}}
 
-async function runBT(){const co=E('bt-c').value,dy=+E('bt-d').value,st=E('bt-s').value,f=+E('bt-f').value,sl=+E('bt-sl').value,cap=+E('bt-k').value,fee=+E('bt-fe').value/100,slip=+E('bt-sp').value/100;
+/* Walk-forward: split 70/30. Run strategy with fixed params on both halves.
+   Compare in-sample vs out-of-sample. Large gap = overfit warning. */
+function walkForward(p,ohlc,ts,st,f,sl,cap,fee,slip,slA,tpA){
+const split=Math.floor(p.length*.7);
+const inP=p.slice(0,split),inT=ts.slice(0,split),inO=ohlc?ohlc.slice(0,split):null,inA=inO?atr(inO,14):null;
+const outP=p.slice(split),outT=ts.slice(split),outO=ohlc?ohlc.slice(split):null,outA=outO?atr(outO,14):null;
+const inS=genSig(inP,st,f,sl),outS=genSig(outP,st,f,sl);
+const inR=execBT(inP,inS,cap,inT,fee,slip,{slAtr:slA,tpAtr:tpA,atrArr:inA});
+const outR=execBT(outP,outS,cap,outT,fee,slip,{slAtr:slA,tpAtr:tpA,atrArr:outA});
+return{in:inR,out:outR,splitIdx:split}}
+
+/* Fetch OHLC array for backtest. Uses Binance klines (preferred) with CG fallback. */
+async function btFetch(co,dy){const bmap={bitcoin:'BTCUSDT',ethereum:'ETHUSDT',solana:'SOLUSDT'};const bsym=bmap[co];
+if(bsym){try{const lim=Math.min(1000,Math.max(60,dy));
+const k=await DS.f(`kl:${bsym}:1d:${lim}`,`https://api.binance.com/api/v3/klines?symbol=${bsym}&interval=1d&limit=${lim}`);
+const pr=k.map(x=>+x[4]),ts=k.map(x=>new Date(+x[0]).toLocaleDateString()),ohlc=k.map(x=>({t:+x[0],o:+x[1],h:+x[2],l:+x[3],c:+x[4],v:+x[5]}));
+return{pr,ts,ohlc}}catch(e){console.warn('Binance fetch failed, using CoinGecko',e)}}
+const d=await DS.f(`chart:${co}:${dy}`,`https://api.coingecko.com/api/v3/coins/${co}/market_chart?vs_currency=usd&days=${dy}`);
+const pr=d.prices.map(x=>x[1]),ts=d.prices.map(x=>new Date(x[0]).toLocaleDateString());
+/* Fallback: synthesize OHLC from close (h/l = close*(1±1%)) so ATR still works */
+const ohlc=pr.map(p=>({o:p,h:p*1.01,l:p*.99,c:p}));
+return{pr,ts,ohlc}}
+
+async function runBT(){const co=E('bt-c').value,dy=+E('bt-d').value,st=E('bt-s').value,f=+E('bt-f').value,sl=+E('bt-sl').value,cap=+E('bt-k').value,fee=+E('bt-fe').value/100,slip=+E('bt-sp').value/100,slA=+E('bt-sla').value,tpA=+E('bt-tpa').value;
 const btn=E('bt-go');btn.textContent='⏳';btn.disabled=true;
-try{const d=await DS.f(`chart:${co}:${dy}`,`https://api.coingecko.com/api/v3/coins/${co}/market_chart?vs_currency=usd&days=${dy}`);const pr=d.prices.map(x=>x[1]),ts=d.prices.map(x=>new Date(x[0]).toLocaleDateString());
-const sig=genSig(pr,st,f,sl),res=execBT(pr,sig,cap,ts,fee,slip);DS.set('bt:r',res);DS.set('bt:p',pr);DS.set('bt:t',ts);
+try{const {pr,ts,ohlc}=await btFetch(co,dy);const atrA=atr(ohlc,14);
+const sig=genSig(pr,st,f,sl),res=execBT(pr,sig,cap,ts,fee,slip,{slAtr:slA,tpAtr:tpA,atrArr:atrA});DS.set('bt:r',res);DS.set('bt:p',pr);DS.set('bt:t',ts);DS.set('bt:ohlc',ohlc);
 E('bt-res').style.display='block';const bh=((pr[pr.length-1]-pr[0])/pr[0])*100,so=sortino(res.eq);
-E('bt-st').innerHTML=[['Return',`${res.rt>=0?'+':''}${res.rt.toFixed(2)}%`,res.rt>=0?'up':'dn'],['B&H',`${bh>=0?'+':''}${bh.toFixed(2)}%`,bh>=0?'up':'dn'],['Alpha',`${(res.rt-bh)>=0?'+':''}${(res.rt-bh).toFixed(2)}%`,(res.rt-bh)>=0?'up':'dn'],['Sharpe',res.sh.toFixed(2),res.sh>1?'up':''],['Sortino',so.toFixed(2),''],['MaxDD',`-${res.dd.toFixed(1)}%`,'dn'],['WinRate',`${res.wr.toFixed(0)}%`,res.wr>50?'up':''],['Trades',res.tc,''],['Fees',$$(res.tf),'dn']].map(([l,v,c])=>`<div class="mb"><div class="ml">${l}</div><div class="mv ${c}" style="font-size:13px">${v}</div></div>`).join('');
+E('bt-st').innerHTML=[['Return',`${res.rt>=0?'+':''}${res.rt.toFixed(2)}%`,res.rt>=0?'up':'dn'],['B&H',`${bh>=0?'+':''}${bh.toFixed(2)}%`,bh>=0?'up':'dn'],['Alpha',`${(res.rt-bh)>=0?'+':''}${(res.rt-bh).toFixed(2)}%`,(res.rt-bh)>=0?'up':'dn'],['Sharpe',res.sh.toFixed(2),res.sh>1?'up':''],['Sortino',so.toFixed(2),''],['MaxDD',`-${res.dd.toFixed(1)}%`,'dn'],['WinRate',`${res.wr.toFixed(0)}%`,res.wr>50?'up':''],['ProfFact',isFinite(res.pf)?res.pf.toFixed(2):'∞',res.pf>=1.5?'up':res.pf<1?'dn':''],['Trades',res.tc,''],['Fees',$$(res.tf),'dn']].map(([l,v,c])=>`<div class="mb"><div class="ml">${l}</div><div class="mv ${c}" style="font-size:13px">${v}</div></div>`).join('');
 // Equity chart
 const cv=E('cv-eq'),{c:ctx,w:W,h:H}=acv(cv,.28);const bhEq=pr.map(x=>cap*x/pr[0]),all=[...res.eq,...bhEq];const mn=Math.min(...all)*.98,mx=Math.max(...all)*1.02;const sx=i=>i/(res.eq.length-1)*W,sy=v=>H-(v-mn)/(mx-mn)*H;ctx.clearRect(0,0,W,H);ctx.fillStyle='#080d18';ctx.fillRect(0,0,W,H);dln(ctx,bhEq,sx,sy,'#ffffff20',1);dln(ctx,res.eq,sx,sy,'#00bbff',2);
 res.trades.forEach(t=>{ctx.fillStyle=t.ty==='BUY'?'#00e676':'#ff3b5c';ctx.beginPath();ctx.arc(sx(t.idx),sy(res.eq[t.idx]),2.5,0,Math.PI*2);ctx.fill()});ctx.fillStyle='#7888a8';ctx.font='9px JetBrains Mono';ctx.fillText($$(mx),3,9);ctx.fillText($$(mn),3,H-3);
@@ -833,11 +968,34 @@ for(let r=0;r<Math.min(80,N);r++){const eq=paths[r];ctx.strokeStyle=eq[eq.length
 dln(ctx,paths[Math.floor(N*.5)],i=>i/(len-1)*W,v=>H-(v-amn)/(amx-amn)*H,'#00bbff',2);ctx.fillStyle='#7888a8';ctx.font='9px JetBrains Mono';ctx.fillText('Median: '+$$(p50),3,10);
 E('mc-st').innerHTML=`<div class="ga" style="text-align:center"><div>P5: <span class="dn">${$$(p5)}</span></div><div>Median: <b>${$$(p50)}</b></div><div>P95: <span class="up">${$$(p95)}</span></div><div>Mean: ${$$(mn2)}</div><div>P(Profit): <b class="${+pp>50?'up':'dn'}">${pp}%</b></div></div>`}
 
-async function runArena(){const co=E('bt-c').value,dy=+E('bt-d').value,cap=+E('bt-k').value,fee=+E('bt-fe').value/100,slip=+E('bt-sp').value/100;
-try{const d=await DS.f(`chart:${co}:${dy}`,`https://api.coingecko.com/api/v3/coins/${co}/market_chart?vs_currency=usd&days=${dy}`);const pr=d.prices.map(x=>x[1]),ts=d.prices.map(x=>new Date(x[0]).toLocaleDateString());
+async function runArena(){const co=E('bt-c').value,dy=+E('bt-d').value,cap=+E('bt-k').value,fee=+E('bt-fe').value/100,slip=+E('bt-sp').value/100,slA=+E('bt-sla').value,tpA=+E('bt-tpa').value;
+try{const {pr,ts,ohlc}=await btFetch(co,dy);const atrA=atr(ohlc,14);
 const strats=[{n:'SMA 10/30',i:'sma_cross',f:10,s:30},{n:'SMA 20/50',i:'sma_cross',f:20,s:50},{n:'RSI 30/70',i:'rsi_revert',f:14,s:30},{n:'BB Squeeze',i:'bb_squeeze',f:20,s:2},{n:'MACD X',i:'macd_cross',f:12,s:26},{n:'Buy&Hold',i:'bh',f:0,s:0}];
-const res=strats.map(st=>{if(st.i==='bh'){const rt=((pr[pr.length-1]-pr[0])/pr[0])*100,eq=pr.map(x=>cap*x/pr[0]);return{...st,rt,sh:sharpe(eq),so:sortino(eq),dd:mdd(eq),wr:rt>0?100:0,tc:0,tf:0}}const sig=genSig(pr,st.i,st.f,st.s),bt=execBT(pr,sig,cap,ts,fee,slip);return{...st,rt:bt.rt,sh:bt.sh,so:sortino(bt.eq),dd:bt.dd,wr:bt.wr,tc:bt.tc,tf:bt.tf}}).sort((a,b)=>b.rt-a.rt);
-E('ar-res').style.display='block';E('ar-tb').innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font:9px var(--mono)"><thead><tr style="color:var(--t3)"><th style="padding:3px">🏆</th><th style="padding:3px">Strategy</th><th style="padding:3px;text-align:right">Return</th><th style="padding:3px;text-align:right">Sharpe</th><th style="padding:3px;text-align:right">Sortino</th><th style="padding:3px;text-align:right">MaxDD</th><th style="padding:3px;text-align:right">WR</th></tr></thead><tbody>'+res.map((s,i)=>`<tr${i===0?' style="background:var(--cd)"':''}><td style="padding:2px 3px;border-bottom:1px solid var(--bdr)">${['🥇','🥈','🥉'][i]||i+1}</td><td style="padding:2px 3px;font-weight:600;border-bottom:1px solid var(--bdr)">${s.n}</td><td style="padding:2px 3px;text-align:right;font-weight:700;border-bottom:1px solid var(--bdr)" class="${s.rt>=0?'up':'dn'}">${s.rt>=0?'+':''}${s.rt.toFixed(2)}%</td><td style="padding:2px 3px;text-align:right;border-bottom:1px solid var(--bdr)">${s.sh.toFixed(2)}</td><td style="padding:2px 3px;text-align:right;border-bottom:1px solid var(--bdr)">${s.so.toFixed(2)}</td><td style="padding:2px 3px;text-align:right;border-bottom:1px solid var(--bdr)" class="dn">-${s.dd.toFixed(1)}%</td><td style="padding:2px 3px;text-align:right;border-bottom:1px solid var(--bdr)">${s.wr.toFixed(0)}%</td></tr>`).join('')+'</tbody></table></div>'}catch(e){alert('Failed: '+e.message)}}
+const res=strats.map(st=>{if(st.i==='bh'){const rt=((pr[pr.length-1]-pr[0])/pr[0])*100,eq=pr.map(x=>cap*x/pr[0]);return{...st,rt,sh:sharpe(eq),so:sortino(eq),dd:mdd(eq),wr:rt>0?100:0,tc:0,tf:0,pf:rt>0?Infinity:0}}const sig=genSig(pr,st.i,st.f,st.s),bt=execBT(pr,sig,cap,ts,fee,slip,{slAtr:slA,tpAtr:tpA,atrArr:atrA});return{...st,rt:bt.rt,sh:bt.sh,so:sortino(bt.eq),dd:bt.dd,wr:bt.wr,tc:bt.tc,tf:bt.tf,pf:bt.pf}}).sort((a,b)=>b.rt-a.rt);
+E('ar-res').style.display='block';E('ar-tb').innerHTML='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font:9px var(--mono)"><thead><tr style="color:var(--t3)"><th style="padding:3px">🏆</th><th style="padding:3px">Strategy</th><th style="padding:3px;text-align:right">Return</th><th style="padding:3px;text-align:right">Sharpe</th><th style="padding:3px;text-align:right">Sortino</th><th style="padding:3px;text-align:right">MaxDD</th><th style="padding:3px;text-align:right">WR</th><th style="padding:3px;text-align:right">PF</th></tr></thead><tbody>'+res.map((s,i)=>`<tr${i===0?' style="background:var(--cd)"':''}><td style="padding:2px 3px;border-bottom:1px solid var(--bdr)">${['🥇','🥈','🥉'][i]||i+1}</td><td style="padding:2px 3px;font-weight:600;border-bottom:1px solid var(--bdr)">${s.n}</td><td style="padding:2px 3px;text-align:right;font-weight:700;border-bottom:1px solid var(--bdr)" class="${s.rt>=0?'up':'dn'}">${s.rt>=0?'+':''}${s.rt.toFixed(2)}%</td><td style="padding:2px 3px;text-align:right;border-bottom:1px solid var(--bdr)">${s.sh.toFixed(2)}</td><td style="padding:2px 3px;text-align:right;border-bottom:1px solid var(--bdr)">${s.so.toFixed(2)}</td><td style="padding:2px 3px;text-align:right;border-bottom:1px solid var(--bdr)" class="dn">-${s.dd.toFixed(1)}%</td><td style="padding:2px 3px;text-align:right;border-bottom:1px solid var(--bdr)">${s.wr.toFixed(0)}%</td><td style="padding:2px 3px;text-align:right;border-bottom:1px solid var(--bdr)">${isFinite(s.pf)?s.pf.toFixed(2):'∞'}</td></tr>`).join('')+'</tbody></table></div>'}catch(e){alert('Failed: '+e.message)}}
+
+async function runWF(){
+const co=E('bt-c').value,dy=+E('bt-d').value,st=E('bt-s').value,f=+E('bt-f').value,sl=+E('bt-sl').value,cap=+E('bt-k').value,fee=+E('bt-fe').value/100,slip=+E('bt-sp').value/100,slA=+E('bt-sla').value,tpA=+E('bt-tpa').value;
+const btn=E('bt-wf');btn.textContent='⏳';btn.disabled=true;
+try{const {pr,ts,ohlc}=await btFetch(co,dy);
+const wf=walkForward(pr,ohlc,ts,st,f,sl,cap,fee,slip,slA,tpA);
+const gap=wf.in.rt-wf.out.rt,overfit=gap>15;
+E('wf-res').style.display='block';
+E('wf-st').innerHTML=[
+  ['IS Return',`${wf.in.rt>=0?'+':''}${wf.in.rt.toFixed(2)}%`,wf.in.rt>=0?'up':'dn'],
+  ['OOS Return',`${wf.out.rt>=0?'+':''}${wf.out.rt.toFixed(2)}%`,wf.out.rt>=0?'up':'dn'],
+  ['IS Sharpe',wf.in.sh.toFixed(2),wf.in.sh>1?'up':''],
+  ['OOS Sharpe',wf.out.sh.toFixed(2),wf.out.sh>1?'up':''],
+  ['IS WinRate',`${wf.in.wr.toFixed(0)}%`,''],
+  ['OOS WinRate',`${wf.out.wr.toFixed(0)}%`,''],
+  ['IS MaxDD',`-${wf.in.dd.toFixed(1)}%`,'dn'],
+  ['OOS MaxDD',`-${wf.out.dd.toFixed(1)}%`,'dn'],
+  ['Gap',`${gap>=0?'+':''}${gap.toFixed(1)}%`,overfit?'dn':'']
+].map(([l,v,c])=>`<div class="mb"><div class="ml">${l}</div><div class="mv ${c}" style="font-size:12px">${v}</div></div>`).join('');
+const trust=wf.out.rt>0&&wf.out.sh>0.5&&gap<20;
+E('wf-note').innerHTML=trust?'<span style="color:var(--g)">✅ Strategy holds up out-of-sample — likely real edge.</span>':overfit?'<span style="color:var(--r)">⚠️ Large IS/OOS gap — strategy may be overfit. Do NOT trade live.</span>':'<span style="color:var(--o)">⚠️ Weak out-of-sample performance. Re-tune or reject.</span>';
+}catch(e){alert('Walk-forward failed: '+e.message)}
+btn.textContent='🔀 WALK-FWD';btn.disabled=false}
 
 /* ===== EQUITIES ===== */
 const EQ_SECTORS={XLK:'Technology',XLF:'Financials',XLV:'Healthcare',XLY:'Consumer Disc',XLP:'Consumer Staples',XLE:'Energy',XLI:'Industrials',XLB:'Materials',XLRE:'Real Estate',XLU:'Utilities',XLC:'Comm Services'};
@@ -1109,7 +1267,7 @@ return{s:Math.max(-3,Math.min(3,s)),r:r.trim(),v:s>=2?'STRONG BUY':s>=1?'BUY':s<
 
 const res2=agents.map(a=>({...a,x:a.run()}));
 const wt=res2.reduce((s,a)=>s+a.x.s*a.w,0),tw=res2.reduce((s,a)=>s+a.w,0),ns=wt/tw;
-const finalAct=ns>=1.2?'STRONG BUY':ns>=.4?'BUY':ns<=-.4?(ns<=-1.2?'STRONG SELL':'SELL'):'HOLD';
+const finalAct=ns>=1.2?'STRONG BUY':ns>=.4?'BUY':ns<=-1.2?'STRONG SELL':ns<=-.4?'SELL':'HOLD';
 const conf=Math.min(100,Math.abs(ns)/2*100).toFixed(0);
 const ac=finalAct.includes('BUY')?'var(--g)':finalAct.includes('SELL')?'var(--r)':'var(--y)';
 
@@ -1440,9 +1598,19 @@ try{const d=await DS.f(`sc:${co}:${dy}`,`https://api.coingecko.com/api/v3/coins/
 let blob;if(fmt==='csv')blob=new Blob(['\uFEFF'+'Date,Price,Volume\n'+rows.map(r=>`${r.date},${r.price},${r.vol}`).join('\n')],{type:'text/csv'});else blob=new Blob([JSON.stringify(rows,null,2)],{type:'application/json'});
 const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${co}_${dy}d.${fmt}`;a.click()}catch(e){alert(e.message)}btn.textContent='DOWNLOAD';btn.disabled=false}
 
-function shCalc(t){['pos','kel','rr','cmp','var'].forEach(x=>{const el=E('clc-'+x);if(el)el.style.display=x===t?'block':'none'});if(t==='pos')cPos();if(t==='kel')cKel();if(t==='rr')cRR();if(t==='cmp')cCmp();if(t==='var')cVaR()}
+function shCalc(t){['pos','kel','bay','rr','cmp','var'].forEach(x=>{const el=E('clc-'+x);if(el)el.style.display=x===t?'block':'none'});if(t==='pos')cPos();if(t==='kel')cKel();if(t==='bay')cBay();if(t==='rr')cRR();if(t==='cmp')cCmp();if(t==='var')cVaR()}
+function cBay(){const pr=(+E('b-pr').value||0)/100,ph=(+E('b-ph').value||0)/100,pn=(+E('b-pn').value||0)/100;if(!pr)return;
+const pe=ph*pr+pn*(1-pr);const post=pe>0?(ph*pr)/pe:0;
+const lift=pr>0?((post-pr)/pr*100):0;
+const br=pr>0&&pr<1?Math.log((post/(1-post))/(pr/(1-pr))):0;
+E('b-o').innerHTML=`先驗 P(H): <b>${(pr*100).toFixed(1)}%</b><br>後驗 P(H|E): <b style="color:var(--c);font-size:14px">${(post*100).toFixed(2)}%</b><br>變化: <b class="${lift>=0?'up':'dn'}">${lift>=0?'+':''}${lift.toFixed(1)}%</b><br>Bayes Factor: <b>${Math.exp(br).toFixed(2)}</b><br><span class="xs mt">${post>.7?'✅ 強信號':post>.55?'⚠ 略微有利':post<.3?'❌ 證據反對':'中性'}</span>`}
 function cPos(){const k=+E('p-k').value||0,rp=+E('p-r').value||0,en=+E('p-e').value||0,st=+E('p-s').value||0;if(!en||!st||en===st)return;const ru=Math.abs(en-st),ra=k*rp/100,sh=Math.floor(ra/ru),ps=sh*en;E('p-o').innerHTML=`Dir: <b>${en>st?'<span class="up">LONG</span>':'<span class="dn">SHORT</span>'}</b><br>Risk: <b class="dn">$${ra.toFixed(2)}</b><br>Qty: <b style="color:var(--c)">${sh}</b><br>Pos: <b>${$$(ps)}</b> (${(ps/k*100).toFixed(1)}%)<br>2R Target: <b class="up">${$$(en>st?en+2*ru:en-2*ru)}</b>`}
-function cKel(){const w=(+E('k-w').value||0)/100,r=+E('k-r').value||0;if(!w||!r)return;const k=w-(1-w)/r;E('k-o').innerHTML=`Full: <b style="color:var(--c)">${(k*100).toFixed(2)}%</b><br>Half: <b class="up">${(k/2*100).toFixed(2)}%</b><br>Quarter: <b>${(k/4*100).toFixed(2)}%</b><br>Edge: <b>${((w*r-(1-w))*100).toFixed(2)}%</b><br>${k<=0?'<span class="dn">⚠ No edge</span>':'✅ Use Half Kelly'}`}
+function cKel(){const w=(+E('k-w').value||0)/100,r=+E('k-r').value||0;if(!w||!r)return;
+const k=w-(1-w)/r,edge=w*r-(1-w);
+/* expected growth at fraction f: g = w*ln(1+f*r) + (1-w)*ln(1-f) */
+const growth=f=>{if(f<=0||f>=1)return 0;return w*Math.log(1+f*r)+(1-w)*Math.log(1-f)};
+const g25=growth(k*.25),g50=growth(k*.5),gFull=growth(k);
+E('k-o').innerHTML=`Full Kelly: <b style="color:var(--c)">${(k*100).toFixed(2)}%</b> (g=${(gFull*100).toFixed(3)}%)<br>Half: <b>${(k/2*100).toFixed(2)}%</b> (g=${(g50*100).toFixed(3)}%)<br><span class="up">⭐ Quarter (建議): <b>${(k/4*100).toFixed(2)}%</b></span> (g=${(g25*100).toFixed(3)}%)<br>Edge: <b>${(edge*100).toFixed(2)}%</b><br>${k<=0?'<span class="dn">⚠ 無優勢，不要下</span>':'✅ 建議用 0.25× Kelly（平衡成長與回撤）'}`}
 function cRR(){const en=+E('rr-e').value,st=+E('rr-s').value,tg=+E('rr-t').value;if(!en||!st||!tg)return;const rk=Math.abs(en-st),rw=Math.abs(tg-en),rr=rw/rk;E('rr-o').innerHTML=`Risk: <b class="dn">$${rk.toFixed(2)}</b> Reward: <b class="up">$${rw.toFixed(2)}</b><br>R:R <b style="color:var(--c)">1:${rr.toFixed(2)}</b><br>BE WR: <b>${(1/(1+rr)*100).toFixed(1)}%</b><br>${rr>=2?'<span class="up">✅ Good</span>':rr>=1?'<span class="wr">⚠ OK</span>':'<span class="dn">❌ Poor</span>'}`}
 function cCmp(){const i=+E('cm-i').value,r=(+E('cm-r').value||0)/100,m=+E('cm-m').value||0;if(!i||!m)return;const f=i*Math.pow(1+r,m);E('cm-o').innerHTML=`Final: <b style="color:var(--c)">${$$(f)}</b><br>Return: <b class="up">+${((f-i)/i*100).toFixed(2)}%</b><br>Profit: <b>${$$(f-i)}</b>`}
 function cVaR(){const pt=+E('vr-p').value||0,cf=(+E('vr-c').value||95)/100,dy=+E('vr-d').value||1;const p=DS.get('h:bitcoin')?.p;if(!p||p.length<10){E('vr-o').innerHTML='<span class="mt">Load BTC chart first</span>';return}const ret=[];for(let i=1;i<p.length;i++)ret.push((p[i]-p[i-1])/p[i-1]);ret.sort((a,b)=>a-b);const idx=Math.floor(ret.length*(1-cf)),dv=Math.abs(ret[idx])*pt,pv=dv*Math.sqrt(dy);const cv=ret.slice(0,idx+1).reduce((s,r)=>s+Math.abs(r),0)/(idx+1)*pt;E('vr-o').innerHTML=`VaR (${(cf*100).toFixed(0)}%,${dy}d): <b class="dn">$${pv.toFixed(2)}</b><br>CVaR: <b class="dn">$${(cv*Math.sqrt(dy)).toFixed(2)}</b><br>Daily VaR: $${dv.toFixed(2)}<br>% Port: ${(pv/pt*100).toFixed(2)}%`}
