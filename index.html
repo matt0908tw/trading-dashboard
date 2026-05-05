@@ -285,12 +285,12 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 .skn-w-meta{width:80px;height:14px}
 .skn-w-text{width:100%;height:12px;display:block;margin:6px 0}
 
-/* Term-structure mini bars */
-.tsbar{display:flex;align-items:flex-end;gap:8px;height:96px;padding:10px 4px;background:var(--bg2);border-radius:6px;border:1px solid var(--bdr)}
-.tsbar .tsb{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:flex-end}
-.tsbar .tsb .tsbk{width:100%;border-radius:3px 3px 0 0;background:var(--c);min-height:4px;transition:height .4s var(--ease)}
-.tsbar .tsb .tsbl{font:10px var(--mono);color:var(--t3)}
-.tsbar .tsb .tsbv{font:600 11px var(--mono);color:var(--t1);font-variant-numeric:tabular-nums}
+/* Term-structure mini bars — fixed sizing prevents overflow into surrounding labels */
+.tsbar{display:flex;align-items:flex-end;gap:8px;height:140px;padding:8px 6px;background:var(--bg2);border-radius:6px;border:1px solid var(--bdr);overflow:hidden}
+.tsbar .tsb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.tsbar .tsb .tsbv{font:600 11px var(--mono);color:var(--t1);font-variant-numeric:tabular-nums;line-height:1;margin-bottom:4px;white-space:nowrap}
+.tsbar .tsb .tsbk{width:100%;max-width:42px;border-radius:3px 3px 0 0;background:var(--c);min-height:3px;transition:height .4s var(--ease)}
+.tsbar .tsb .tsbl{font:10px var(--mono);color:var(--t3);line-height:1;margin-top:6px;white-space:nowrap}
 
 /* Predict tab indicator dot */
 .tb[data-p="predict"]{position:relative}
@@ -2341,11 +2341,13 @@ async function ldSkew(){
     E('sk-pc').textContent=pc.toFixed(3)+(pc>1.05?' (put-skewed)':pc<0.95?' (call-skewed)':' (balanced)');
     E('sk-ts').textContent=(slope>=0?'+':'')+slope.toFixed(2)+' vol pts '+(slope>0?'(contango)':'(backwardation)');
     E('sk-ts').className='val '+(slope>=0?'':'wr');
-    // Term structure bars
-    const maxIv=Math.max(...tsData.map(t=>t.atmIv));
+    // Term structure bars — min-max range scaling so close IV values still show curve shape;
+    // bar heights stay within container (140px − value/label/padding ≈ 94px usable)
+    const ivs=tsData.map(t=>t.atmIv);
+    const maxIv=Math.max(...ivs),minIv=Math.min(...ivs),range=maxIv-minIv;
     E('sk-tsb').innerHTML=tsData.map(t=>{
-      const h=Math.max(4,t.atmIv/maxIv*70);
-      return `<div class="tsb"><div class="tsbv">${t.atmIv.toFixed(0)}</div><div class="tsbk" style="height:${h}px"></div><div class="tsbl">${Math.round(t.dte)}d</div></div>`;
+      const h=range<0.5?52:24+((t.atmIv-minIv)/range)*70;
+      return `<div class="tsb"><div class="tsbv">${t.atmIv.toFixed(0)}</div><div class="tsbk" style="height:${h.toFixed(0)}px"></div><div class="tsbl">${Math.round(t.dte)}d</div></div>`;
     }).join('');
     // Interpretation
     let sig='s-neu',sigTxt='NEUTRAL',interp='';
