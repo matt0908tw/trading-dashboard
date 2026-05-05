@@ -13,37 +13,102 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+/* === Design tokens (shadcn-style) — light by default === */
 :root{
-/* Institutional dark — slate base */
---bg0:#0b1220;--bg1:#0f172a;--bg2:#131b2e;--bg3:#1a2236;--bg4:#1e293b;
---bdr:#1f2a40;--bdr2:#2c3a55;--bdr-strong:#3b4a6a;
-/* Text — WCAG-tuned for #0b1220 base */
---t1:#f1f5f9;--t2:#94a3b8;--t3:#64748b;
-/* Single primary accent — institutional gold */
---c:#f59e0b;--cd:rgba(245,158,11,0.08);--cm:rgba(245,158,11,0.22);
-/* Pure semantic up/down (cleaner than neon) */
---g:#10b981;--gd:rgba(16,185,129,0.08);
---r:#ef4444;--rd:rgba(239,68,68,0.08);
-/* Reserved muted tones for secondary states only */
---o:#fb923c;--od:rgba(251,146,60,0.08);
---p:#94a3b8;--pd:rgba(148,163,184,0.06);
---y:#facc15;--yd:rgba(250,204,21,0.06);
---rr:10px;--mono:'JetBrains Mono',ui-monospace,monospace;--sans:'Inter',system-ui,sans-serif;
+--card:#ffffff;
+--ring:#3b82f6;
+--input:#e5e7eb;
+--muted:#f9fafb;
+--accent:#e0f2fe;
+--border:#e5e7eb;
+--radius:0.375rem;
+--chart-1:#3b82f6;--chart-2:#2563eb;--chart-3:#1d4ed8;--chart-4:#1e40af;--chart-5:#1e3a8a;
+--popover:#ffffff;
+--primary:#3b82f6;
+--sidebar:#f9fafb;
+--font-mono:'JetBrains Mono',ui-monospace,monospace;
+--font-sans:'Inter',system-ui,sans-serif;
+--secondary:#f3f4f6;
+--background:#ffffff;
+--foreground:#333333;
+--destructive:#ef4444;
+--card-foreground:#333333;
+--muted-foreground:#6b7280;
+--accent-foreground:#1e3a8a;
+--primary-foreground:#ffffff;
+--secondary-foreground:#4b5563;
+--destructive-foreground:#ffffff;
+
+/* Legacy aliases — keep existing component CSS working */
+--bg0:var(--background);
+--bg1:var(--card);
+--bg2:var(--secondary);
+--bg3:var(--muted);
+--bg4:var(--accent);
+--bdr:var(--border);
+--bdr2:var(--input);
+--bdr-strong:#9ca3af;
+--t1:var(--foreground);
+--t2:var(--muted-foreground);
+--t3:#9ca3af;
+--c:var(--primary);
+--cd:rgba(59,130,246,0.08);
+--cm:rgba(59,130,246,0.22);
+--g:#10b981;--gd:rgba(16,185,129,0.10);
+--r:var(--destructive);--rd:rgba(239,68,68,0.10);
+--o:#f59e0b;--od:rgba(245,158,11,0.10);
+--p:var(--muted-foreground);--pd:rgba(107,114,128,0.08);
+--y:#eab308;--yd:rgba(234,179,8,0.10);
+--rr:var(--radius);
+--mono:var(--font-mono);
+--sans:var(--font-sans);
 --bar:30px;--nav:48px;
---glass:rgba(15,23,42,0.94);--blur:blur(8px);
---sh:0 1px 2px rgba(0,0,0,0.4),0 4px 12px rgba(0,0,0,0.25);
---shh:0 2px 4px rgba(0,0,0,0.4),0 12px 28px rgba(0,0,0,0.35);
+--glass:rgba(255,255,255,0.94);--blur:blur(8px);
+--sh:0 1px 2px rgba(0,0,0,0.04),0 1px 3px rgba(0,0,0,0.06);
+--shh:0 4px 6px rgba(0,0,0,0.06),0 10px 15px rgba(0,0,0,0.08);
 --ease:cubic-bezier(.4,0,.2,1);
-/* Type scale */
 --fs-xs:11px;--fs-s:12px;--fs-base:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:24px;--fs-xxl:32px;
 }
+.dark{
+--card:#262626;
+--ring:#3b82f6;
+--input:#404040;
+--muted:#262626;
+--accent:#1e3a8a;
+--border:#404040;
+--chart-1:#60a5fa;--chart-2:#3b82f6;--chart-3:#2563eb;--chart-4:#1d4ed8;--chart-5:#1e40af;
+--popover:#262626;
+--primary:#3b82f6;
+--sidebar:#171717;
+--secondary:#262626;
+--background:#171717;
+--foreground:#e5e5e5;
+--card-foreground:#e5e5e5;
+--muted-foreground:#a3a3a3;
+--accent-foreground:#bfdbfe;
+--secondary-foreground:#e5e5e5;
+
+/* Dark-mode overrides for legacy aliases */
+--bg2:#2d2d2d;
+--bg3:#1f1f1f;
+--bdr-strong:#525252;
+--t3:#737373;
+--c:#60a5fa;
+--cd:rgba(96,165,250,0.10);
+--cm:rgba(96,165,250,0.22);
+--gd:rgba(16,185,129,0.12);
+--rd:rgba(239,68,68,0.14);
+--od:rgba(245,158,11,0.12);
+--pd:rgba(163,163,163,0.08);
+--glass:rgba(38,38,38,0.94);
+--sh:0 1px 2px rgba(0,0,0,0.4),0 4px 12px rgba(0,0,0,0.25);
+--shh:0 2px 4px rgba(0,0,0,0.4),0 12px 28px rgba(0,0,0,0.35);
+}
+
 html{font-size:14px;scroll-behavior:smooth}
-body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:100dvh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;position:relative;font-feature-settings:'cv11','ss01'}
-/* Subtle single-source accent glow (less noisy than dual ambient) */
-body::before{content:'';position:fixed;top:-30%;left:-10%;width:50%;height:60%;background:radial-gradient(ellipse,rgba(245,158,11,0.025) 0%,transparent 65%);pointer-events:none;z-index:0}
+body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:100dvh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden;position:relative;transition:background-color .2s var(--ease),color .2s var(--ease)}
 a{color:var(--c);text-decoration:none;transition:opacity .15s}a:hover{opacity:.85}
-::selection{background:rgba(245,158,11,0.25);color:var(--t1)}
-/* Tabular numbers everywhere data is displayed */
+::selection{background:var(--cm);color:var(--t1)}
 .m,.mv,.pr,.ch,.val,.sbar .pr,.sbar .ch,.regst,td,th{font-variant-numeric:tabular-nums;font-feature-settings:'tnum' on,'lnum' on}
 
 /* STATUS BAR */
@@ -69,7 +134,11 @@ a{color:var(--c);text-decoration:none;transition:opacity .15s}a:hover{opacity:.8
 .tb{background:0;border:0;color:var(--t2);font:600 11px/1 var(--sans);padding:8px 12px;border-radius:6px;cursor:pointer;white-space:nowrap;letter-spacing:.2px;transition:color .15s var(--ease),background .15s var(--ease);position:relative}
 .tb:hover{color:var(--t1);background:var(--bg3)}
 .tb.on{color:var(--c);background:transparent;box-shadow:inset 0 -2px 0 var(--c)}
-.ham{display:none;background:0;border:0;color:var(--t1);font-size:20px;cursor:pointer;padding:6px;margin-left:auto;border-radius:8px;transition:all .2s var(--ease)}
+.theme-tg{background:0;border:1px solid var(--bdr2);color:var(--t2);cursor:pointer;padding:7px 9px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:border-color .15s var(--ease),color .15s var(--ease),background .15s var(--ease);margin-left:8px}
+.theme-tg:hover{color:var(--t1);border-color:var(--bdr-strong);background:var(--bg2)}
+.theme-tg .ic-sun{display:none}.theme-tg .ic-moon{display:block}
+.dark .theme-tg .ic-sun{display:block}.dark .theme-tg .ic-moon{display:none}
+.ham{display:none;background:0;border:0;color:var(--t1);font-size:20px;cursor:pointer;padding:6px;margin-left:8px;border-radius:8px;transition:all .2s var(--ease)}
 .ham:hover{background:rgba(255,255,255,0.05)}
 .mmenu{display:flex;position:fixed;top:calc(var(--bar) + var(--nav));left:0;right:0;bottom:0;background:var(--bg0);z-index:199;padding:16px;overflow-y:auto;flex-direction:column;gap:2px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:all .25s var(--ease);pointer-events:none}
 .mmenu.open{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
@@ -294,6 +363,10 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 <button class="tb" data-p="jrnl">Journal</button>
 <button class="tb" data-p="tools">Tools</button>
 </div>
+<button class="theme-tg" id="theme-tg" aria-label="Toggle theme" title="Toggle theme (light/dark)">
+<svg class="ic-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+<svg class="ic-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
 <button class="ham" id="ham">☰</button>
 </nav>
 
@@ -797,6 +870,20 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 <script>
 const E=id=>document.getElementById(id);
 
+/* === Theme toggle === */
+(function initTheme(){
+  const saved=localStorage.getItem('theme');
+  const prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme=saved||(prefersDark?'dark':'dark'); // default dark even if user prefers light
+  if(theme==='dark')document.documentElement.classList.add('dark');
+})();
+window.toggleTheme=function(){
+  const html=document.documentElement;
+  html.classList.toggle('dark');
+  const isDark=html.classList.contains('dark');
+  localStorage.setItem('theme',isDark?'dark':'light');
+};
+
 /* ===== DashboardState ===== */
 /* DS_: cache + per-host rate limit + retry + timeout */
 class DS_{constructor(){this.c=new Map;this.p=new Map;this.ttl={crypto:60e3,fng:12e4,chart:12e4,weather:3e5,deriv:3e4,heatmap:6e4,ohlc:12e4};this.ld=new Set;
@@ -905,6 +992,7 @@ function sw(pg){allT.forEach(t=>t.classList.toggle('on',t.dataset.p===pg));docum
 if(!DS.is(pg)){DS.mk(pg);if(pg==='term')loadTerm();else if(pg==='flow')initFlow();else if(pg==='deriv')loadDeriv();else if(pg==='heat')loadHeat();else if(pg==='predict')loadPredict();else if(pg==='eq')loadEqIdx();else if(pg==='wx')loadWx();else if(pg==='tools')cPos()}}
 allT.forEach(t=>t.addEventListener('click',()=>sw(t.dataset.p)));
 hm.addEventListener('click',()=>{const o=mm.classList.toggle('open');hm.textContent=o?'✕':'☰'});
+E('theme-tg')?.addEventListener('click',toggleTheme);
 document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;const n=+e.key;if(n>=1&&n<=9){sw(TK[n-1]);e.preventDefault()}else if(e.key==='0'){sw(TK[9]);e.preventDefault()}else if(e.key==='a'){toggleAP();e.preventDefault()}else if(e.key==='r'){DS.inv('crypto');DS.inv('fng');if(DS.is('term'))loadTerm();e.preventDefault()}else if(e.key==='Escape'){E('apnl').style.display='none'}});
 function toggleAP(){const p=E('apnl');p.style.display=p.style.display==='none'?'block':'none'}
 
