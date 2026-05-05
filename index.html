@@ -164,6 +164,8 @@ a{color:var(--c);text-decoration:none;transition:opacity .15s}a:hover{opacity:.8
 .ct{font:600 11px/1 var(--mono);color:var(--t2);text-transform:uppercase;letter-spacing:1.6px;margin-bottom:14px;display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--bdr)}
 .ct .ld{width:4px;height:4px;border-radius:50%;background:var(--g);flex-shrink:0}
 .rw{display:flex;gap:12px;flex-wrap:wrap}.cl{flex:1;min-width:0}
+/* On mobile, override inline min-width on flex columns so they don't push content past viewport */
+@media(max-width:600px){.cl[style*="min-width"]{min-width:0!important;flex-basis:100%}}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -1087,7 +1089,7 @@ const lvs=[5,10,25,50,100].map(l=>({l,lo:pr*(1-1/l),sh:pr*(1+1/l)}));E('dlq').in
 E('lql').innerHTML='<table style="width:100%;border-collapse:collapse;font:9px var(--mono)"><thead><tr><th style="padding:3px;color:var(--t3)">LEV</th><th style="padding:3px;text-align:right;color:var(--g)">LONG LIQ</th><th style="padding:3px;text-align:right;color:var(--r)">SHORT LIQ</th></tr></thead><tbody>'+lvs.map(l=>`<tr><td style="padding:2px 3px;border-bottom:1px solid var(--bdr)">${l.l}x</td><td style="padding:2px 3px;text-align:right;color:var(--g);border-bottom:1px solid var(--bdr)">${$$(l.lo)}</td><td style="padding:2px 3px;text-align:right;color:var(--r);border-bottom:1px solid var(--bdr)">${$$(l.sh)}</td></tr>`).join('')+'</tbody></table><div class="xs mt" style="margin-top:3px">Current: '+$$(pr)+'</div>'}
 
 async function ldMF(){try{const syms=['BTCUSDT','ETHUSDT','SOLUSDT','DOGEUSDT','BNBUSDT','XRPUSDT','ADAUSDT','AVAXUSDT'];const res=await Promise.allSettled(syms.map(s=>DS.f(`deriv:f:${s}`,`https://fapi.binance.com/fapi/v1/fundingRate?symbol=${s}&limit=1`).then(d=>({s:s.replace('USDT',''),r:+d[0].fundingRate}))));const data=res.filter(r=>r.status==='fulfilled').map(r=>r.value).sort((a,b)=>b.r-a.r);
-E('mf').innerHTML=data.map(d=>{const c=d.r>.0001?'var(--r)':d.r<-.0001?'var(--g)':'var(--t2)';return`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #060c16;font:9px var(--mono)"><span>${d.s}</span><span style="color:${c}">${(d.r*100).toFixed(4)}% <span class="mt">(${(d.r*3*365*100).toFixed(0)}%/yr)</span></span></div>`}).join('')}catch{E('mf').innerHTML='<span class="xs mt">Failed</span>'}}
+E('mf').innerHTML=data.map(d=>{const c=d.r>.0001?'var(--r)':d.r<-.0001?'var(--g)':'var(--t2)';return`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--bdr);font:9px var(--mono)"><span>${d.s}</span><span style="color:${c}">${(d.r*100).toFixed(4)}% <span class="mt">(${(d.r*3*365*100).toFixed(0)}%/yr)</span></span></div>`}).join('')}catch{E('mf').innerHTML='<span class="xs mt">Failed</span>'}}
 
 /* ===== HEATMAP ===== */
 async function loadHeat(){await Promise.allSettled([ldHG(),ldCorr(),ldBrd()])}
@@ -1166,10 +1168,10 @@ if(l20>l50){bu++;sigs.push({n:'SMA',d:'B',r:'20>50'})}else{be++;sigs.push({n:'SM
 if(lt<bL){bu++;sigs.push({n:'BB',d:'B',r:'Below band'})}else if(lt>bU){be++;sigs.push({n:'BB',d:'S',r:'Above band'})}else sigs.push({n:'BB',d:'N',r:'Inside'});
 if(l200&&lt>l200){bu++;sigs.push({n:'200MA',d:'B',r:'Above'})}else if(l200){be++;sigs.push({n:'200MA',d:'S',r:'Below'})}
 const tot=bu-be,vd=tot>=3?'STRONG BUY':tot>=1?'BUY':tot<=-3?'STRONG SELL':tot<=-1?'SELL':'NEUTRAL',vc=vd.includes('BUY')?'var(--g)':vd.includes('SELL')?'var(--r)':'var(--y)';
-E('ti').innerHTML=sigs.map(s=>{const c=s.d==='B'?'var(--g)':s.d==='S'?'var(--r)':'var(--t3)';return`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #060c16;font:10px var(--mono)"><span>${s.n}</span><span style="color:${c}">${s.r}</span></div>`}).join('')+`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #060c16;font:10px var(--mono)"><span>Vol</span><span>${v.toFixed(2)}%</span></div><div style="display:flex;justify-content:space-between;padding:3px 0;font:10px var(--mono)"><span>BBW</span><span>${bW.toFixed(2)}%</span></div><div style="margin-top:6px;padding:6px;background:var(--bg0);border-radius:var(--rr);text-align:center"><div class="xs mt">CONSENSUS</div><div class="m" style="font-size:14px;font-weight:700;color:${vc}">${vd}</div><div class="xs mt">Bull ${bu} / Bear ${be}</div></div>`}
+E('ti').innerHTML=sigs.map(s=>{const c=s.d==='B'?'var(--g)':s.d==='S'?'var(--r)':'var(--t3)';return`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--bdr);font:10px var(--mono)"><span>${s.n}</span><span style="color:${c}">${s.r}</span></div>`}).join('')+`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--bdr);font:10px var(--mono)"><span>Vol</span><span>${v.toFixed(2)}%</span></div><div style="display:flex;justify-content:space-between;padding:3px 0;font:10px var(--mono)"><span>BBW</span><span>${bW.toFixed(2)}%</span></div><div style="margin-top:6px;padding:6px;background:var(--bg0);border-radius:var(--rr);text-align:center"><div class="xs mt">CONSENSUS</div><div class="m" style="font-size:14px;font-weight:700;color:${vc}">${vd}</div><div class="xs mt">Bull ${bu} / Bear ${be}</div></div>`}
 
 function rMTF(){const co=E('ch-coin').value,d=DS.get(`h:${co}`);if(!d)return;const p=d.p;
-E('mtf').innerHTML=[{n:'4H',sl:Math.min(42,p.length)},{n:'1D',sl:Math.min(30,p.length)},{n:'1W',sl:p.length}].map(t=>{const s=p.slice(-t.sl),r=rsi(s,14),lr=r[r.length-1]||50,s20=sma(s,Math.min(20,s.length-1)),lt=s[s.length-1],l20=s20[s20.length-1],tr=lt>(l20||lt)?'BULL':'BEAR',tc=tr==='BULL'?'tg-g':'tg-r',rc=lr>70?'dn':lr<30?'up':'';return`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #060c16;font:9px var(--mono)"><span>${t.n}</span><span>RSI <span class="${rc}">${lr.toFixed(0)}</span></span><span class="tg ${tc}">${tr}</span></div>`}).join('')}
+E('mtf').innerHTML=[{n:'4H',sl:Math.min(42,p.length)},{n:'1D',sl:Math.min(30,p.length)},{n:'1W',sl:p.length}].map(t=>{const s=p.slice(-t.sl),r=rsi(s,14),lr=r[r.length-1]||50,s20=sma(s,Math.min(20,s.length-1)),lt=s[s.length-1],l20=s20[s20.length-1],tr=lt>(l20||lt)?'BULL':'BEAR',tc=tr==='BULL'?'tg-g':'tg-r',rc=lr>70?'dn':lr<30?'up':'';return`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--bdr);font:9px var(--mono)"><span>${t.n}</span><span>RSI <span class="${rc}">${lr.toFixed(0)}</span></span><span class="tg ${tc}">${tr}</span></div>`}).join('')}
 
 /* ===== AGENTS ===== */
 async function runAg(){const co=E('ag-c').value,cards=E('agc');ldg(cards,'Analyzing...');E('cbox').style.display='none';E('dbc').style.display='none';
@@ -1299,31 +1301,48 @@ let eqCache={};
 
 function eqQuick(s){E('eq-sym').value=s;loadEQ()}
 
+/* Stooq quote — reliable free CSV via corsproxy.io. Yahoo-shape compatible. */
+function _stooqSym(s){if(s==='VIX'||s==='^VIX')return null;if(s.startsWith('^'))return null;return s.toLowerCase()+'.us'}
+async function stooqQuote(sym){
+const key='eq:sq:'+sym;const cached=DS.get(key);if(cached)return cached;
+const ssym=_stooqSym(sym);if(!ssym)return null;
+const target='https://stooq.com/q/l/?s='+ssym+'&f=spchov&h&e=csv';
+const url='https://corsproxy.io/?'+encodeURIComponent(target);
+try{
+const ac=new AbortController();const t=setTimeout(()=>ac.abort(),6000);
+const r=await fetch(url,{signal:ac.signal});clearTimeout(t);if(!r.ok)return null;
+const txt=await r.text();const rows=txt.trim().split('\n');if(rows.length<2)return null;
+const cols=rows[1].split(',');if(cols.length<3||cols[1]==='N/D')return null;
+const m={regularMarketPrice:+cols[2],previousClose:+cols[1],regularMarketDayHigh:+cols[3],regularMarketOpen:+cols[4],regularMarketVolume:+cols[5],symbol:sym};
+DS.set(key,m);return m;
+}catch{return null}}
+
 async function loadEqIdx(){
 const el=E('eq-idx');ldg(el);
-try{
 const syms=['SPY','QQQ','DIA','IWM','VIX'];
-const res=await Promise.allSettled(syms.map(async s=>{
-const urls=yfProxy(`https://query1.finance.yahoo.com/v8/finance/chart/${s}?interval=1d&range=5d`);
-for(const u of urls){try{return await yfFetch(u,8000)}catch{}}
-throw new Error('unavailable');
-}));
+const out=new Array(syms.length);
+for(let i=0;i<syms.length;i++){
+  out[i]=await stooqQuote(syms[i]).catch(()=>null);
+  if(!out[i]&&syms[i]!=='VIX')out[i]=await yfQuote(syms[i]).catch(()=>null);
+  if(i<syms.length-1)await new Promise(r=>setTimeout(r,140));
+}
 el.innerHTML=syms.map((s,i)=>{
-if(res[i].status!=='fulfilled')return`<div class="c" style="text-align:center"><div class="m xs mt">${s}</div><div class="dn xs">Unavailable</div></div>`;
-const d=res[i].value,m=d.chart?.result?.[0]?.meta;
-if(!m)return`<div class="c" style="text-align:center"><div class="m xs mt">${s}</div><div class="dn xs">No data</div></div>`;
+const m=out[i];
+if(!m)return`<div class="c" style="text-align:center;padding:12px 8px"><div class="m xs mt" style="font-weight:600">${s}</div><div class="mt xs">N/A</div></div>`;
 const pr=m.regularMarketPrice||0,pc=m.previousClose||pr,ch=((pr-pc)/pc*100),u=ch>=0;
 if(s==='SPY'){E('sb-spyp').textContent='$'+pr.toFixed(2);const ce=E('sb-spyc');ce.textContent=pct(ch);ce.style.color=u?'var(--g)':'var(--r)'}
 if(s==='VIX'){E('sb-vix').textContent=pr.toFixed(1)}
-return`<div class="c" style="text-align:center;cursor:pointer" onclick="eqQuick('${s}')"><div class="m xs mt">${s}</div><div class="m" style="font-size:18px;font-weight:700;margin:2px 0">$${pr.toFixed(2)}</div><div class="m s ${u?'up':'dn'}">${u?'▲':'▼'} ${Math.abs(ch).toFixed(2)}%</div></div>`}).join('');
-}catch(e){el.innerHTML='<div class="c xs mt">Yahoo Finance unavailable — try CORS proxy</div>'}}
+return`<div class="c" style="text-align:center;cursor:pointer;padding:12px 8px" onclick="eqQuick('${s}')"><div class="m xs mt" style="font-weight:600;letter-spacing:.5px">${s}</div><div class="m" style="font-size:16px;font-weight:700;margin:4px 0;font-variant-numeric:tabular-nums">$${pr.toFixed(2)}</div><div class="m s ${u?'up':'dn'}" style="font-variant-numeric:tabular-nums">${u?'▲':'▼'} ${Math.abs(ch).toFixed(2)}%</div></div>`}).join('');}
 
+/* Yahoo proxy chain — order: direct first (some networks allow), then 4 free CORS proxies */
 function yfProxy(base){return[
-`https://corsproxy.io/?${encodeURIComponent(base)}`,
 base,
-`https://api.allorigins.win/raw?url=${encodeURIComponent(base)}`
+`https://corsproxy.io/?${encodeURIComponent(base)}`,
+`https://api.allorigins.win/raw?url=${encodeURIComponent(base)}`,
+`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(base)}`,
+`https://cors.eu.org/${base}`
 ]}
-async function yfFetch(url,ms=10000){const ac=new AbortController();const t=setTimeout(()=>ac.abort(),ms);try{const r=await fetch(url,{signal:ac.signal});clearTimeout(t);if(!r.ok)throw new Error(r.status);return await r.json()}catch(e){clearTimeout(t);throw e}}
+async function yfFetch(url,ms=10000){const ac=new AbortController();const t=setTimeout(()=>ac.abort(),ms);try{const r=await fetch(url,{signal:ac.signal});clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}catch(e){clearTimeout(t);throw e}}
 
 async function yfChart(sym,range='6mo',interval='1d'){
 const key=`eq:ch:${sym}:${range}`;
@@ -1398,54 +1417,70 @@ if(l200&&lt>l200){bu++;sigs.push({n:'200MA',d:'B',r:'Above'})}else if(l200){be++
 sigs.push({n:'Vol',d:'N',r:v.toFixed(2)+'%'});sigs.push({n:'BBW',d:'N',r:bW.toFixed(2)+'%'});
 const tot=bu-be,vd=tot>=3?'STRONG BUY':tot>=1?'BUY':tot<=-3?'STRONG SELL':tot<=-1?'SELL':'NEUTRAL',vc=vd.includes('BUY')?'var(--g)':vd.includes('SELL')?'var(--r)':'var(--y)';
 E('eq-sig').innerHTML=sigs.map(s=>{const c=s.d==='B'?'var(--g)':s.d==='S'?'var(--r)':'var(--t3)';
-return`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #060c16;font:10px var(--mono)"><span>${s.n}</span><span style="color:${c}">${s.r}</span></div>`}).join('')+
-`<div style="margin-top:6px;padding:6px;background:var(--bg0);border-radius:var(--rr);text-align:center"><div class="xs mt">TECHNICAL CONSENSUS</div><div class="m" style="font-size:14px;font-weight:700;color:${vc}">${vd}</div><div class="xs mt">Bull ${bu} / Bear ${be}</div></div>`}
+return`<div class="srow" style="font:11px var(--sans)"><span class="lbl">${s.n}</span><span class="val" style="color:${c};font-family:var(--mono);font-variant-numeric:tabular-nums">${s.r}</span></div>`}).join('')+
+`<div style="margin-top:10px;padding:10px;background:var(--bg2);border-radius:var(--rr);text-align:center;border:1px solid var(--bdr)"><div class="xs mt">TECHNICAL CONSENSUS</div><div class="m" style="font-size:16px;font-weight:700;color:${vc};margin:4px 0">${vd}</div><div class="xs mt">Bull ${bu} / Bear ${be}</div></div>`}
 
 async function loadEqProfile(sym){
-const m=await yfQuote(sym);
+let m=await yfQuote(sym).catch(()=>null);
+if(!m)m=await stooqQuote(sym).catch(()=>null);
 if(!m){E('eq-profile').innerHTML='<span class="xs mt">No quote data</span>';E('eq-fund').innerHTML='';E('eq-earn').innerHTML='';return}
+// If Stooq-only response (no 52W data) try to enrich from yfChart history
+if(!m.fiftyTwoWeekHigh){
+  try{const ch=eqCache[sym];if(ch?.prices?.length>30){const ps=ch.prices;m.fiftyTwoWeekHigh=Math.max(...ps);m.fiftyTwoWeekLow=Math.min(...ps);
+    const last50=ps.slice(-50),last200=ps.slice(-200);
+    m.fiftyDayAverage=last50.reduce((s,v)=>s+v,0)/last50.length;
+    m.twoHundredDayAverage=last200.reduce((s,v)=>s+v,0)/last200.length;}}catch{}
+}
 const pr=m.regularMarketPrice||0,pc=m.previousClose||pr,ch=((pr-pc)/pc*100);
 const hi52=m.fiftyTwoWeekHigh||0,lo52=m.fiftyTwoWeekLow||0,avg50=m.fiftyDayAverage||0,avg200=m.twoHundredDayAverage||0;
-const fromHi=hi52?((pr-hi52)/hi52*100):0,fromLo=lo52?((pr-lo52)/lo52*100):0;
+const has52=hi52>0&&lo52>0,fromHi=has52?((pr-hi52)/hi52*100):0,fromLo=has52?((pr-lo52)/lo52*100):0;
 const u=ch>=0;
+const fmtPx=v=>v>0?'$'+v.toFixed(2):'<span class="mt">N/A</span>';
 E('eq-profile').innerHTML=`
-<div style="text-align:center;margin-bottom:6px">
+<div style="text-align:center;margin-bottom:8px">
 <div class="m xs mt">${sym} · ${m.exchangeName||'NYSE'} · ${m.currency||'USD'}</div>
-<div class="m" style="font-size:26px;font-weight:700;margin:3px 0">$${pr.toFixed(2)}</div>
+<div class="m" style="font-size:26px;font-weight:700;margin:3px 0;font-variant-numeric:tabular-nums">$${pr.toFixed(2)}</div>
 <div class="m s ${u?'up':'dn'}">${u?'▲':'▼'} ${Math.abs(ch).toFixed(2)}% today</div>
 </div>
-<div style="font:9px var(--mono);line-height:1.8">
-<div style="display:flex;justify-content:space-between"><span class="mt">52W High</span><span>$${hi52.toFixed(2)} <span class="${fromHi<-20?'dn':fromHi>-5?'up':'wr'}">(${fromHi.toFixed(1)}%)</span></span></div>
-<div style="display:flex;justify-content:space-between"><span class="mt">52W Low</span><span>$${lo52.toFixed(2)} <span class="up">(+${fromLo.toFixed(1)}%)</span></span></div>
-<div style="display:flex;justify-content:space-between"><span class="mt">50D Avg</span><span${pr>avg50?' class="up"':' class="dn"'}>$${avg50.toFixed(2)}</span></div>
-<div style="display:flex;justify-content:space-between"><span class="mt">200D Avg</span><span${pr>avg200?' class="up"':' class="dn"'}>$${avg200.toFixed(2)}</span></div>
+<div style="font:11px var(--sans);line-height:1.6">
+<div class="srow"><span class="lbl">52W High</span><span class="val">${fmtPx(hi52)}${has52?` <span class="${fromHi<-20?'dn':fromHi>-5?'up':'wr'}">(${fromHi.toFixed(1)}%)</span>`:''}</span></div>
+<div class="srow"><span class="lbl">52W Low</span><span class="val">${fmtPx(lo52)}${has52?` <span class="up">(+${fromLo.toFixed(1)}%)</span>`:''}</span></div>
+<div class="srow"><span class="lbl">50D Avg</span><span class="val ${avg50?(pr>avg50?'up':'dn'):''}">${fmtPx(avg50)}</span></div>
+<div class="srow"><span class="lbl">200D Avg</span><span class="val ${avg200?(pr>avg200?'up':'dn'):''}">${fmtPx(avg200)}</span></div>
 </div>
-<div style="margin-top:4px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--r),var(--y),var(--g));position:relative">
-<div style="width:8px;height:8px;border-radius:50%;background:#fff;border:2px solid var(--bg0);position:absolute;top:-1px;left:${lo52!==hi52?((pr-lo52)/(hi52-lo52)*100):50}%;transition:left .3s"></div>
-</div><div class="xs mt" style="text-align:center;margin-top:2px">52W Range Position</div>`;
+${has52?`<div style="margin-top:8px;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--r),var(--y),var(--g));position:relative">
+<div style="width:10px;height:10px;border-radius:50%;background:var(--t1);border:2px solid var(--bg1);position:absolute;top:-3px;left:${((pr-lo52)/(hi52-lo52)*100).toFixed(1)}%;transition:left .3s;box-shadow:var(--sh)"></div>
+</div><div class="xs mt" style="text-align:center;margin-top:4px">52W Range Position</div>`:''}`;
 E('eq-fund').innerHTML=[
 ['Prev Close','$'+pc.toFixed(2)],
-['Day Range','$'+(m.regularMarketDayLow||0).toFixed(2)+' – $'+(m.regularMarketDayHigh||0).toFixed(2)],
-['50D Avg','$'+avg50.toFixed(2)],
-['200D Avg','$'+avg200.toFixed(2)],
-['52W Hi/Lo','$'+lo52.toFixed(2)+' – $'+hi52.toFixed(2)],
+['Day Range',m.regularMarketDayLow?'$'+(m.regularMarketDayLow).toFixed(2)+' – $'+(m.regularMarketDayHigh||0).toFixed(2):'N/A'],
+['50D Avg',avg50?'$'+avg50.toFixed(2):'N/A'],
+['200D Avg',avg200?'$'+avg200.toFixed(2):'N/A'],
+['52W Hi/Lo',has52?'$'+lo52.toFixed(2)+' – $'+hi52.toFixed(2):'N/A'],
 ['Exchange',m.exchangeName||'—'],
-].map(([l,v])=>`<div class="mb"><div class="ml">${l}</div><div class="mv" style="font-size:11px">${v}</div></div>`).join('');
+].map(([l,v])=>`<div class="mb"><div class="ml">${l}</div><div class="mv" style="font-size:13px">${v}</div></div>`).join('');
+const fmtRel=(v,inv)=>v?`<span class="${(inv?-v:v)>0?'up':'dn'}">${v>0?'+':''}${v.toFixed(2)}%</span>`:'<span class="mt">N/A</span>';
 E('eq-earn').innerHTML=`
-<div style="font:9px var(--mono);line-height:2">
-<div style="display:flex;justify-content:space-between"><span class="mt">From 52W High</span><span class="${fromHi<-20?'dn':'up'}">${fromHi.toFixed(1)}%</span></div>
-<div style="display:flex;justify-content:space-between"><span class="mt">From 52W Low</span><span class="up">+${fromLo.toFixed(1)}%</span></div>
-<div style="display:flex;justify-content:space-between"><span class="mt">Vs 50 DMA</span><span class="${pr>avg50?'up':'dn'}">${((pr-avg50)/avg50*100).toFixed(2)}%</span></div>
-<div style="display:flex;justify-content:space-between"><span class="mt">Vs 200 DMA</span><span class="${pr>avg200?'up':'dn'}">${((pr-avg200)/avg200*100).toFixed(2)}%</span></div>
+<div>
+<div class="srow"><span class="lbl">From 52W High</span>${has52?fmtRel(fromHi,1):'<span class="val mt">N/A</span>'}</div>
+<div class="srow"><span class="lbl">From 52W Low</span>${has52?fmtRel(fromLo,0):'<span class="val mt">N/A</span>'}</div>
+<div class="srow"><span class="lbl">Vs 50 DMA</span>${avg50?fmtRel((pr-avg50)/avg50*100,0):'<span class="val mt">N/A</span>'}</div>
+<div class="srow"><span class="lbl">Vs 200 DMA</span>${avg200?fmtRel((pr-avg200)/avg200*100,0):'<span class="val mt">N/A</span>'}</div>
 </div>`}
 
 async function loadEqSectors(){
 const el=E('eq-sector');ldg(el);
 const syms=Object.keys(EQ_SECTORS);
-const res=await Promise.allSettled(syms.map(s=>yfQuote(s)));
+// Sequence — Stooq first, Yahoo fallback
+const out=new Array(syms.length);
+for(let i=0;i<syms.length;i++){
+  out[i]=await stooqQuote(syms[i]).catch(()=>null);
+  if(!out[i])out[i]=await yfQuote(syms[i]).catch(()=>null);
+  if(i<syms.length-1)await new Promise(r=>setTimeout(r,140));
+}
 const data=syms.map((s,i)=>{
-if(res[i].status!=='fulfilled'||!res[i].value)return null;
-const m=res[i].value,pr=m.regularMarketPrice||0,pc=m.previousClose||pr;
+const m=out[i];if(!m)return null;
+const pr=m.regularMarketPrice||0,pc=m.previousClose||pr;
 return{sym:s,name:EQ_SECTORS[s],ch:((pr-pc)/pc*100)}}).filter(Boolean).sort((a,b)=>b.ch-a.ch);
 if(!data.length){el.innerHTML='<span class="xs mt">Sectors unavailable</span>';return}
 el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:3px">'+
@@ -1456,11 +1491,18 @@ async function loadEqPeers(sym){
 const el=E('eq-peers');
 const peers=EQ_PEERS[sym]||['SPY','QQQ','DIA'];
 ldg(el);
-const res=await Promise.allSettled(peers.map(s=>yfQuote(s)));
+// Sequence — Stooq first, Yahoo fallback
+const out=new Array(peers.length);
+for(let i=0;i<peers.length;i++){
+  out[i]=await stooqQuote(peers[i]).catch(()=>null);
+  if(!out[i])out[i]=await yfQuote(peers[i]).catch(()=>null);
+  if(i<peers.length-1)await new Promise(r=>setTimeout(r,140));
+}
 el.innerHTML=peers.map((s,i)=>{
-if(res[i].status!=='fulfilled'||!res[i].value)return`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #060c16;font:10px var(--mono)"><span>${s}</span><span class="mt">N/A</span></div>`;
-const m=res[i].value,pr=m.regularMarketPrice||0,pc=m.previousClose||pr,ch=((pr-pc)/pc*100),u=ch>=0;
-return`<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #060c16;font:10px var(--mono);cursor:pointer" onclick="eqQuick('${s}')"><span style="color:var(--c)">${s}</span><span>$${pr.toFixed(2)}</span><span class="${u?'up':'dn'}">${u?'+':''}${ch.toFixed(2)}%</span></div>`}).join('')}
+const m=out[i];
+if(!m)return`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr);font:11px var(--sans)"><span>${s}</span><span class="mt">N/A</span></div>`;
+const pr=m.regularMarketPrice||0,pc=m.previousClose||pr,ch=((pr-pc)/pc*100),u=ch>=0;
+return`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--bdr);font:11px var(--sans);cursor:pointer" onclick="eqQuick('${s}')"><span style="color:var(--c);font-weight:600;flex-shrink:0">${s}</span><span class="m" style="font-variant-numeric:tabular-nums">$${pr.toFixed(2)}</span><span class="m ${u?'up':'dn'}" style="font-variant-numeric:tabular-nums">${u?'+':''}${ch.toFixed(2)}%</span></div>`}).join('')}
 
 /* EQUITY AI AGENTS — fundamentally different from crypto */
 async function runEqAg(){
