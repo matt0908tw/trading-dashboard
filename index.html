@@ -1301,6 +1301,26 @@ let eqCache={};
 
 function eqQuick(s){E('eq-sym').value=s;loadEQ()}
 
+/* CBOE quote for VIX (Stooq lacks ^VIX). Returns Yahoo-shape. */
+async function cboeVixQuote(){
+  const key='eq:cboe:VIX';const cached=DS.get(key);if(cached)return cached;
+  try{
+    const url='https://corsproxy.io/?'+encodeURIComponent('https://cdn.cboe.com/api/global/delayed_quotes/quotes/_VIX.json');
+    const ac=new AbortController();const t=setTimeout(()=>ac.abort(),6000);
+    const r=await fetch(url,{signal:ac.signal});clearTimeout(t);if(!r.ok)return null;
+    const j=await r.json();const d=j?.data;if(!d?.current_price)return null;
+    const m={
+      regularMarketPrice:+d.current_price,
+      previousClose:+d.current_price-(+d.price_change||0),
+      regularMarketDayHigh:+d.high||+d.current_price,
+      regularMarketDayLow:+d.low||+d.current_price,
+      regularMarketOpen:+d.open||+d.current_price,
+      symbol:'VIX',
+    };
+    DS.set(key,m);return m;
+  }catch{return null}
+}
+
 /* Stooq quote — reliable free CSV via corsproxy.io. Yahoo-shape compatible. */
 function _stooqSym(s){if(s==='VIX'||s==='^VIX')return null;if(s.startsWith('^'))return null;return s.toLowerCase()+'.us'}
 async function stooqQuote(sym){
@@ -1322,8 +1342,11 @@ const el=E('eq-idx');ldg(el);
 const syms=['SPY','QQQ','DIA','IWM','VIX'];
 const out=new Array(syms.length);
 for(let i=0;i<syms.length;i++){
-  out[i]=await stooqQuote(syms[i]).catch(()=>null);
-  if(!out[i]&&syms[i]!=='VIX')out[i]=await yfQuote(syms[i]).catch(()=>null);
+  if(syms[i]==='VIX')out[i]=await cboeVixQuote().catch(()=>null);
+  else{
+    out[i]=await stooqQuote(syms[i]).catch(()=>null);
+    if(!out[i])out[i]=await yfQuote(syms[i]).catch(()=>null);
+  }
   if(i<syms.length-1)await new Promise(r=>setTimeout(r,140));
 }
 el.innerHTML=syms.map((s,i)=>{
