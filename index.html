@@ -368,6 +368,64 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 .toast{padding:13px 20px;border-radius:16px;font:500 13px/1.4 var(--sans);background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--bdr);box-shadow:var(--shh);color:var(--t1);pointer-events:auto;animation:toastIn .4s var(--ease-spring),toastOut .3s 2.4s var(--ease) forwards;display:flex;align-items:center;gap:8px;max-width:340px;letter-spacing:-.01em}
 @keyframes toastIn{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes toastOut{to{opacity:0;transform:translateY(-10px) scale(.96)}}
+
+/* ===== TREND PREDICTION ENGINE ===== */
+.tp-card{border-radius:var(--rr-lg);padding:0;overflow:hidden;border:1px solid var(--bdr);background:var(--bg1);box-shadow:var(--shh);margin-bottom:14px;position:relative}
+.tp-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent,var(--t3));transition:background .4s var(--ease);z-index:1}
+.tp-card[data-bias="bull"]{--accent:var(--g)}
+.tp-card[data-bias="bear"]{--accent:var(--r)}
+.tp-card[data-bias="neutral"]{--accent:var(--t3)}
+.tp-card[data-bias="risk"]{--accent:var(--o)}
+.tp-hd{padding:20px 22px 16px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.tp-eyebrow{font:600 11px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--t3);display:flex;align-items:center;gap:7px}
+.tp-verdict{font:700 27px/1.15 var(--sans);letter-spacing:-.022em;color:var(--accent,var(--c));margin:9px 0 5px}
+.tp-action{font:500 14px/1.45 var(--sans);color:var(--t2);max-width:460px}
+.tp-action b{color:var(--t1);font-weight:600}
+.tp-dir{text-align:right;flex-shrink:0;min-width:96px}
+.tp-dir-num{font:700 42px/1 var(--mono);letter-spacing:-.03em;color:var(--accent,var(--c));font-variant-numeric:tabular-nums}
+.tp-dir-lab{font:600 10px/1.3 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--t3);margin-top:7px}
+.tp-hzgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bdr);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
+.tp-hz{background:var(--bg1);padding:14px 16px;text-align:center}
+.tp-hz .hzt{font:600 10px/1 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--t3)}
+.tp-hz .hzb{font:700 16px/1.1 var(--sans);letter-spacing:-.01em;margin:8px 0 4px;color:var(--t2)}
+.tp-hz .hzs{font:500 11px/1 var(--mono);color:var(--t3);font-variant-numeric:tabular-nums}
+.tp-hz[data-b="bull"] .hzb{color:var(--g)}
+.tp-hz[data-b="bear"] .hzb{color:var(--r)}
+.tp-meters{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:16px 22px}
+.tp-meter .mtl{display:flex;justify-content:space-between;font:600 10px/1.2 var(--sans);letter-spacing:.02em;text-transform:uppercase;color:var(--t3);margin-bottom:7px}
+.tp-meter .mtl b{font:700 12px/1 var(--mono);color:var(--t1);font-variant-numeric:tabular-nums}
+.meter-bar{height:6px;border-radius:3px;background:var(--bg3);overflow:hidden}
+.meter-fill{height:100%;border-radius:3px;transition:width .55s var(--ease-out),background .4s var(--ease)}
+.tp-disc{padding:11px 22px;border-top:1px solid var(--bdr);font:500 11px/1.45 var(--sans);color:var(--t3);background:var(--bg3);display:flex;align-items:center;gap:7px}
+@media(max-width:600px){.tp-meters{grid-template-columns:repeat(2,1fr)}.tp-hzgrid{grid-template-columns:1fr}.tp-dir{text-align:left}.tp-verdict{font-size:23px}}
+/* Signal explanation list */
+.sigl{display:flex;flex-direction:column}
+.sigl .si{display:flex;gap:9px;align-items:baseline;font:13px/1.5 var(--sans);padding:6px 0;border-bottom:1px solid var(--bdr)}
+.sigl .si:last-child{border-bottom:0}
+.sigl .si .sic{flex-shrink:0;width:14px;text-align:center;font-weight:700;font-size:12px}
+.sigl .si .six{color:var(--t2)}
+.si-b .sic{color:var(--g)}.si-r .sic{color:var(--r)}.si-n .sic{color:var(--t3)}.si-x .sic{color:var(--o)}
+.sig-grp{font:600 10px/1 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--t3);margin:12px 0 4px}
+.sig-grp:first-child{margin-top:0}
+/* Key levels */
+.kl-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bdr);font:13px var(--sans)}
+.kl-row:last-child{border-bottom:0}
+.kl-row .kll{color:var(--t2);display:flex;align-items:center;gap:7px}
+.kl-row .klv{font:600 13px var(--mono);color:var(--t1);font-variant-numeric:tabular-nums}
+.kl-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+/* Data quality chips */
+.dq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.dq-chip{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:10px;background:var(--bg3);font:12px var(--sans)}
+.dq-chip .dqi{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dq-ok .dqi{background:var(--g)}.dq-warn .dqi{background:var(--o)}.dq-err .dqi{background:var(--r)}.dq-na .dqi{background:var(--t3)}
+.dq-chip .dqn{color:var(--t2)}.dq-chip .dqs{margin-left:auto;font-weight:600;color:var(--t1);font-size:11px}
+/* History table */
+.hist-t{width:100%;border-collapse:collapse;font:12px var(--sans)}
+.hist-t th{text-align:right;padding:7px 8px;font:600 10px/1 var(--sans);letter-spacing:.03em;text-transform:uppercase;color:var(--t3);border-bottom:1px solid var(--bdr)}
+.hist-t th:first-child,.hist-t td:first-child{text-align:left}
+.hist-t td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--bdr);font-variant-numeric:tabular-nums;color:var(--t1)}
+.hist-t tr:last-child td{border-bottom:0}
+.hist-wrap{max-height:280px;overflow-y:auto}
 </style>
 </head>
 <body>
@@ -616,6 +674,40 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 </div>
 </div>
 
+<!-- TREND PREDICTION SUMMARY -->
+<div class="c tp-card" id="tp-card" data-bias="neutral">
+<div class="tp-hd">
+<div style="flex:1;min-width:200px">
+<div class="tp-eyebrow">◆ TREND PREDICTION ENGINE · <span id="tp-asset">BTC</span></div>
+<div class="tp-verdict" id="tp-verdict">Analyzing…</div>
+<div class="tp-action" id="tp-action">Collecting regime, crowding, macro, basis &amp; volatility-skew data…</div>
+</div>
+<div class="tp-dir">
+<div class="tp-dir-num" id="tp-dir-num">—</div>
+<div class="tp-dir-lab">Direction Score<br>−100 ↔ +100</div>
+</div>
+</div>
+<div class="tp-hzgrid" id="tp-hzgrid">
+<div class="tp-hz" data-b="neutral"><div class="hzt">1-Day Bias</div><div class="hzb">—</div><div class="hzs">—</div></div>
+<div class="tp-hz" data-b="neutral"><div class="hzt">7-Day Bias</div><div class="hzb">—</div><div class="hzs">—</div></div>
+<div class="tp-hz" data-b="neutral"><div class="hzt">30-Day Bias</div><div class="hzb">—</div><div class="hzs">—</div></div>
+</div>
+<div class="tp-meters" id="tp-meters"></div>
+<div class="tp-disc">⚠ <span>Signals are for research only, not financial advice. This is a trading-assistance tool — always verify independently.</span></div>
+</div>
+
+<!-- SIGNAL EXPLANATION -->
+<div class="c" id="tp-exp-card">
+<div class="ct">SIGNAL EXPLANATION · WHY THIS CALL</div>
+<div id="tp-exp"><div class="ld-box xs mt">Waiting for prediction model…</div></div>
+</div>
+
+<!-- KEY LEVELS -->
+<div class="c" id="tp-levels-card">
+<div class="ct"><span class="ld"></span> KEY LEVELS & INVALIDATION</div>
+<div id="tp-levels"><div class="ld-box xs mt">Computing support / resistance / invalidation…</div></div>
+</div>
+
 <!-- REGIME BANNER -->
 <div class="regbn" id="rg-bn" data-r="neutral">
 <div class="regttl"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)"></span> MARKET REGIME</div>
@@ -693,9 +785,28 @@ input,select,textarea{min-height:40px;padding:10px 12px}
 </div>
 </div>
 
+<!-- DATA QUALITY -->
+<div class="c" id="tp-health-card">
+<div class="ct">DATA QUALITY & MODEL HEALTH</div>
+<div id="tp-health"><div class="ld-box xs mt">Checking data sources…</div></div>
+</div>
+
+<!-- PREDICTION HISTORY -->
+<div class="c">
+<div class="ct" style="display:flex;justify-content:space-between;align-items:center"><span>PREDICTION HISTORY · LAST 50</span><button class="bt" style="padding:5px 10px;font-size:10px" onclick="clearPredHistory()">Clear</button></div>
+<div id="tp-hist" class="hist-wrap"><div class="ld-box xs mt">No predictions recorded yet.</div></div>
+</div>
+
+<!-- CALIBRATION -->
+<div class="c">
+<div class="ct" style="display:flex;justify-content:space-between;align-items:center"><span>SIGNAL CALIBRATION · 180D BACKTEST</span><button class="bt" style="padding:5px 10px;font-size:10px" onclick="runCalibration(true)">Run</button></div>
+<div id="tp-cal"><div class="ld-box xs mt">Press “Run” for an estimated historical edge check.</div></div>
+</div>
+
 <div class="c" style="margin-top:6px">
 <div class="ct">METHODOLOGY · 為何這些訊號比 RSI/MACD 更有預測力</div>
 <div class="xs mt" style="line-height:1.7">
+<b style="color:var(--t1)">Trend Prediction Engine</b> — 收集 regime / crowding / macro / derivatives 五大模組的 structured data，對每個訊號給定 per-horizon 權重（1D 重 momentum/funding、7D 重趨勢結構、30D 重 macro/SMA200），加權後輸出 −100~+100 directionScore、confidence、trend quality、crowding risk，並產生明確結論與失效條件。<br>
 <b style="color:var(--t1)">Regime filter</b> — RSI/MACD 在震盪市發出大量假訊號。先用 ADX (&gt;25 = 趨勢) + Hurst (&gt;0.5 = 持續) 切 regime，趨勢策略只在 trending 跑，能砍掉 30-50% 的 max DD。<br>
 <b style="color:var(--t1)">Funding/OI percentile</b> — raw funding rate 沒有 baseline。轉成過去 90 天的百分位，&gt;90% + OI 暴增 = 多頭擁擠 → 短線反向風險。<br>
 <b style="color:var(--t1)">Cross-asset</b> — BTC dominance ↓ + ETH/BTC ↑ = alt season 開關；DXY ↓ + 10Y ↓ = 風險偏好升溫，crypto 通常跟漲。<br>
@@ -2191,14 +2302,43 @@ function _showSkeletons(){
   ['sk-rr','sk-pc','sk-ts'].forEach(id=>{const e=E(id);if(e)e.innerHTML='<span class="skn skn-w-num"></span>'});
   E('sk-sig')&&(E('sk-sig').innerHTML='<span class="skn skn-w-pill"></span>');
   E('sk-tsb')&&(E('sk-tsb').innerHTML='<div class="ld-box xs mt"><span class="sp"></span> Loading IV term…</div>');
+  // Trend Prediction summary
+  E('tp-verdict')&&(E('tp-verdict').textContent='Analyzing…');
+  E('tp-action')&&(E('tp-action').textContent='Collecting regime, crowding, macro, basis & volatility-skew data…');
+  E('tp-dir-num')&&(E('tp-dir-num').textContent='—');
+  E('tp-meters')&&(E('tp-meters').innerHTML='');
+  E('tp-card')&&(E('tp-card').dataset.bias='neutral');
+  E('tp-exp')&&(E('tp-exp').innerHTML='<div class="ld-box xs mt"><span class="sp"></span> Building prediction model…</div>');
+  E('tp-levels')&&(E('tp-levels').innerHTML='<div class="ld-box xs mt"><span class="sp"></span> Computing key levels…</div>');
+  E('tp-health')&&(E('tp-health').innerHTML='<div class="ld-box xs mt"><span class="sp"></span> Checking data sources…</div>');
 }
 async function loadPredict(force=false){
-  if(force){['cr:fund90','cr:oi90','mc:dom','sk:btc','bs:premium'].forEach(k=>DS.inv(k))}
+  const asset=(E('pr-sym')?.value||'BTC');
+  if(force){
+    // invalidate per-asset caches so Refresh actually refetches
+    ['pr:kl:'+asset+'USDT:1d:300','pr:fund:'+asset+'USDT','pr:oi:'+asset+'USDT',
+     'pr:ls:'+asset+'USDT','pr:cg:global','pr:ethbtc','pr:dr:'+asset,'pr:dr:tk:'+asset]
+      .forEach(k=>DS.inv(k));
+    ['pr:pi:BTCUSDT','pr:pi:ETHUSDT','pr:pi:SOLUSDT'].forEach(k=>DS.inv(k));
+  }
   _showSkeletons();
-  await Promise.allSettled([ldRegime(),ldCrowding(),ldMacro(),ldBasis(),ldSkew()]);
+  E('tp-asset')&&(E('tp-asset').textContent=asset);
+  const res=await Promise.allSettled([ldRegime(),ldCrowding(),ldMacro(),ldBasis(),ldSkew()]);
+  const val=i=>res[i].status==='fulfilled'&&res[i].value?res[i].value:{ok:false,error:res[i].reason?.message||'rejected'};
+  const I=assemblePredictionInputs(asset,val(0),val(1),val(2),val(3),val(4));
+  try{
+    const model=buildPredictionModel(I);
+    renderPrediction(model,I);
+    savePredictionSnapshot(model);
+    renderHistory();
+  }catch(e){
+    console.error('prediction engine:',e);
+    E('tp-verdict')&&(E('tp-verdict').textContent='MODEL ERROR');
+    E('tp-action')&&(E('tp-action').textContent='Prediction engine failed: '+e.message);
+  }
 }
 
-/* --- 1. Regime --- */
+/* --- 1. Regime — renders the banner AND returns structured data --- */
 async function ldRegime(){
   try{
     const sym=(E('pr-sym')?.value||'BTC')+'USDT';
@@ -2210,6 +2350,10 @@ async function ldRegime(){
     const atrArr=atr(ohlc,14).filter(v=>v!==null);
     const atrPctNow=_pct(atrArr,_last(atrArr));
     const adxV=a?a.adx:0,pDI=a?a.plusDI:0,nDI=a?a.minusDI:0;
+    // Extra TA needed by the prediction engine
+    const s20=sma(closes,20),s50=sma(closes,50),s200=sma(closes,200);
+    const mc=macd(closes),r=rsi(closes,14);
+    const price=_last(closes);
     let regime='neutral',sub='',action='';
     if(atrPctNow>85){
       regime='volatile';
@@ -2236,9 +2380,14 @@ async function ldRegime(){
     E('rg-hurst').textContent=h.toFixed(3);
     E('rg-atrp').textContent=atrPctNow.toFixed(0)+'%';
     E('rg-act').textContent=action;
+    return {ok:true,ohlc,regimeLabel:regime,adx:adxV,plusDI:pDI,minusDI:nDI,hurst:h,
+      atrPercentile:atrPctNow,atrAbs:_last(atrArr),sma20:_last(s20),sma50:_last(s50),sma200:_last(s200),
+      sma20Prev:s20[s20.length-6],macdHistogram:_last(mc.h),macdHistPrev:mc.h[mc.h.length-4],
+      rsi:_last(r),price};
   }catch(e){
     E('rg-st').textContent='ERROR';
     E('rg-sub').textContent='無法載入 klines — '+e.message;
+    return {ok:false,error:e.message};
   }
 }
 
@@ -2279,9 +2428,12 @@ async function ldCrowding(){
     E('cr-oip').textContent=oiPct.toFixed(0)+'%';
     E('cr-ls').textContent=lsTxt;
     E('cr-int').textContent=interp;
+    return {ok:true,fundingRate:last,fundingPercentile:fpct,fundingZScore:fz,
+      oiChange30d:oiChg,oiPercentile:oiPct,longShortRatio:lsTxt==='—'?null:+lsTxt,signal:sigTxt};
   }catch(e){
     E('cr-sig').innerHTML='<span class="spill s-warn">ERROR</span>';
     E('cr-int').textContent='無法載入：'+e.message;
+    return {ok:false,error:e.message};
   }
 }
 
@@ -2301,10 +2453,10 @@ async function ldMacro(){
     }catch{}
     const ethbtcChg=ethbtc30?ethbtcNow/ethbtc30*100-100:0;
     // DXY proxy (UUP), 10Y (^TNX), SPX (^GSPC)
-    let dxyChg=0,tnxNow=0,spxChg=0;
-    try{const r=await yfChart('DX-Y.NYB','1mo','1d');if(r){const cl=r.indicators.quote[0].close.filter(x=>x);if(cl.length>1)dxyChg=cl[cl.length-1]/cl[0]*100-100}}catch{}
-    try{const r=await yfChart('%5ETNX','5d','1d');if(r){const cl=r.indicators.quote[0].close.filter(x=>x);tnxNow=cl[cl.length-1]/100}}catch{}
-    try{const r=await yfChart('%5EGSPC','1mo','1d');if(r){const cl=r.indicators.quote[0].close.filter(x=>x);if(cl.length>1)spxChg=cl[cl.length-1]/cl[0]*100-100}}catch{}
+    let dxyChg=0,tnxNow=0,spxChg=0;const macroMissing=[];
+    try{const r=await yfChart('DX-Y.NYB','1mo','1d');if(r){const cl=r.indicators.quote[0].close.filter(x=>x);if(cl.length>1)dxyChg=cl[cl.length-1]/cl[0]*100-100}else macroMissing.push('DXY')}catch{macroMissing.push('DXY')}
+    try{const r=await yfChart('%5ETNX','5d','1d');if(r){const cl=r.indicators.quote[0].close.filter(x=>x);tnxNow=cl[cl.length-1]/100}else macroMissing.push('10Y')}catch{macroMissing.push('10Y')}
+    try{const r=await yfChart('%5EGSPC','1mo','1d');if(r){const cl=r.indicators.quote[0].close.filter(x=>x);if(cl.length>1)spxChg=cl[cl.length-1]/cl[0]*100-100}else macroMissing.push('SPX')}catch{macroMissing.push('SPX')}
     // Risk-on score: SPX up + DXY down + 10Y stable = risk-on
     const riskScore=(spxChg)-(dxyChg*1.5)-(tnxNow>4.5?5:0);
     let mood='s-neu',moodTxt='NEUTRAL';
@@ -2330,9 +2482,13 @@ async function ldMacro(){
     E('mc-risk').textContent=riskScore.toFixed(1);
     E('mc-risk').className='val '+(riskScore>0?'up':'dn');
     E('mc-int').textContent=interp;
+    return {ok:true,btcDominance:dom,ethDominance:ethDom,ethBtcChange30d:ethbtcChg,
+      dxyChange30d:dxyChg,spxChange30d:spxChg,tenYearYield:tnxNow*100,riskOnScore:riskScore,
+      missing:macroMissing};
   }catch(e){
     E('mc-sig').innerHTML='<span class="spill s-warn">ERROR</span>';
     E('mc-int').textContent='無法載入 macro：'+e.message;
+    return {ok:false,error:e.message};
   }
 }
 
@@ -2368,9 +2524,15 @@ async function ldBasis(){
     else if(ann>15){sig='s-warn';sigTxt='ELEVATED';interp=`基差偏高（${ann.toFixed(1)}% 年化），需留意是否進一步擴張。`}
     E('bs-sig').innerHTML=`<span class="spill ${sig}"><span class="dot"></span>${sigTxt}</span>`;
     E('bs-int').textContent=interp+' · 計算：年化基差 ≈ funding_8h × 3 × 365。';
+    // basisAnnualized for the currently-selected asset
+    const curSym=(E('pr-sym')?.value||'BTC')+'USDT';
+    const cur=out[curSym];
+    return {ok:Object.keys(out).length>0,perAsset:out,
+      basisAnnualized:cur?cur.annPct:null,fundingRate:cur?cur.fund:null};
   }catch(e){
     E('bs-sig').innerHTML='<span class="spill s-warn">ERROR</span>';
     E('bs-int').textContent='無法載入：'+e.message;
+    return {ok:false,error:e.message};
   }
 }
 
@@ -2379,12 +2541,12 @@ async function ldSkew(){
   try{
     const cur=(E('pr-sym')?.value||'BTC');
     if(cur==='SOL'){
-      // Deribit doesn't list SOL options — fallback message
-      E('sk-sig').innerHTML='<span class="spill s-warn">N/A</span>';
+      // Deribit doesn't list SOL options — graceful N/A, not an error
+      E('sk-sig').innerHTML='<span class="spill s-neu">N/A</span>';
       E('sk-rr').textContent='—';E('sk-pc').textContent='—';E('sk-ts').textContent='—';
-      E('sk-tsb').innerHTML='<div class="ld-box xs mt">Deribit 無 SOL options — 切換 BTC/ETH</div>';
-      E('sk-int').textContent='Deribit 目前主要支援 BTC/ETH options。SOL 切換成 BTC 或 ETH 看 forward-looking 訊號。';
-      return;
+      E('sk-tsb').innerHTML='<div class="ld-box xs mt">Deribit 無 SOL options — 此區塊不適用 SOL</div>';
+      E('sk-int').textContent='Deribit 目前主要支援 BTC/ETH options。SOL 無 options skew 資料，預測模型會自動排除此模組並略降 confidence。';
+      return {ok:false,na:true};
     }
     const summ=await DS.f(`pr:dr:${cur}`,`https://www.deribit.com/api/v2/public/get_book_summary_by_currency?currency=${cur}&kind=option`);
     const items=summ.result||[];
@@ -2450,10 +2612,12 @@ async function ldSkew(){
     else if(slope>10)interp+=' Contango 較陡 → 預期短線平靜、長線有事件。';
     E('sk-sig').innerHTML=`<span class="spill ${sig}"><span class="dot"></span>${sigTxt}</span>`;
     E('sk-int').textContent=interp;
+    return {ok:true,optionsRiskReversal:rr,putCallIvRatio:pc,termSlope:slope,atmIvFront:tsData[0]?.atmIv||null};
   }catch(e){
     E('sk-sig').innerHTML='<span class="spill s-warn">ERROR</span>';
     E('sk-int').textContent='無法載入 Deribit：'+e.message+'（可能是 CORS 或 rate limit）';
     E('sk-tsb').innerHTML='<div class="ld-box xs mt">'+e.message+'</div>';
+    return {ok:false,error:e.message};
   }
 }
 
@@ -2463,6 +2627,551 @@ function _parseDeribitDate(s){
   const months={JAN:0,FEB:1,MAR:2,APR:3,MAY:4,JUN:5,JUL:6,AUG:7,SEP:8,OCT:9,NOV:10,DEC:11};
   const d=new Date(Date.UTC(2000+ +m[3],months[m[2]],+m[1],8,0,0));
   return d.getTime();
+}
+
+/* ===========================================================
+   TREND PREDICTION ENGINE
+   Pure scoring/model layer is kept separate from DOM rendering.
+   buildPredictionModel() consumes the structured objects returned
+   by ldRegime/ldCrowding/ldMacro/ldBasis/ldSkew.
+   =========================================================== */
+
+function _clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}
+function _fmtUsd(v){if(v==null||isNaN(v))return 'n/a';return v>=1000?'$'+v.toLocaleString('en',{maximumFractionDigits:0}):'$'+v.toFixed(2)}
+
+/* Tunable weights — every signal's influence lives here, not scattered as magic numbers.
+   Each weight is per-horizon {d1,d7,d30}. Rationale per the spec:
+   - 1D  : momentum / funding / OI / RSI dominate
+   - 7D  : trend structure (ADX, DI, SMA20/50, MACD, basis) dominate
+   - 30D : macro + SMA50/200 + Hurst dominate */
+const PREDICT_W={
+  trend:{
+    diSpread:{d1:0.60,d7:1.00,d30:0.40}, // +DI vs −DI — core directional read
+    smaStack:{d1:0.50,d7:1.00,d30:0.70}, // price / SMA20 / SMA50 alignment
+    sma200:  {d1:0.10,d7:0.40,d30:1.00}, // SMA50 vs SMA200 — long-horizon structure
+    macd:    {d1:0.70,d7:0.80,d30:0.30}, // MACD histogram momentum
+    rsi:     {d1:0.90,d7:0.40,d30:0.15}, // RSI — short-term momentum, faded at extremes
+    hurst:   {d1:0.20,d7:0.60,d30:0.90}, // persistence vs mean-reversion
+  },
+  crowding:{
+    funding: {d1:1.00,d7:0.50,d30:0.20}, // funding percentile extreme — counter-trend
+    fundingZ:{d1:0.80,d7:0.40,d30:0.15}, // funding z-score instability
+    oi:      {d1:0.60,d7:0.70,d30:0.30}, // OI 30D change
+    ls:      {d1:0.50,d7:0.30,d30:0.10}, // long/short ratio extreme
+  },
+  macro:{
+    riskOn:  {d1:0.20,d7:0.55,d30:1.00}, // SPX/DXY/10Y risk-on backdrop
+    ethBtc:  {d1:0.15,d7:0.40,d30:0.70}, // ETH/BTC — alt beta
+    dominance:{d1:0.10,d7:0.30,d30:0.60},// BTC dominance trend
+  },
+  deriv:{
+    basis:   {d1:0.70,d7:0.60,d30:0.25}, // perp basis — leverage overheating
+    skewRR:  {d1:0.60,d7:0.45,d30:0.20}, // 25Δ options risk-reversal
+    term:    {d1:0.50,d7:0.30,d30:0.10}, // IV term-structure slope
+  },
+};
+
+/* --- Assemble the structured input object the engine consumes --- */
+function assemblePredictionInputs(asset,regime,crowding,macro,basis,skew){
+  const missing=[],fallback=[];
+  if(regime.ok===false)missing.push('regime');
+  if(crowding.ok===false)missing.push('crowding');
+  if(macro.ok===false)missing.push('macro');
+  else if(macro.missing&&macro.missing.length)fallback.push(...macro.missing.map(x=>'macro:'+x));
+  if(basis.ok===false)missing.push('basis');
+  const skewNA=!!(skew&&skew.na);
+  if(skew.ok===false&&!skewNA)missing.push('skew');
+  return {
+    asset,
+    price:regime.ok!==false?regime.price:null,
+    regime:regime.ok!==false?regime:{ok:false},
+    crowding:crowding.ok!==false?crowding:{ok:false},
+    macro:macro.ok!==false?macro:{ok:false},
+    derivatives:basis.ok!==false?basis:{ok:false},
+    skew:skew.ok?skew:{ok:false,na:skewNA},
+    dataQuality:{
+      regimeLoaded:regime.ok!==false,crowdingLoaded:crowding.ok!==false,
+      macroLoaded:macro.ok!==false,basisLoaded:basis.ok!==false,
+      skewLoaded:!!skew.ok,skewNA,
+      missingFields:missing,fallbackFields:fallback,lastUpdated:Date.now(),
+    },
+  };
+}
+
+/* --- Sub-model: trend signals + trend-quality score --- */
+function scoreTrendSignals(I){
+  const sig=[],rg=I.regime;
+  if(!rg||rg.ok===false)return {signals:sig,trendQuality:0};
+  const W=PREDICT_W.trend;
+  const {adx,plusDI,minusDI,hurst,sma20,sma50,sma200,macdHistogram,macdHistPrev,rsi,price}=rg;
+  const diSpread=plusDI-minusDI;
+  sig.push({id:'di',cat:'trend',w:W.diSpread,dir:_clamp(diSpread/25,-1,1),
+    label:`+DI/−DI spread ${diSpread>=0?'+':''}${diSpread.toFixed(1)}`,
+    note:diSpread>0?'+DI leads — buyers in control':'−DI leads — sellers in control'});
+  if(sma20&&sma50){
+    let d,txt;
+    if(price>sma20&&sma20>sma50){d=1;txt='Price > SMA20 > SMA50 — clean uptrend stack'}
+    else if(price<sma20&&sma20<sma50){d=-1;txt='Price < SMA20 < SMA50 — clean downtrend stack'}
+    else if(price>sma50){d=0.35;txt='Price above SMA50 but stack mixed'}
+    else{d=-0.35;txt='Price below SMA50 — stack mixed'}
+    sig.push({id:'smaStack',cat:'trend',w:W.smaStack,dir:d,label:'SMA20 / SMA50 alignment',note:txt});
+  }
+  if(sma50&&sma200){
+    sig.push({id:'sma200',cat:'trend',w:W.sma200,dir:_clamp((sma50-sma200)/sma200*12,-1,1),
+      label:`SMA50 ${sma50>sma200?'above':'below'} SMA200`,
+      note:sma50>sma200?'Long-term structure bullish':'Long-term structure bearish'});
+  }
+  if(macdHistogram!=null){
+    // sign sets direction; a histogram expanding in its own direction strengthens it
+    const expanding=macdHistPrev!=null&&Math.abs(macdHistogram)>Math.abs(macdHistPrev);
+    const mag=expanding?1:0.6;
+    sig.push({id:'macd',cat:'trend',w:W.macd,dir:Math.sign(macdHistogram)*mag,
+      label:`MACD histogram ${macdHistogram>0?'positive':'negative'}${expanding?', expanding':''}`,
+      note:macdHistogram>0?'Momentum above signal line':'Momentum below signal line'});
+  }
+  if(rsi!=null){
+    let d=_clamp((rsi-50)/25,-1,1),txt=`RSI ${rsi.toFixed(0)}`;
+    if(rsi>72){d=-0.30;txt+=' — overbought, pullback risk'}     // fade extremes
+    else if(rsi<28){d=0.30;txt+=' — oversold, bounce potential'}
+    else txt+=rsi>50?' — momentum up':' — momentum down';
+    sig.push({id:'rsi',cat:'trend',w:W.rsi,dir:d,label:'RSI(14)',note:txt});
+  }
+  if(hurst!=null){
+    const persist=_clamp((hurst-0.5)/0.12,-1,1);
+    const trendDir=Math.sign(diSpread||(price-(sma50||price)))||1;
+    sig.push({id:'hurst',cat:'trend',w:W.hurst,dir:_clamp(trendDir*Math.max(0,persist),-1,1),
+      label:`Hurst ${hurst.toFixed(2)}`,
+      note:hurst>0.55?'Persistent series — trend-follow favoured':hurst<0.45?'Mean-reverting series — fade extremes':'Hurst neutral'});
+  }
+  // Trend quality 0..100 = ADX strength + Hurst persistence + stack cleanliness
+  let q=_clamp((adx-15)/35,0,1)*45 + _clamp((hurst-0.42)/0.20,0,1)*30;
+  const st=sig.find(s=>s.id==='smaStack');
+  q+=(st?Math.abs(st.dir):0)*25;
+  return {signals:sig,trendQuality:Math.round(_clamp(q,0,100))};
+}
+
+/* --- Sub-model: crowding / overheat risk --- */
+function scoreCrowdingRisk(I){
+  const sig=[],cr=I.crowding;
+  if(!cr||cr.ok===false)return {signals:sig,crowdedRiskScore:0};
+  const W=PREDICT_W.crowding;
+  const {fundingPercentile:fp,fundingZScore:fz,oiChange30d:oi,longShortRatio:ls}=cr;
+  let risk=0;
+  if(fp>=88){ // crowded long → short-term counter-trend tilt
+    sig.push({id:'funding',cat:'crowding',w:W.funding,dir:-(0.1+_clamp((fp-88)/12,0,1)*0.8),
+      label:`Funding ${fp.toFixed(0)}th pct — crowded long`,note:'Leverage longs crowded; mean-reversion risk short-term'});
+    risk+=40;
+  }else if(fp<=12){ // crowded short → squeeze risk to the upside
+    sig.push({id:'funding',cat:'crowding',w:W.funding,dir:(0.1+_clamp((12-fp)/12,0,1)*0.8),
+      label:`Funding ${fp.toFixed(0)}th pct — crowded short`,note:'Leverage shorts crowded; upside squeeze potential'});
+    risk+=35;
+  }else if(fp>75){
+    sig.push({id:'funding',cat:'crowding',w:W.funding,dir:-0.30,label:`Funding ${fp.toFixed(0)}th pct — elevated`,note:'Funding rich but not extreme'});risk+=18;
+  }else if(fp<25){
+    sig.push({id:'funding',cat:'crowding',w:W.funding,dir:0.25,label:`Funding ${fp.toFixed(0)}th pct — soft`,note:'Funding cheap — cautious sentiment'});risk+=12;
+  }
+  if(Math.abs(fz)>2){
+    sig.push({id:'fundingZ',cat:'crowding',w:W.fundingZ,dir:-Math.sign(fz)*0.5,
+      label:`Funding z-score ${fz.toFixed(1)}σ`,note:'Funding far from 90-day norm — unstable positioning'});
+    risk+=Math.min(20,(Math.abs(fz)-2)*15+8);
+  }
+  if(oi>25){
+    risk+=Math.min(22,(oi-25)/3+8);
+    sig.push({id:'oi',cat:'crowding',w:W.oi,dir:(fp>50?-1:1)*0.40,
+      label:`OI +${oi.toFixed(0)}% in 30D`,
+      note:fp>50?'OI surging into rich funding — fragile longs':'OI surging into cheap funding — fragile shorts'});
+  }else if(oi<-15){
+    sig.push({id:'oi',cat:'crowding',w:W.oi,dir:0,label:`OI ${oi.toFixed(0)}% in 30D`,note:'OI contracting — leverage flushed, positioning lighter'});
+  }
+  if(ls!=null){
+    if(ls>2.2){sig.push({id:'ls',cat:'crowding',w:W.ls,dir:-0.40,label:`L/S ratio ${ls.toFixed(2)}`,note:'Accounts heavily long — contrarian caution'});risk+=12;}
+    else if(ls<0.6){sig.push({id:'ls',cat:'crowding',w:W.ls,dir:0.40,label:`L/S ratio ${ls.toFixed(2)}`,note:'Accounts heavily short — squeeze fuel'});risk+=10;}
+  }
+  return {signals:sig,crowdedRiskScore:Math.round(_clamp(risk,0,100))};
+}
+
+/* --- Sub-model: macro backdrop --- */
+function scoreMacroRisk(I){
+  const sig=[],mc=I.macro;
+  if(!mc||mc.ok===false)return {signals:sig,macroRisk:0};
+  const W=PREDICT_W.macro;
+  const {riskOnScore:ro,ethBtcChange30d:eb,btcDominance:dom,dxyChange30d:dxy,spxChange30d:spx,tenYearYield:tny}=mc;
+  sig.push({id:'riskOn',cat:'macro',w:W.riskOn,dir:_clamp(ro/8,-1,1),
+    label:`Macro ${ro>3?'risk-ON':ro<-3?'risk-OFF':'neutral'}`,
+    note:`SPX ${spx>=0?'+':''}${spx.toFixed(1)}% · DXY ${dxy>=0?'+':''}${dxy.toFixed(1)}% · 10Y ${tny.toFixed(2)}%`});
+  const ebW=I.asset==='BTC'?0.4:1; // ETH/BTC less relevant to BTC's own direction
+  sig.push({id:'ethBtc',cat:'macro',w:{d1:W.ethBtc.d1*ebW,d7:W.ethBtc.d7*ebW,d30:W.ethBtc.d30*ebW},
+    dir:_clamp(eb/8,-1,1)*(I.asset==='BTC'?-0.3:1),
+    label:`ETH/BTC ${eb>=0?'+':''}${eb.toFixed(1)}% 30D`,
+    note:eb>2?'Alt beta strengthening':eb<-2?'Alt beta weakening — BTC-led tape':'ETH/BTC flat'});
+  sig.push({id:'dominance',cat:'macro',w:W.dominance,
+    dir:(I.asset==='BTC'?0.3:-1)*_clamp((dom-56)/8,-1,1),
+    label:`BTC dominance ${dom.toFixed(1)}%`,
+    note:dom>58?'High dominance — capital concentrated in BTC, alt risk up':'Dominance moderate — broader risk appetite'});
+  let mr=0;
+  if(ro<-3)mr+=40;else if(ro<0)mr+=18;
+  if(tny>4.5)mr+=20;
+  if(dxy>1.5)mr+=18;
+  if(spx<-4)mr+=22;
+  return {signals:sig,macroRisk:Math.round(_clamp(mr,0,100))};
+}
+
+/* --- Sub-model: derivatives (basis + options) risk --- */
+function scoreDerivativesRisk(I){
+  const sig=[],W=PREDICT_W.deriv;let risk=0;
+  const bs=I.derivatives;
+  if(bs&&bs.ok!==false&&bs.basisAnnualized!=null){
+    const ann=bs.basisAnnualized;
+    if(ann>30){sig.push({id:'basis',cat:'deriv',w:W.basis,dir:-0.60,label:`Perp basis +${ann.toFixed(0)}% ann.`,note:'Leverage longs overheated — pullback risk'});risk+=35;}
+    else if(ann<-10){sig.push({id:'basis',cat:'deriv',w:W.basis,dir:0.50,label:`Perp basis ${ann.toFixed(0)}% ann.`,note:'Basis inverted — panic / contrarian long zone'});risk+=30;}
+    else if(ann>15){sig.push({id:'basis',cat:'deriv',w:W.basis,dir:-0.25,label:`Perp basis +${ann.toFixed(0)}% ann.`,note:'Basis elevated — watch for overheating'});risk+=15;}
+    else sig.push({id:'basis',cat:'deriv',w:W.basis,dir:_clamp(ann/40,-0.3,0.3),label:`Perp basis ${ann>=0?'+':''}${ann.toFixed(0)}% ann.`,note:'Basis in a healthy range'});
+  }
+  if(I.skew&&I.skew.ok){
+    const {optionsRiskReversal:rr,termSlope:ts}=I.skew;
+    if(rr>5){sig.push({id:'skewRR',cat:'deriv',w:W.skewRR,dir:-0.55,label:`25Δ risk-reversal +${rr.toFixed(1)} vol`,note:'Heavy put demand — institutional downside hedging'});risk+=25;}
+    else if(rr<-3){sig.push({id:'skewRR',cat:'deriv',w:W.skewRR,dir:0.40,label:`25Δ risk-reversal ${rr.toFixed(1)} vol`,note:'Call-skewed — upside demand (can also signal FOMO)'});risk+=8;}
+    else sig.push({id:'skewRR',cat:'deriv',w:W.skewRR,dir:_clamp(-rr/10,-0.3,0.3),label:`25Δ risk-reversal ${rr>=0?'+':''}${rr.toFixed(1)} vol`,note:'Options skew balanced'});
+    if(ts<-3){sig.push({id:'term',cat:'deriv',w:W.term,dir:-0.40,label:'IV term in backwardation',note:'Front IV > back IV — near-term event/panic priced'});risk+=18;}
+    else if(ts>10)sig.push({id:'term',cat:'deriv',w:W.term,dir:0.10,label:'IV term steep contango',note:'Calm priced near-term'});
+  }
+  return {signals:sig,derivRisk:Math.round(_clamp(risk,0,100))};
+}
+
+/* --- Regime classification --- */
+function deriveRegime(I,m){
+  const rg=I.regime,cr=I.crowding,bs=I.derivatives;
+  if(rg&&rg.ok!==false&&rg.atrPercentile>85)return 'Volatile';
+  if(cr&&cr.ok!==false){
+    if(cr.fundingPercentile>=90&&cr.oiChange30d>15)return 'Crowded Long';
+    if(cr.fundingPercentile<=10&&cr.oiChange30d>15)return 'Crowded Short';
+  }
+  if(bs&&bs.ok!==false&&bs.basisAnnualized!=null&&bs.basisAnnualized<-8)return 'Panic';
+  if(rg&&rg.ok!==false){
+    if(rg.adx>25&&m.trendQuality>50){
+      if(m.directionScore>10)return 'Trending Up';
+      if(m.directionScore<-10)return 'Trending Down';
+    }
+    if(rg.adx<20||rg.hurst<0.45)return 'Range';
+  }
+  return 'Neutral';
+}
+
+/* --- Suggested action decision tree --- */
+function deriveAction(regime,dir,conf,crowd,macroRisk){
+  if(regime==='Volatile')return {tag:'Reduce leverage',why:'High-volatility regime — directional edge is unreliable and stops get swept.'};
+  if(regime==='Panic')return {tag:'Hedge',why:'Basis inverted / fear extreme — protect downside or wait for stabilisation before adding risk.'};
+  if(regime==='Crowded Long')return {tag:dir>0?'Reduce leverage':'Wait',why:'Leverage longs are crowded — chasing here carries elevated mean-reversion risk.'};
+  if(regime==='Crowded Short')return {tag:'Wait',why:'Leverage shorts are crowded — squeeze risk cuts both ways; let positioning resolve.'};
+  if(conf<35)return {tag:'Wait',why:'Confidence is low — signals conflict or a data module is missing.'};
+  if(regime==='Trending Up'&&crowd<55)return {tag:'Trend-follow long',why:'Confirmed up-trend with acceptable crowding — momentum favours longs.'};
+  if(regime==='Trending Down'&&crowd<55)return {tag:'Trend-follow short',why:'Confirmed down-trend — momentum favours shorts.'};
+  if(regime==='Range')return {tag:'Mean-revert',why:'Range regime — fade extremes back toward the mean, avoid breakout entries.'};
+  if(macroRisk>55&&dir>0)return {tag:'Hedge',why:'Macro risk-off backdrop undercuts crypto longs — size down or hedge.'};
+  return {tag:'Wait',why:'No clean edge — wait for a regime confirmation before committing.'};
+}
+
+/* --- Signal explanation + invalidation --- */
+function buildSignalExplanation(allSignals,model,I){
+  const wt=s=>((s.w.d1||0)+(s.w.d7||0)+(s.w.d30||0))/3;
+  const strength=s=>Math.abs(s.dir)*wt(s);
+  const sorted=[...allSignals].sort((a,b)=>strength(b)-strength(a));
+  const bull=sorted.filter(s=>s.dir>0.12).slice(0,5);
+  const bear=sorted.filter(s=>s.dir<-0.12).slice(0,5);
+  const neutral=sorted.filter(s=>Math.abs(s.dir)<=0.12).slice(0,3);
+  let confTxt;
+  const c=model.confidence;
+  if(c>=70)confTxt='Signals broadly agree and data coverage is good — higher conviction.';
+  else if(c>=45)confTxt='Moderate conviction — some signals conflict or a data module is missing/fallback.';
+  else confTxt='Low conviction — signals conflict, crowding is elevated, or data is incomplete. Treat as observation, not a setup.';
+  if(model.crowd>60)confTxt+=' Crowding risk is high, so timing is fragile even if the direction proves right.';
+  const inv=[],rg=I.regime;
+  if(rg&&rg.ok!==false){
+    if(model.directionScore>8){
+      inv.push(`${I.asset} closes below SMA20 (${_fmtUsd(rg.sma20)}) on rising volume`);
+      inv.push('+DI crosses back below −DI');
+      inv.push('Funding flips negative while price breaks the nearest support');
+    }else if(model.directionScore<-8){
+      inv.push(`${I.asset} reclaims and holds above SMA20 (${_fmtUsd(rg.sma20)})`);
+      inv.push('−DI crosses back below +DI');
+      inv.push('Funding flips positive with a confirmed higher-high breakout');
+    }else{
+      inv.push('A decisive close outside the current range with follow-through');
+    }
+  }
+  inv.push('Price closes beyond the calculated trend-invalidation level (see Key Levels)');
+  return {bull,bear,neutral,confTxt,invalidation:inv};
+}
+
+/* --- Key levels & invalidation from OHLC --- */
+function buildKeyLevels(ohlc,model){
+  const n=ohlc.length;if(n<25)return null;
+  const closes=ohlc.map(c=>c.c);
+  const price=closes[n-1];
+  const atrArr=atr(ohlc,14),atrV=atrArr[atrArr.length-1]||price*0.03;
+  const win=ohlc.slice(-20);
+  const hi20=Math.max(...win.map(c=>c.h)),lo20=Math.min(...win.map(c=>c.l));
+  const s20=sma(closes,20),sma20V=s20[s20.length-1]||price;
+  const s50=sma(closes,50),sma50V=s50[s50.length-1]||price;
+  const sw=findSwings(closes,5);
+  const swHi=sw.filter(s=>s.type==='H'&&s.p>price*1.001).map(s=>s.p).sort((a,b)=>a-b);
+  const swLo=sw.filter(s=>s.type==='L'&&s.p<price*0.999).map(s=>s.p).sort((a,b)=>b-a);
+  const resistance=swHi[0]||hi20;
+  const support=swLo[0]||lo20;
+  const up=model.directionScore>=0;
+  const invalidation=up?Math.min(sma20V,support):Math.max(sma20V,resistance);
+  const breakout=up?resistance*1.005:support*0.995;
+  const stop=up?price-1.5*atrV:price+1.5*atrV;
+  const target=up?Math.max(resistance,price+2.5*atrV):Math.min(support,price-2.5*atrV);
+  return {price,support,resistance,invalidation,breakout,stop,target,atr:atrV,hi20,lo20,sma20:sma20V,sma50:sma50V,bias:up?'long':'short'};
+}
+
+/* --- Orchestrate the whole model --- */
+function buildPredictionModel(I){
+  const t=scoreTrendSignals(I),c=scoreCrowdingRisk(I),m=scoreMacroRisk(I),d=scoreDerivativesRisk(I);
+  const allSignals=[...t.signals,...c.signals,...m.signals,...d.signals];
+  const horizonScore=hk=>{
+    let num=0,den=0;
+    for(const s of allSignals){const w=(s.w&&s.w[hk])||0;num+=s.dir*w;den+=w;}
+    return den?_clamp(num/den*100,-100,100):0;
+  };
+  const d1=horizonScore('d1'),d7=horizonScore('d7'),d30=horizonScore('d30');
+  const directionScore=Math.round(_clamp(0.30*d1+0.45*d7+0.25*d30,-100,100));
+  // Signal agreement → confidence base (dispersion of 7D-relevant signal directions)
+  const dirs=allSignals.filter(s=>(s.w.d7||0)>0.05).map(s=>s.dir);
+  const agreement=_clamp(100-(dirs.length?_std(dirs):1)*120,0,100);
+  const dq=I.dataQuality;
+  const loaded=[dq.regimeLoaded,dq.crowdingLoaded,dq.macroLoaded,dq.basisLoaded].filter(Boolean).length;
+  let dataFactor=loaded/4;
+  if(!dq.skewLoaded&&!dq.skewNA)dataFactor-=0.08;
+  dataFactor=_clamp(dataFactor,0,1);
+  const dataQualityScore=Math.round(_clamp(
+    loaded/4*70 + (dq.skewLoaded?20:dq.skewNA?10:0) + (dq.missingFields.length===0?10:0),0,100));
+  const crowd=Math.max(c.crowdedRiskScore,Math.round(d.derivRisk*0.7));
+  // Confidence = agreement + trend-quality + data, then haircuts for crowding / macro headwind
+  let confidence=agreement*0.55 + t.trendQuality*0.30 + dataQualityScore*0.15;
+  confidence*=dataFactor;
+  if(crowd>60)confidence*=0.78;else if(crowd>40)confidence*=0.90;
+  if(m.macroRisk>55&&directionScore>0)confidence*=0.90;
+  confidence=Math.round(_clamp(confidence,0,100));
+  const hzConf=v=>Math.round(_clamp(confidence*(0.6+0.4*Math.min(1,Math.abs(v)/55)),0,100));
+  const bias=v=>v>14?'bull':v<-14?'bear':'neutral';
+  const horizons={
+    d1:{score:Math.round(d1),bias:bias(d1),confidence:hzConf(d1)},
+    d7:{score:Math.round(d7),bias:bias(d7),confidence:hzConf(d7)},
+    d30:{score:Math.round(d30),bias:bias(d30),confidence:hzConf(d30)},
+  };
+  const regimeLabel=deriveRegime(I,{directionScore,trendQuality:t.trendQuality});
+  const action=deriveAction(regimeLabel,directionScore,confidence,crowd,m.macroRisk);
+  const mm={directionScore,confidence,crowd,regimeLabel};
+  const explanation=buildSignalExplanation(allSignals,mm,I);
+  const keyLevels=(I.regime&&I.regime.ok!==false&&I.regime.ohlc)?buildKeyLevels(I.regime.ohlc,{directionScore}):null;
+  return {
+    asset:I.asset,price:I.price,ts:Date.now(),
+    directionScore,confidenceScore:confidence,trendQualityScore:t.trendQuality,
+    crowdedRiskScore:c.crowdedRiskScore,derivRiskScore:d.derivRisk,macroRiskScore:m.macroRisk,
+    dataQualityScore,horizons,regimeLabel,suggestedAction:action,
+    signals:allSignals,explanation,keyLevels,dataQuality:dq,
+  };
+}
+
+/* ===== RENDER LAYER (DOM only) ===== */
+const _BIAS_TXT={bull:'Bullish',bear:'Bearish',neutral:'Neutral'};
+function _meterColor(v,invert){const x=invert?100-v:v;return x>=66?'var(--g)':x>=40?'var(--o)':'var(--r)'}
+
+function renderPrediction(model,I){
+  const dir=model.directionScore;
+  // card bias accent: risk overrides when crowding is high
+  let bias='neutral';
+  if(model.crowdedRiskScore>=60||model.regimeLabel==='Volatile'||model.regimeLabel==='Panic')bias='risk';
+  else if(dir>14)bias='bull';else if(dir<-14)bias='bear';
+  const card=E('tp-card');if(card)card.dataset.bias=bias;
+  E('tp-asset')&&(E('tp-asset').textContent=model.asset);
+  E('tp-verdict')&&(E('tp-verdict').textContent=model.regimeLabel);
+  E('tp-action')&&(E('tp-action').innerHTML=`<b>${model.suggestedAction.tag}</b> — ${model.suggestedAction.why}`);
+  const dn=E('tp-dir-num');if(dn){dn.textContent=(dir>0?'+':'')+dir;}
+  // horizon cards
+  const hg=E('tp-hzgrid');
+  if(hg){
+    const H=[['1-Day',model.horizons.d1],['7-Day',model.horizons.d7],['30-Day',model.horizons.d30]];
+    hg.innerHTML=H.map(([lbl,h])=>`<div class="tp-hz" data-b="${h.bias}">
+      <div class="hzt">${lbl} Bias</div>
+      <div class="hzb">${_BIAS_TXT[h.bias]}</div>
+      <div class="hzs">score ${h.score>0?'+':''}${h.score} · conf ${h.confidence}</div></div>`).join('');
+  }
+  // meters
+  const mt=E('tp-meters');
+  if(mt){
+    const M=[
+      ['Confidence',model.confidenceScore,false],
+      ['Trend Quality',model.trendQualityScore,false],
+      ['Crowding Risk',model.crowdedRiskScore,true],
+      ['Data Quality',model.dataQualityScore,false],
+    ];
+    mt.innerHTML=M.map(([lbl,v,inv])=>`<div class="tp-meter">
+      <div class="mtl">${lbl}<b>${v}</b></div>
+      <div class="meter-bar"><div class="meter-fill" style="width:${v}%;background:${_meterColor(v,inv)}"></div></div>
+    </div>`).join('');
+  }
+  // explanation
+  const ex=model.explanation,exEl=E('tp-exp');
+  if(exEl){
+    const li=(arr,cls,ic)=>arr.length?arr.map(s=>`<div class="si ${cls}"><span class="sic">${ic}</span><span class="six">${s.label} — ${s.note}</span></div>`).join(''):`<div class="si si-n"><span class="sic">·</span><span class="six">None</span></div>`;
+    exEl.innerHTML=`
+      <div class="sig-grp">▲ Top bullish signals</div><div class="sigl">${li(ex.bull,'si-b','▲')}</div>
+      <div class="sig-grp">▼ Top bearish signals</div><div class="sigl">${li(ex.bear,'si-r','▼')}</div>
+      <div class="sig-grp">● Conflicting / neutral</div><div class="sigl">${li(ex.neutral,'si-n','●')}</div>
+      <div class="sig-grp">Confidence read</div>
+      <div class="xs" style="color:var(--t2);line-height:1.55">${ex.confTxt}</div>
+      <div class="sig-grp">✕ Forecast invalidation</div>
+      <div class="sigl">${ex.invalidation.map(t=>`<div class="si si-x"><span class="sic">✕</span><span class="six">${t}</span></div>`).join('')}</div>`;
+  }
+  // key levels
+  const kl=model.keyLevels,klEl=E('tp-levels');
+  if(klEl){
+    if(!kl){klEl.innerHTML='<div class="ld-box xs mt">Key levels unavailable — regime data failed to load.</div>';}
+    else{
+      const row=(lbl,val,color,sub)=>`<div class="kl-row"><span class="kll"><span class="kl-dot" style="background:${color}"></span>${lbl}${sub?` <span class="mt xs">${sub}</span>`:''}</span><span class="klv">${_fmtUsd(val)}</span></div>`;
+      const dist=v=>((v-kl.price)/kl.price*100);
+      klEl.innerHTML=
+        row('Current price',kl.price,'var(--c)','')+
+        row('Nearest resistance',kl.resistance,'var(--r)',`+${dist(kl.resistance).toFixed(1)}%`)+
+        row('Nearest support',kl.support,'var(--g)',`${dist(kl.support).toFixed(1)}%`)+
+        row('Breakout confirmation',kl.breakout,'var(--c)',kl.bias==='long'?'close above to confirm':'close below to confirm')+
+        row('Trend invalidation',kl.invalidation,'var(--o)',`${dist(kl.invalidation).toFixed(1)}% · thesis fails beyond`)+
+        row('Stop-loss reference',kl.stop,'var(--t3)','1.5× ATR')+
+        row('Take-profit reference',kl.target,'var(--t3)','≈2.5× ATR / next level')+
+        `<div class="xs mt" style="margin-top:8px;line-height:1.5">ATR(14) ≈ ${_fmtUsd(kl.atr)} · 20D range ${_fmtUsd(kl.lo20)}–${_fmtUsd(kl.hi20)}. Levels are reference points from swing structure + ATR, not orders.</div>`;
+    }
+  }
+  // data quality
+  renderDataHealth(model,I);
+}
+
+function renderDataHealth(model,I){
+  const el=E('tp-health');if(!el)return;
+  const dq=model.dataQuality;
+  const chip=(name,state,txt)=>`<div class="dq-chip dq-${state}"><span class="dqi"></span><span class="dqn">${name}</span><span class="dqs">${txt}</span></div>`;
+  const st=ok=>ok?'ok':'err',lab=ok=>ok?'Loaded':'Failed';
+  let html='<div class="dq-grid">'+
+    chip('Regime / TA',st(dq.regimeLoaded),lab(dq.regimeLoaded))+
+    chip('Crowding',st(dq.crowdingLoaded),lab(dq.crowdingLoaded))+
+    chip('Macro',dq.macroLoaded?(dq.fallbackFields.length?'warn':'ok'):'err',dq.macroLoaded?(dq.fallbackFields.length?'Partial':'Loaded'):'Failed')+
+    chip('Perp basis',st(dq.basisLoaded),lab(dq.basisLoaded))+
+    chip('Options skew',dq.skewLoaded?'ok':dq.skewNA?'na':'err',dq.skewLoaded?'Loaded':dq.skewNA?'N/A':'Failed')+
+  '</div>';
+  const upd=new Date(dq.lastUpdated).toLocaleTimeString('en',{hour12:false});
+  html+=`<div class="xs mt" style="margin-top:10px;line-height:1.6">Last updated ${upd}`;
+  if(dq.missingFields.length)html+=` · <span class="dn">missing: ${dq.missingFields.join(', ')}</span>`;
+  if(dq.fallbackFields.length)html+=` · <span class="wr">fallback: ${dq.fallbackFields.join(', ')}</span>`;
+  if(!dq.missingFields.length&&!dq.fallbackFields.length)html+=' · all sources healthy';
+  html+=`. Data Quality score ${model.dataQualityScore}/100 — confidence is automatically capped when modules are missing.</div>`;
+  el.innerHTML=html;
+}
+
+/* ===== PREDICTION HISTORY (localStorage, last 50) ===== */
+const PRED_HIST_KEY='nexus_predict_history';
+function _loadHist(){try{return JSON.parse(localStorage.getItem(PRED_HIST_KEY)||'[]')}catch{return[]}}
+function _saveHist(a){try{localStorage.setItem(PRED_HIST_KEY,JSON.stringify(a.slice(-50)))}catch{}}
+function savePredictionSnapshot(model){
+  if(!model||model.price==null)return;
+  const hist=_loadHist();
+  // Grade older pending snapshots of the same asset using the now-known later price
+  const now=Date.now();
+  for(const h of hist){
+    if(h.outcome||h.asset!==model.asset||h.priceAtPrediction==null)continue;
+    if(now-h.ts<22*3600*1000)continue;            // too soon to judge the 1D call
+    h.priceLater=model.price;
+    const ret=(model.price-h.priceAtPrediction)/h.priceAtPrediction*100;
+    h.realizedPct=ret;
+    if(h.d1.bias==='neutral')h.outcome=Math.abs(ret)<2?'hit':'miss';
+    else h.outcome=((h.d1.bias==='bull'&&ret>0)||(h.d1.bias==='bear'&&ret<0))?'hit':'miss';
+  }
+  hist.push({
+    ts:model.ts,asset:model.asset,priceAtPrediction:model.price,
+    directionScore:model.directionScore,confidenceScore:model.confidenceScore,
+    currentRegime:model.regimeLabel,suggestedAction:model.suggestedAction.tag,
+    d1:model.horizons.d1,d7:model.horizons.d7,d30:model.horizons.d30,
+    outcome:null,priceLater:null,realizedPct:null,
+  });
+  _saveHist(hist);
+}
+function renderHistory(){
+  const el=E('tp-hist');if(!el)return;
+  const hist=_loadHist().slice().reverse();
+  if(!hist.length){el.innerHTML='<div class="ld-box xs mt">No predictions recorded yet.</div>';return;}
+  const graded=hist.filter(h=>h.outcome),hits=graded.filter(h=>h.outcome==='hit').length;
+  const acc=graded.length?(hits/graded.length*100).toFixed(0):'—';
+  let html=`<table class="hist-t"><thead><tr><th>Time</th><th>Asset</th><th>Price</th><th>Regime</th><th>1D</th><th>7D</th><th>30D</th><th>Dir</th><th>Conf</th><th>1D Result</th></tr></thead><tbody>`;
+  for(const h of hist.slice(0,50)){
+    const t=new Date(h.ts).toLocaleString('en',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
+    const bcol=b=>b==='bull'?'up':b==='bear'?'dn':'mt';
+    const bt=b=>b==='bull'?'Bull':b==='bear'?'Bear':'Neut';
+    const oc=h.outcome==='hit'?`<span class="up">✓ hit ${h.realizedPct>=0?'+':''}${h.realizedPct?.toFixed(1)}%</span>`
+      :h.outcome==='miss'?`<span class="dn">✕ miss ${h.realizedPct>=0?'+':''}${h.realizedPct?.toFixed(1)}%</span>`
+      :'<span class="mt">pending</span>';
+    html+=`<tr><td>${t}</td><td>${h.asset}</td><td>${_fmtUsd(h.priceAtPrediction)}</td><td class="mt">${h.currentRegime}</td>`+
+      `<td class="${bcol(h.d1.bias)}">${bt(h.d1.bias)}</td><td class="${bcol(h.d7.bias)}">${bt(h.d7.bias)}</td><td class="${bcol(h.d30.bias)}">${bt(h.d30.bias)}</td>`+
+      `<td class="${h.directionScore>0?'up':h.directionScore<0?'dn':'mt'}">${h.directionScore>0?'+':''}${h.directionScore}</td><td>${h.confidenceScore}</td><td>${oc}</td></tr>`;
+  }
+  html+='</tbody></table>';
+  html=`<div class="xs mt" style="margin-bottom:8px">Graded 1D calls: <b style="color:var(--t1)">${graded.length}</b> · directional accuracy <b style="color:var(--t1)">${acc}${acc!=='—'?'%':''}</b> <span class="mt">(small sample — for tracking only)</span></div>`+html;
+  el.innerHTML=html;
+}
+function clearPredHistory(){try{localStorage.removeItem(PRED_HIST_KEY)}catch{}renderHistory();if(typeof toast==='function')toast('Prediction history cleared','info');}
+
+/* ===== LIGHTWEIGHT CALIBRATION / BACKTEST (estimated) =====
+   Replays a simplified trend signal (price vs SMA20 + MACD sign) over
+   ~180 daily bars and measures forward 7-day outcomes. This is an
+   estimate to sanity-check edge — NOT the full model replayed. */
+async function runCalibration(){
+  const el=E('tp-cal');if(!el)return;
+  el.innerHTML='<div class="ld-box xs mt"><span class="sp"></span> Replaying 180D of history…</div>';
+  try{
+    const sym=(E('pr-sym')?.value||'BTC')+'USDT';
+    const ohlc=await _klines(sym,'1d',260);
+    if(!ohlc||ohlc.length<120)throw new Error('insufficient history');
+    const closes=ohlc.map(c=>c.c);
+    const s20=sma(closes,20),mc=macd(closes);
+    const FWD=7;
+    let bull=[],bear=[],correct=0,total=0,maeArr=[];
+    const buckets={'50-60':[],'60-70':[],'70-80':[],'80+':[]};
+    for(let i=60;i<closes.length-FWD;i++){
+      if(s20[i]==null||mc.h[i]==null)continue;
+      const up=closes[i]>s20[i]&&mc.h[i]>0;
+      const dn=closes[i]<s20[i]&&mc.h[i]<0;
+      if(!up&&!dn)continue;
+      const fwdRet=(closes[i+FWD]-closes[i])/closes[i]*100;
+      // max adverse excursion over the forward window
+      let mae=0;for(let j=i+1;j<=i+FWD;j++){const ex=(closes[j]-closes[i])/closes[i]*100;if(up&&ex<mae)mae=ex;if(dn&&-ex<mae)mae=-ex;}
+      maeArr.push(Math.abs(mae));
+      total++;
+      const hit=(up&&fwdRet>0)||(dn&&fwdRet<0);
+      if(hit)correct++;
+      (up?bull:bear).push(fwdRet);
+      // proxy confidence (full model not replayed bar-by-bar): per-bar 14D momentum
+      // magnitude + SMA20 extension — strong, well-extended trends ≈ higher confidence
+      const mom14=i>=14?Math.abs((closes[i]-closes[i-14])/closes[i-14])*100:0;
+      const ext=Math.abs(closes[i]/s20[i]-1)*100;
+      const conf=_clamp(46+mom14*1.9+ext*1.2,40,95);
+      const cb=conf>=80?'80+':conf>=70?'70-80':conf>=60?'60-70':conf>=50?'50-60':null;
+      if(cb)buckets[cb].push(hit?1:0);
+    }
+    const avg=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:0;
+    const acc=total?(correct/total*100):0;
+    const bucketRow=(k)=>{const b=buckets[k];const a=b.length?(avg(b)*100).toFixed(0)+'%':'—';return `<div class="srow"><span class="lbl">Confidence ${k}</span><span class="val">${a} <span class="mt xs">n=${b.length}</span></span></div>`;};
+    el.innerHTML=
+      `<div class="xs mt" style="margin-bottom:8px">Simplified replay · ${total} signals over ~180D · <b style="color:var(--o)">estimated</b>, not the full model.</div>`+
+      `<div class="srow"><span class="lbl">Directional accuracy (7D)</span><span class="val ${acc>=55?'up':acc<48?'dn':''}">${acc.toFixed(0)}%</span></div>`+
+      `<div class="srow"><span class="lbl">Avg 7D return after bull signal</span><span class="val ${avg(bull)>=0?'up':'dn'}">${avg(bull)>=0?'+':''}${avg(bull).toFixed(2)}%</span></div>`+
+      `<div class="srow"><span class="lbl">Avg 7D return after bear signal</span><span class="val ${avg(bear)<=0?'up':'dn'}">${avg(bear)>=0?'+':''}${avg(bear).toFixed(2)}%</span></div>`+
+      `<div class="srow"><span class="lbl">Avg max adverse excursion</span><span class="val wr">${avg(maeArr).toFixed(2)}%</span></div>`+
+      `<div class="sig-grp">Accuracy by confidence bucket (momentum proxy)</div>`+
+      bucketRow('50-60')+bucketRow('60-70')+bucketRow('70-80')+bucketRow('80+')+
+      `<div class="xs mt" style="margin-top:8px;line-height:1.5">Confidence buckets use a 14-day momentum + SMA20-extension proxy because the full multi-factor model is not replayed bar-by-bar. Use directionally, not as precise expectancy.</div>`;
+  }catch(e){
+    el.innerHTML='<div class="ld-box xs mt">Calibration failed: '+e.message+'</div>';
+  }
 }
 </script>
 <div class="toast-c" id="toast-c"></div>
